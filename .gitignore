@@ -1,0 +1,8 @@
+
+# Misc Files Files
+*.lock
+
+# Directories
+node_modules
+.next
+
