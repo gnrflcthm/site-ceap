@@ -16,7 +16,7 @@ const NavLink: FC<NavLinkProps> = ({ href, text, navigate = true }) => {
     const [isActive, setIsActive] = useState<boolean>();
 
     useEffect(() => {
-        setIsActive(router.pathname.substring(1) === href.substring(1));
+        setIsActive(router.pathname.substring(1).split("/")[0] === href.substring(1));
     }, [router.pathname]);
 
     if (navigate) {

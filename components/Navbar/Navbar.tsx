@@ -17,6 +17,9 @@ const Navbar: FC = () => {
     const router = useRouter();
 
     useEffect(() => {
+        setMobile(window.innerWidth < 768);
+        setShowNav(window.innerWidth >= 768);
+
         const handleResize = () => {
             setMobile(window.innerWidth < 768);
             setShowNav(window.innerWidth >= 768);
@@ -49,10 +52,19 @@ const Navbar: FC = () => {
             <Flex p={2}>
                 <Image src={logo} objectFit={"contain"} />
             </Flex>
-            <Box display={{ base: "none", lg: "none" }}>
-                <IconButton icon={<FaBars />} aria-label="Menu" />
-            </Box>
-            <NavMenu mobile={mobile} />
+            <Flex
+                display={{ base: "block", lg: "none" }}
+                alignSelf={"center"}
+                pr={"2"}
+            >
+                <IconButton
+                    icon={<FaBars />}
+                    aria-label="Menu"
+                    fontSize={"2xl"}
+                    onClick={() => setShowNav(!showNav)}
+                />
+            </Flex>
+            <NavMenu mobile={mobile} expand={showNav} />
         </Flex>
     );
 };

@@ -1,5 +1,6 @@
-import { useState, useEffect, FC } from "react";
-import { useRouter } from "next/router";
+import { FC } from "react";
+
+import NextLink from "next/link";
 
 import { Link } from "@chakra-ui/react";
 
@@ -8,17 +9,11 @@ interface NavDropdownLinkProps {
     text: string;
 }
 
-const NavDropdownLink: FC<NavDropdownLinkProps> = ({ href, text }) => {
-    const router = useRouter();
-    const [isActive, setIsActive] = useState<boolean>();
-
-    useEffect(() => {
-        setIsActive(router.pathname.substring(1) === href.substring(1));
-    }, [router.pathname]);
-    return (
+const NavDropdownLink: FC<NavDropdownLinkProps> = ({ href, text }) => (
+    <NextLink href={href} passHref>
         <Link
             h={"full"}
-            textColor={isActive ? "primary.base" : "gray.500"}
+            textColor={"primary.base"}
             fontSize={"14"}
             fontWeight={"600"}
             _hover={{ color: "primary.base", textDecor: "none" }}
@@ -32,7 +27,7 @@ const NavDropdownLink: FC<NavDropdownLinkProps> = ({ href, text }) => {
         >
             {text}
         </Link>
-    );
-};
+    </NextLink>
+);
 
 export default NavDropdownLink;

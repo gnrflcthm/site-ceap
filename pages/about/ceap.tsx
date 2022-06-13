@@ -5,7 +5,7 @@ import { Box, Heading } from "@chakra-ui/react";
 const About: FC = () => {
     return (
         <Box>
-            <Heading>About Page</Heading>
+            <Heading>CEAP Page</Heading>
         </Box>
     );
 };
