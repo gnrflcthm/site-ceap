@@ -20,28 +20,22 @@ interface MobileDropdownProps {
 
 const MobileDropdown: FC<MobileDropdownProps> = ({ href, text, children }) => {
     return (
-        <Accordion allowMultiple={true} allowToggle={true} p={0}>
-            <AccordionItem border={"none"}>
-                <AccordionButton>
-                    <Box flex={"1"}>
-                        <MobileNavLink
-                            href={href}
-                            text={text}
-                            navigate={false}
-                        />
-                    </Box>
-                    <AccordionIcon />
-                </AccordionButton>
-                <AccordionPanel
-                    as={VStack}
-                    alignItems={"stretch"}
-                    spacing={"0"}
-                    p={"0"}
-                >
-                    {children}
-                </AccordionPanel>
-            </AccordionItem>
-        </Accordion>
+        <AccordionItem border={"none"}>
+            <AccordionButton p={"0"} pr={"2"}>
+                <Box flex={"1"}>
+                    <MobileNavLink href={href} text={text} navigate={false} />
+                </Box>
+                <AccordionIcon />
+            </AccordionButton>
+            <AccordionPanel
+                as={VStack}
+                alignItems={"stretch"}
+                spacing={"0"}
+                p={"0"}
+            >
+                {children}
+            </AccordionPanel>
+        </AccordionItem>
     );
 };
 

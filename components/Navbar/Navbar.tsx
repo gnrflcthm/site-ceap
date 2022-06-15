@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 
 import { useRouter } from "next/router";
 import Image from "next/image";
+import Link from "next/link";
 
 import { Flex, Box, IconButton } from "@chakra-ui/react";
 import { FaBars } from "react-icons/fa";
@@ -11,8 +12,8 @@ import NavMenu from "./NavMenu";
 import logo from "../../assets/logo.png";
 
 const Navbar: FC = () => {
-    const [showNav, setShowNav] = useState<boolean>(true);
-    const [mobile, setMobile] = useState<boolean>(false);
+    const [showNav, setShowNav] = useState<boolean>(false);
+    const [mobile, setMobile] = useState<boolean>(true);
 
     const router = useRouter();
 
@@ -26,9 +27,7 @@ const Navbar: FC = () => {
         };
 
         router.events.on("routeChangeStart", () => {
-            if (mobile) {
-                setShowNav(false);
-            }
+            setShowNav(false);
         });
 
         window.addEventListener("resize", handleResize);
@@ -49,9 +48,11 @@ const Navbar: FC = () => {
             zIndex={"popover"}
             bg={"gray.100"}
         >
-            <Flex p={2}>
-                <Image src={logo} objectFit={"contain"} />
-            </Flex>
+            <Link href="/">
+                <Flex p={2}>
+                    <Image src={logo} objectFit={"contain"} />
+                </Flex>
+            </Link>
             <Flex
                 display={{ base: "block", lg: "none" }}
                 alignSelf={"center"}

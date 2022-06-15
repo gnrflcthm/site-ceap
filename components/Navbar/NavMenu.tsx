@@ -1,15 +1,6 @@
 import { FC } from "react";
 
-import {
-    Box,
-    Flex,
-    Accordion,
-    AccordionButton,
-    AccordionPanel,
-    AccordionItem,
-    AccordionIcon,
-    VStack,
-} from "@chakra-ui/react";
+import { Accordion, Flex, VStack } from "@chakra-ui/react";
 
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -17,7 +8,7 @@ import NavLink from "./NavLink";
 import NavDropdown from "./NavDropdown";
 import NavDropdownLink from "./NavDropdownLink";
 import MobileNavLink from "./MobileNavLink";
-import MobileDropdown from "./MobileDropDown";
+import MobileDropdown from "./MobileDropdown";
 
 interface NavMenuProps {
     mobile: boolean;
@@ -29,17 +20,20 @@ const NavMenu: FC<NavMenuProps> = ({ mobile, expand }) => {
         return (
             <AnimatePresence>
                 {expand && (
-                    <VStack
+                    <Accordion
+                        allowToggle={true}
+                        p={0}
                         position={"absolute"}
                         top={"100%"}
                         left={"0"}
                         alignItems={"stretch"}
                         w={"full"}
                         bg={"blue.300"}
-                        spacing={"0"}
                         as={motion.div}
                         initial={{ height: "0%" }}
-                        animate={{ height: "fit-content" }}
+                        animate={{
+                            height: "fit-content"
+                        }}
                         exit={{ height: "0%" }}
                         overflow={"hidden"}
                     >
@@ -81,7 +75,30 @@ const NavMenu: FC<NavMenuProps> = ({ mobile, expand }) => {
                                 indent={"6"}
                             />
                         </MobileDropdown>
-                    </VStack>
+                        <MobileDropdown href="/news" text="News & Events">
+                            <MobileNavLink
+                                href="/news"
+                                text="News"
+                                indent={"6"}
+                            />
+                            <MobileNavLink
+                                href="/events/photos"
+                                text="Photo Gallery"
+                                indent={"6"}
+                            />
+                            <MobileNavLink
+                                href="/events/videos"
+                                text="Video Gallery"
+                                indent={"6"}
+                            />
+                        </MobileDropdown>
+                        <MobileNavLink
+                            href="/member-schools"
+                            text="Member Schools"
+                        />
+                        <MobileNavLink href="/resources" text="Resources" />
+                        <MobileNavLink href="/contact" text="Contact Us" />
+                    </Accordion>
                 )}
             </AnimatePresence>
         );
