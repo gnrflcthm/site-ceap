@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -7,65 +7,81 @@ import Link from "next/link";
 import { Flex, Box, IconButton } from "@chakra-ui/react";
 import { FaBars } from "react-icons/fa";
 
-import NavMenu from "./NavMenu";
+import NavLink from "./NavLink";
 
-import logo from "../../assets/logo.png";
+import siteRoutes from "./routes";
 
-const Navbar: FC = () => {
+interface NavbarProps {
+    offSet?: string | number;
+}
+
+const Navbar: FC<NavbarProps> = ({ offSet = 0 }) => {
     const [showNav, setShowNav] = useState<boolean>(false);
     const [mobile, setMobile] = useState<boolean>(true);
+    const [scrollValue, setScrollValue] = useState<number>(0);
+    const [scrolled, setScrolled] = useState<boolean>(false);
+    const [initialTop, setInitialTop] = useState<number>(-1);
+
+    const navbar = useRef<HTMLDivElement>(null);
 
     const router = useRouter();
 
-    useEffect(() => {
-        setMobile(window.innerWidth < 768);
-        setShowNav(window.innerWidth >= 768);
+    // Mobile Reference 768p
 
-        const handleResize = () => {
-            setMobile(window.innerWidth < 768);
-            setShowNav(window.innerWidth >= 768);
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrollValue(window.scrollY);
         };
 
-        router.events.on("routeChangeStart", () => {
-            setShowNav(false);
-        });
+        const handleChangeRoute = () => {
+            setInitialTop(-1);
+        };
 
-        window.addEventListener("resize", handleResize);
+        window.addEventListener("scroll", handleScroll);
+        router.events.on("routeChangeStart", handleChangeRoute);
 
         return () => {
-            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("scroll", handleScroll);
+            router.events.off("routeChangeStart", handleChangeRoute);
         };
     }, []);
 
+    useEffect(() => {
+        if (navbar.current) {
+            let { offsetTop } = navbar.current;
+            if (initialTop === -1) {
+                setInitialTop(offsetTop);
+            }
+            setScrolled(scrollValue > 0);
+        }
+    }, [scrollValue]);
+
     return (
         <Flex
-            borderBottom={"1px"}
-            borderBottomColor={"gray.300"}
-            position={"sticky"}
-            top={0}
-            justifyContent={"space-between"}
-            alignItems={"stretch"}
-            zIndex={"popover"}
-            bg={"gray.100"}
+            justifyContent={{ base: "flex-start", lg: "center" }}
+            alignItems={"center"}
+            bg={"primary"}
+            position={"fixed"}
+            top={{
+                base: "0",
+                md: scrolled ? Math.max(0, initialTop - scrollValue) : offSet,
+            }}
+            w={"full"}
+            zIndex={"sticky"}
+            ref={navbar}
         >
-            <Link href="/">
-                <Flex p={2}>
-                    <Image src={logo} objectFit={"contain"} />
-                </Flex>
-            </Link>
-            <Flex
-                display={{ base: "block", lg: "none" }}
-                alignSelf={"center"}
-                pr={"2"}
-            >
-                <IconButton
-                    icon={<FaBars />}
-                    aria-label="Menu"
-                    fontSize={"2xl"}
-                    onClick={() => setShowNav(!showNav)}
-                />
-            </Flex>
-            <NavMenu mobile={mobile} expand={showNav} />
+            <IconButton
+                aria-label="Expand Nav"
+                icon={<FaBars />}
+                display={{ base: "inherit", lg: "none" }}
+                bg={"transparent"}
+                color={"textOnPrimary"}
+            />
+            <Box display={{ base: "none", lg: "flex" }}>
+                {siteRoutes.map((route, i) => (
+                    <NavLink {...route} key={i} />
+                ))}
+            </Box>
         </Flex>
     );
 };
