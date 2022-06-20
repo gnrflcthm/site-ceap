@@ -1,11 +1,9 @@
-import { extendTheme } from "@chakra-ui/react";
-import { whiten } from '@chakra-ui/theme-tools'
+import { extendTheme } from "@chakra-ui/react"; 
 
 export const appTheme = extendTheme({
     colors: {
-        primary: {
-            base: "#0F164A",
-        },
+        primary: "#18167B",
+        textOnPrimary: "#EEEEEE"
     },
     fonts: {
         heading: "Roboto, Helvetica, sans-serif",
