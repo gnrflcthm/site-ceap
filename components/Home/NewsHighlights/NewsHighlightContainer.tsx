@@ -22,7 +22,6 @@ const NewsHighlightContainer: FC<NewsHighlightContainerProps> = ({
         <Box h={"fit-content"} mx={"4"} my={{base: "8", md: "0"}} w={{base: "full", md: "33%"}} position={"relative"}>
             <Box
                 position={"relative"}
-                bg={"red.200"}
                 w={"full"}
                 h={"60"}
                 objectFit={"cover"}

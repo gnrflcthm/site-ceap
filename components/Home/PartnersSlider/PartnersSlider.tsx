@@ -5,6 +5,7 @@ import { Box, Flex, Heading } from "@chakra-ui/react";
 import Slider, { Settings } from "react-slick";
 
 import PartnerItem, { PartnerData } from "./PartnerItem";
+import SectionHeading from "../SectionHeading";
 
 interface PartnersSliderProps {
     partners: PartnerData[];
@@ -23,34 +24,10 @@ const PartnersSlider: FC<PartnersSliderProps> = ({ partners }) => {
             flexDir={"column"}
             alignItems={"center"}
             justifyContent={"space-between"}
-            py={"4"}
+            p={{ base: "2", md: "4" }}
             bg={"textOnPrimary"}
         >
-            <Heading
-                textAlign={"center"}
-                my={"4"}
-                position={"relative"}
-                _after={{
-                    content: `""`,
-                    bg: "black",
-                    position: "absolute",
-                    width: "100%",
-                    h: "1",
-                    top: "50%",
-                    left: "110%",
-                }}
-                _before={{
-                    content: `""`,
-                    bg: "black",
-                    position: "absolute",
-                    width: "100%",
-                    h: "1",
-                    top: "50%",
-                    right: "110%",
-                }}
-            >
-                Meet Our Partners
-            </Heading>
+            <SectionHeading>Meet Our Partners</SectionHeading>
             <Flex
                 display={{ base: "none", md: "flex" }}
                 my={"4"}

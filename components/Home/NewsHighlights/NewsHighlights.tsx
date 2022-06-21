@@ -4,6 +4,7 @@ import { StaticImageData } from "next/image";
 
 import { Box, Heading, Flex, Button } from "@chakra-ui/react";
 import NewsHighlightContainer from "./NewsHighlightContainer";
+import SectionHeading from "../SectionHeading";
 
 interface NewsHighlightsProps {
     newsData: NewsHighlight[];
@@ -26,31 +27,7 @@ const NewsHighlights: FC<NewsHighlightsProps> = ({ newsData }) => {
             justifyContent={"space-between"}
             alignItems={"center"}
         >
-            <Heading
-                textAlign={"center"}
-                my={"4"}
-                position={"relative"}
-                _after={{
-                    content: `""`,
-                    bg: "black",
-                    position: "absolute",
-                    width: "100%",
-                    h: "1",
-                    top: "50%",
-                    left: "110%",
-                }}
-                _before={{
-                    content: `""`,
-                    bg: "black",
-                    position: "absolute",
-                    width: "100%",
-                    h: "1",
-                    top: "50%",
-                    right: "110%",
-                }}
-            >
-                News & Events
-            </Heading>
+            <SectionHeading>News & Events</SectionHeading>
             <Flex
                 justifyContent={"space-between"}
                 alignItems={"center"}

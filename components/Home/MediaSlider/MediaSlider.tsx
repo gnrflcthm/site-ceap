@@ -2,9 +2,11 @@ import { FC } from "react";
 
 import Image from "next/image";
 
-import { Flex, Box, Heading, Button } from "@chakra-ui/react";
+import { Flex, Box, Button } from "@chakra-ui/react";
 
 import Slider, { Settings } from "react-slick";
+
+import SectionHeading from "../SectionHeading";
 
 interface MediaSliderProps {
     images: string[];
@@ -21,32 +23,9 @@ const MediaSlider: FC<MediaSliderProps> = ({ images }) => {
             justifyContent={"center"}
             alignItems={"center"}
             flexDir={"column"}
-            p={"4"}
+            p={{ base: "2", md: "4" }}
         >
-            <Heading
-                textAlign={"center"}
-                _after={{
-                    content: `""`,
-                    bg: "black",
-                    position: "absolute",
-                    width: "100%",
-                    h: "1",
-                    top: "50%",
-                    left: "110%"
-                }}
-                _before={{
-                    content: `""`,
-                    bg: "black",
-                    position: "absolute",
-                    width: "100%",
-                    h: "1",
-                    top: "50%",
-                    right: "110%"
-                }}
-                position={"relative"}
-            >
-                Photos & Videos
-            </Heading>
+            <SectionHeading>Photos & Videos</SectionHeading>
             <Flex
                 display={{ base: "none", md: "flex" }}
                 my={"4"}
@@ -59,24 +38,32 @@ const MediaSlider: FC<MediaSliderProps> = ({ images }) => {
             >
                 <Slider {...mediaSliderSettings}>
                     {images.map((src, i) => (
-                        <Box
-                            key={i}
-                            h={"40vh"}
+                        <Flex
+                            display={"flex !important"}
+                            justifyContent={"center"}
+                            alignItems={"center"}
+                            w={"full"}
                             position={"relative"}
-                            overflow={"hidden"}
-                            objectFit={"contain"}
                         >
-                            <Image
-                                src={src}
-                                layout={"fill"}
+                            <Box
+                                key={i}
+                                h={"40"}
+                                w={"64"}
+                                position={"relative"}
                                 objectFit={"cover"}
-                            />
-                        </Box>
+                            >
+                                <Image
+                                    src={src}
+                                    layout={"fill"}
+                                    objectFit={"cover"}
+                                />
+                            </Box>
+                        </Flex>
                     ))}
                 </Slider>
             </Flex>
-            <Flex justifyContent={"end"} w={"full"}>
-                <Button>View More</Button>
+            <Flex justifyContent={"end"} px={"8"} alignSelf={"end"}>
+                <Button w={{ base: "full", md: "initial" }}>View More</Button>
             </Flex>
         </Flex>
     );

@@ -10,7 +10,9 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
     const router = useRouter();
     return (
         <Box position={"absolute"} top={"0"} w={"full"}>
-            <Navbar offSet={router.pathname === "/" ? "50vh" : "0"} />
+            <Navbar
+                offSet={["/", "/home"].includes(router.pathname) ? "50vh" : "0"}
+            />
             {children}
             <Footer />
         </Box>

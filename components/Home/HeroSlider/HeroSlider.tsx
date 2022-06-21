@@ -1,14 +1,10 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, PropsWithChildren } from "react";
 
 import Slider, { Settings } from "react-slick";
 
 import { Flex } from "@chakra-ui/react";
 
-interface HeroSliderProps {
-    children: ReactNode;
-}
-
-const HeroSlider: FC<HeroSliderProps> = ({ children }) => {
+const HeroSlider: FC<PropsWithChildren> = ({ children }) => {
     const heroSliderSettings: Settings = {
         dots: true,
         infinite: true,
@@ -16,7 +12,7 @@ const HeroSlider: FC<HeroSliderProps> = ({ children }) => {
         slidesToScroll: 1,
         autoplay: true,
         autoplaySpeed: 3000,
-        fade: true
+        fade: true,
     };
 
     return (
