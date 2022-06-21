@@ -1,2 +1,2 @@
-# site-ceap
+# CEAP
 Online Web Application for CEAP.
