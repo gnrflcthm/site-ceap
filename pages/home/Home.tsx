@@ -1,8 +1,9 @@
 import { FC } from "react";
 
 import Image from "next/image";
+import Head from "next/head";
 
-import { Box, Flex, Heading, Text, Link, Button } from "@chakra-ui/react";
+import { Box, Flex, Heading } from "@chakra-ui/react";
 
 import {
     HeroSlider,
@@ -47,37 +48,42 @@ const Home: FC = () => {
     ];
 
     return (
-        <Box
-            bg={`linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(${i1.src})`}
-            bgAttachment={"fixed"}
-            bgPos={"center"}
-            bgRepeat={"no-repeat"}
-            bgSize={"cover"}
-        >
-            <Flex
-                as={"section"}
-                flexDir={"column"}
-                justifyContent={"center"}
-                alignItems={"center"}
-                h={"50vh"}
-                pt={{ base: "10", md: "0" }}
+        <>
+            <Head>
+                <title>Home</title>
+            </Head>
+            <Box
+                bg={`linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(${i1.src})`}
+                bgAttachment={"fixed"}
+                bgPos={"center"}
+                bgRepeat={"no-repeat"}
+                bgSize={"cover"}
             >
-                <Box as={Image} src={logo} objectFit={"contain"} />
-                <Heading w={"40%"} textAlign={"center"}>
-                    Catholic Educational Association Of The Philippines
-                </Heading>
-            </Flex>
-            <HeroSlider>
-                {images.map((src, i) => (
-                    <HeroSliderItem image={src} key={i} />
-                ))}
-            </HeroSlider>
-            <NewsHighlights newsData={newsHighlights} />
-            <MediaSlider images={images.map((val) => val.src)} />
-            <PartnersSlider
-                partners={images.map((val) => ({ logo: val.src }))}
-            />
-        </Box>
+                <Flex
+                    as={"section"}
+                    flexDir={"column"}
+                    justifyContent={"center"}
+                    alignItems={"center"}
+                    h={"50vh"}
+                    pt={{ base: "10", md: "0" }}
+                >
+                    <Box as={Image} src={logo} objectFit={"contain"} />
+                    <Heading w={"40%"} textAlign={"center"}>
+                        Catholic Educational Association Of The Philippines
+                    </Heading>
+                </Flex>
+                <HeroSlider>
+                    {images.map((src, i) => (
+                        <HeroSliderItem image={src} key={i} />
+                    ))}
+                </HeroSlider>
+                <NewsHighlights newsData={newsHighlights} />
+                <MediaSlider images={images.map((val) => val.src)} />
+                <PartnersSlider
+                    partners={images.map((val) => ({ logo: val.src }))}
+                />
+            </Box>
+        </>
     );
 };
 
