@@ -2,12 +2,14 @@ export interface SiteRoute {
     name: string;
     route: string;
     subroutes?: SiteRoute[];
+    activeRoutes?: string[]
 }
 
 const siteRoutes: SiteRoute[] = [
     {
         name: "Home",
-        route: "/",
+        route: "/home",
+        activeRoutes: ["/", "/home"]
     },
     {
         name: "About",

@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 
 import { Box, Flex, Link } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BsCaretDownFill, BsFillCaretDownFill } from "react-icons/bs";
+import { BsFillCaretDownFill } from "react-icons/bs";
 
 import { SiteRoute } from "./routes";
 
@@ -15,6 +15,7 @@ interface NavLinkProps {
     subroutes?: SiteRoute[];
     color?: string;
     isSubroute?: boolean;
+    activeRoutes?: string[];
 }
 
 const NavLink: FC<NavLinkProps> = ({
@@ -23,6 +24,7 @@ const NavLink: FC<NavLinkProps> = ({
     subroutes,
     color,
     isSubroute = false,
+    activeRoutes = []
 }) => {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [hovered, setHovered] = useState<boolean>(false);
@@ -31,7 +33,7 @@ const NavLink: FC<NavLinkProps> = ({
 
     useEffect(() => {
         setIsActive(
-            router.pathname.substring(1).split("/")[0] === route.substring(1)
+            router.pathname.substring(1).split("/")[0] === route.substring(1) || activeRoutes.includes(router.pathname)
         );
     }, [router.pathname]);
 
