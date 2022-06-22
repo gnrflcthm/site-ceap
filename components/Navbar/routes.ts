@@ -12,7 +12,7 @@ const siteRoutes: SiteRoute[] = [
         activeRoutes: ["/", "/home"]
     },
     {
-        name: "About",
+        name: "Who We Are",
         route: "/about",
         subroutes: [
             {

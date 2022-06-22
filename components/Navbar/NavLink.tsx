@@ -24,7 +24,7 @@ const NavLink: FC<NavLinkProps> = ({
     subroutes,
     color,
     isSubroute = false,
-    activeRoutes = []
+    activeRoutes = [],
 }) => {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [hovered, setHovered] = useState<boolean>(false);
@@ -33,7 +33,8 @@ const NavLink: FC<NavLinkProps> = ({
 
     useEffect(() => {
         setIsActive(
-            router.pathname.substring(1).split("/")[0] === route.substring(1) || activeRoutes.includes(router.pathname)
+            router.pathname.substring(1).split("/")[0] === route.substring(1) ||
+                activeRoutes.includes(router.pathname)
         );
     }, [router.pathname]);
 
@@ -64,7 +65,7 @@ const NavLink: FC<NavLinkProps> = ({
                     justifyContent={"space-around"}
                     alignItems={"center"}
                 >
-                    {name}{" "}
+                    {name.toUpperCase()}{" "}
                     {subroutes && <Box as={BsFillCaretDownFill} pl={"2"} />}
                 </Link>
             </NextLink>
