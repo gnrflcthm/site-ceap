@@ -61,11 +61,13 @@ const Navbar: FC<NavbarProps> = ({ offSet = 0 }) => {
             justifyContent={{ base: "flex-start", lg: "center" }}
             alignItems={"center"}
             bg={"primary"}
-            position={"fixed"}
-            top={{
-                base: "0",
-                md: scrolled ? Math.max(0, initialTop - scrollValue) : offSet,
-            }}
+            position={"sticky"}
+            top={"0"}
+            // position={"fixed"}
+            // top={{
+            //     base: "0",
+            //     md: scrolled ? Math.max(0, initialTop - scrollValue) : offSet,
+            // }}
             w={"full"}
             zIndex={"sticky"}
             ref={navbar}

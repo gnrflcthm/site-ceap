@@ -14,7 +14,7 @@ const SectionHeading: FC<SectionHeadingProps> = ({
         content: `""`,
         bg: lineDecorColor || "black",
         position: "absolute",
-        width: "100%",
+        width: { base: "50%", md: "100%" },
         h: "2px",
         top: "50%",
     };

@@ -44,9 +44,9 @@ const MediaSlider: FC<MediaSliderProps> = ({ images }) => {
                             alignItems={"center"}
                             w={"full"}
                             position={"relative"}
+                            key={i}
                         >
                             <Box
-                                key={i}
                                 h={"40"}
                                 w={"64"}
                                 position={"relative"}

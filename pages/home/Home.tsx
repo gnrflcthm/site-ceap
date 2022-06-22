@@ -58,8 +58,10 @@ const Home: FC = () => {
                 bgPos={"center"}
                 bgRepeat={"no-repeat"}
                 bgSize={"cover"}
+                m={"0"}
+                py={"2"}
             >
-                <Flex
+                {/* <Flex
                     as={"section"}
                     flexDir={"column"}
                     justifyContent={"center"}
@@ -71,7 +73,7 @@ const Home: FC = () => {
                     <Heading w={"40%"} textAlign={"center"}>
                         Catholic Educational Association Of The Philippines
                     </Heading>
-                </Flex>
+                </Flex> */}
                 <HeroSlider>
                     {images.map((src, i) => (
                         <HeroSliderItem image={src} key={i} />
