@@ -2,14 +2,14 @@ export interface SiteRoute {
     name: string;
     route: string;
     subroutes?: SiteRoute[];
-    activeRoutes?: string[]
+    activeRoutes?: string[];
 }
 
 const siteRoutes: SiteRoute[] = [
     {
         name: "Home",
         route: "/home",
-        activeRoutes: ["/", "/home"]
+        activeRoutes: ["/", "/home"],
     },
     {
         name: "Who We Are",
@@ -32,16 +32,8 @@ const siteRoutes: SiteRoute[] = [
                 route: "/about/strategic-direction",
             },
             {
-                name: "Board Of Trustees",
-                route: "/about/trustees",
-            },
-            {
-                name: "Commission & Committees",
-                route: "/about/commitees",
-            },
-            {
-                name: "National Secretariat",
-                route: "/about/secretariat",
+                name: "Meet The Members",
+                route: "/about/members",
             },
         ],
     },

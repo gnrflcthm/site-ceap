@@ -18,10 +18,10 @@ const HeroSlider: FC<PropsWithChildren> = ({ children }) => {
     return (
         <Flex
             display={{ base: "none", md: "flex" }}
-            my={"20"}
             mx={"auto"}
             w={"80vw"}
             px={"10"}
+            py={"20"}
             flexDir={"column"}
             justifyContent={"center"}
         >

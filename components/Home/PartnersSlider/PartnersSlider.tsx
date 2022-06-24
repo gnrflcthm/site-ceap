@@ -5,7 +5,7 @@ import { Box, Flex, Heading } from "@chakra-ui/react";
 import Slider, { Settings } from "react-slick";
 
 import PartnerItem, { PartnerData } from "./PartnerItem";
-import SectionHeading from "../SectionHeading";
+import SectionHeading from "../../SectionHeading";
 
 interface PartnersSliderProps {
     partners: PartnerData[];

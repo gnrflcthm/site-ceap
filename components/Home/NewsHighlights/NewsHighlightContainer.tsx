@@ -8,7 +8,7 @@ import { Box, Flex, Link, Text, Heading } from "@chakra-ui/react";
 interface NewsHighlightContainerProps {
     coverPhoto: StaticImageData;
     headline: string;
-    date: string | Date;
+    date: Date;
     story: string;
 }
 
@@ -37,7 +37,7 @@ const NewsHighlightContainer: FC<NewsHighlightContainerProps> = ({
             <Box position={"absolute"} w={"full"} p={"4"} top={"40%"}>
                 <Box bg={"white"} p={"4"}>
                     <Heading>{headline}</Heading>
-                    <Text>{date.toLocaleString()}</Text>
+                    <Text>{date.toDateString()}</Text>
                     <Text>{story.substring(0, 100) + "..."}</Text>
                     <Link textAlign={"end"} display={"block"}>
                         Read More

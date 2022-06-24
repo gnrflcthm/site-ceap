@@ -4,7 +4,7 @@ import { StaticImageData } from "next/image";
 
 import { Box, Heading, Flex, Button } from "@chakra-ui/react";
 import NewsHighlightContainer from "./NewsHighlightContainer";
-import SectionHeading from "../SectionHeading";
+import SectionHeading from "../../SectionHeading";
 
 interface NewsHighlightsProps {
     newsData: NewsHighlight[];
@@ -13,7 +13,7 @@ interface NewsHighlightsProps {
 export interface NewsHighlight {
     coverPhoto: StaticImageData;
     headline: string;
-    date: string | Date;
+    date: Date;
     story: string;
 }
 

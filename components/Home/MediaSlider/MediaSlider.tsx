@@ -6,7 +6,7 @@ import { Flex, Box, Button } from "@chakra-ui/react";
 
 import Slider, { Settings } from "react-slick";
 
-import SectionHeading from "../SectionHeading";
+import SectionHeading from "../../SectionHeading";
 
 interface MediaSliderProps {
     images: string[];
