@@ -59,7 +59,6 @@ const Home: FC = () => {
                 bgRepeat={"no-repeat"}
                 bgSize={"cover"}
                 m={"0"}
-                py={"2"}
             >
                 {/* <Flex
                     as={"section"}
