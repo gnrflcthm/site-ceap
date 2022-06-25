@@ -4,9 +4,10 @@ import { CSSObject, Heading, Flex } from "@chakra-ui/react";
 
 interface SectionHeadingProps extends PropsWithChildren {
     color?: string;
+    my?: string | number;
 }
 
-const SectionHeading: FC<SectionHeadingProps> = ({ children, color }) => {
+const SectionHeading: FC<SectionHeadingProps> = ({ children, color, my }) => {
     const lineDecor: CSSObject = {
         content: `""`,
         bg: color || "black",
@@ -19,6 +20,7 @@ const SectionHeading: FC<SectionHeadingProps> = ({ children, color }) => {
     return (
         <Flex w={"full"} justifyContent={"center"} alignItems={"center"}>
             <Heading
+                as={"h1"}
                 textAlign={"center"}
                 _after={{
                     ...lineDecor,
@@ -29,7 +31,7 @@ const SectionHeading: FC<SectionHeadingProps> = ({ children, color }) => {
                     right: "110%",
                 }}
                 position={"relative"}
-                my={"4"}
+                my={my || 4}
                 color={color}
             >
                 {children}
