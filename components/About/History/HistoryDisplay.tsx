@@ -150,11 +150,13 @@ const HistoryDisplay: FC = () => {
                 <IconButton
                     aria-label={"previous"}
                     icon={<BsFillCaretLeftFill />}
+                    disabled={slide === 0}
                     onClick={() => setSlide([Math.max(0, slide - 1), -1])}
                 />
                 <IconButton
                     aria-label={"next"}
                     icon={<BsFillCaretRightFill />}
+                    disabled={slide === content.length -1}
                     onClick={() =>
                         setSlide([Math.min(content.length - 1, slide + 1), 1])
                     }
