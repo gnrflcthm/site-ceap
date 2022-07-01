@@ -43,7 +43,7 @@ const siteRoutes: SiteRoute[] = [
         subroutes: [
             {
                 name: "News",
-                route: "/news-and-events/news",
+                route: "/news-and-events",
             },
             {
                 name: "Photo Gallery",
@@ -61,7 +61,7 @@ const siteRoutes: SiteRoute[] = [
     },
     {
         name: "Resources",
-        route: "/resoureces",
+        route: "/resources",
     },
     {
         name: "Contact Us",
