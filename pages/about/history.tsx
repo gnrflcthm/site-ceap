@@ -1,10 +1,10 @@
-import { FC } from "react";
+import { NextPage } from "next";
 
 import { Flex, Box, VStack, Heading } from "@chakra-ui/react";
 import SectionHeading from "../../components/SectionHeading";
 import { HistoryDisplay } from "../../components/About/History";
 
-const History: FC = () => {
+const History: NextPage = () => {
     return (
         <Flex minH={"100vh"} flexDir={"column"} alignItems={"center"} p={"4"}>
             <Box my={"4"}>
