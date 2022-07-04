@@ -1,9 +1,13 @@
 
 # Misc Files Files
 *.lock
+.env
+next-env.d.ts
 
 # Directories
 node_modules
 .next
 docs
 
+# Log Files
+*.log

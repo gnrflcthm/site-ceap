@@ -1,9 +1,8 @@
-import { FC } from "react";
-
+import { NextPage } from "next";
 import Image from "next/image";
 import Head from "next/head";
 
-import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 
 import {
     HeroSlider,
@@ -13,7 +12,6 @@ import {
     MediaSlider,
 } from "../../components/Home";
 
-import logo from "../../public/logo.png";
 import i1 from "../../assets/2.jpg";
 
 import i2 from "../../assets/1.jpg";
@@ -25,7 +23,7 @@ import PartnersSlider from "../../components/Home/PartnersSlider";
 
 const images = [i2, i3, i4, i5, i6];
 
-const Home: FC = () => {
+const Home: NextPage = () => {
     const newsHighlights: NewsHighlight[] = [
         {
             coverPhoto: i2,
@@ -60,19 +58,6 @@ const Home: FC = () => {
                 bgSize={"cover"}
                 m={"0"}
             >
-                {/* <Flex
-                    as={"section"}
-                    flexDir={"column"}
-                    justifyContent={"center"}
-                    alignItems={"center"}
-                    h={"50vh"}
-                    pt={{ base: "10", md: "0" }}
-                >
-                    <Box as={Image} src={logo} objectFit={"contain"} />
-                    <Heading w={"40%"} textAlign={"center"}>
-                        Catholic Educational Association Of The Philippines
-                    </Heading>
-                </Flex> */}
                 <HeroSlider>
                     {images.map((src, i) => (
                         <HeroSliderItem image={src} key={i} />
