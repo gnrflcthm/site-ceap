@@ -1,5 +1,4 @@
 import { NextPage } from "next";
-import Image from "next/image";
 import Head from "next/head";
 
 import { Box } from "@chakra-ui/react";
@@ -10,16 +9,16 @@ import {
     NewsHighlights,
     NewsHighlight,
     MediaSlider,
-} from "../../components/Home";
+} from "../components/Home";
 
-import i1 from "../../assets/2.jpg";
+import i1 from "../assets/2.jpg";
 
-import i2 from "../../assets/1.jpg";
-import i3 from "../../assets/3.jpg";
-import i4 from "../../assets/4.jpg";
-import i5 from "../../assets/5.jpg";
-import i6 from "../../assets/6.jpg";
-import PartnersSlider from "../../components/Home/PartnersSlider";
+import i2 from "../assets/1.jpg";
+import i3 from "../assets/3.jpg";
+import i4 from "../assets/4.jpg";
+import i5 from "../assets/5.jpg";
+import i6 from "../assets/6.jpg";
+import PartnersSlider from "../components/Home/PartnersSlider";
 
 const images = [i2, i3, i4, i5, i6];
 
