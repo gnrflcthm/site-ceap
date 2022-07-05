@@ -12,7 +12,7 @@ const SectionHeading: FC<SectionHeadingProps> = ({ children, color, my }) => {
         content: `""`,
         bg: color || "black",
         position: "absolute",
-        width: { base: "50%", md: "100%" },
+        width: { base: "25%", md: "25%" },
         h: "2px",
         top: "50%",
     };

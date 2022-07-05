@@ -1,13 +1,13 @@
 import { NextPage } from "next";
 
-import { Flex, Box, VStack, Heading } from "@chakra-ui/react";
+import { Flex, Box, Heading } from "@chakra-ui/react";
 import SectionHeading from "../../components/SectionHeading";
 import { HistoryDisplay } from "../../components/About/History";
 
 const History: NextPage = () => {
     return (
-        <Flex minH={"100vh"} flexDir={"column"} alignItems={"center"} p={"4"}>
-            <Box my={"4"}>
+        <Flex minH={"100vh"} flexDir={"column"} alignItems={"center"} px={"8"}>
+            <Box my={"10"}>
                 <SectionHeading color={"primary"} my={"0"}>
                     History Of CEAP
                 </SectionHeading>

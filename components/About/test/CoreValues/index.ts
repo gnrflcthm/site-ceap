@@ -1,3 +1,3 @@
-import coreValues from "./coreValuesComponent";
+import CoreValues from "./CoreValues";
 
-export { coreValues };
+export default CoreValues;
