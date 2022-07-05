@@ -1,3 +1,6 @@
-import test from "./testComponent";
+import MVCVNav from "./MVCVNav";
+import CoreValues from "./CoreValues";
+import Mission from "./Mission";
+import Vision from "./Vision";
 
-export { test };
+export { Mission, Vision, CoreValues, MVCVNav };

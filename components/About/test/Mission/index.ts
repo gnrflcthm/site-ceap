@@ -1,3 +1,3 @@
-import mission from "./missionComponent";
+import Mission from "./Mission";
 
-export { mission };
+export default Mission;

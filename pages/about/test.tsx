@@ -1,46 +1,55 @@
-import { FC, useState } from "react";
+import { NextPage } from "next";
+import { useState } from "react";
 import Head from "next/head";
-import { test as Test } from "../../components/About/test";
-import { mission as Mission } from "../../components/About/test/Mission";
-import { vision as Vision } from "../../components/About/test/Vision";
-import { coreValues as CoreValues } from "../../components/About/test/CoreValues";
-import { Center, Box, Flex, Heading, Text, Button } from "@chakra-ui/react";
+import {
+    MVCVNav,
+    CoreValues,
+    Mission,
+    Vision,
+} from "../../components/About/test";
+import { Box, HStack } from "@chakra-ui/react";
 import SectionHeading from "../../components/SectionHeading";
 
-const MissionVisionValues: FC = () => {
-    const [current, setCurrent] = useState("Mission")
+const components = {
+    Mission: Mission,
+    Vision: Vision,
+    CoreValues: CoreValues,
+};
+
+const MissionVisionValues: NextPage = () => {
+    const [current, setCurrent] = useState<string>("Mission");
+
+    const MVCVPage = components[current as keyof typeof components];
+
     return (
-        <>
+        <Box px={"8"}>
             <Head>
                 <title>Mission, Vision, & Core Values</title>
             </Head>
-            <SectionHeading color={"primary"} my={"10"}>Mission, Vision, & Core Values</SectionHeading>
-            <Test
-                title={"Mission"}
-                active={current === "Mission"}
-                onClick={() => setCurrent("Mission")}
-            />
-            <Test
-                title={"Vision"}
-                active={current === "Vision"}
-                onClick={() => setCurrent("Vision")}
-            />
-            <Test
-                title={"Core Values"}
-                active={current === "CoreValues"}
-                onClick={() => setCurrent("CoreValues")}
-            />
-            {/* <Button rounded={"0"} size='lg' ml={"5"} mb={"10"} as='i' color="white" bg={'primary'}>Mission</Button>
-            <Button rounded={"0"} size='lg' ml={"5"} mb={"10"} as='i' color="white" bg={'primary'}>Vision</Button>
-            <Button rounded={"0"} size='lg' ml={"5"} mb={"10"} as='i' color="white" bg={'primary'}>Core Values</Button> */}
-
-            <Box p={"5"}>
-                {current === "Mission" ? <Mission /> : ""}
-                {current === "Vision" ? <Vision /> : ""}
-                {current === "CoreValues" ? <CoreValues /> : ""}
+            <SectionHeading color={"primary"} my={"10"}>
+                Mission, Vision, & Core Values
+            </SectionHeading>
+            <HStack>
+                <MVCVNav
+                    title={"Mission"}
+                    active={current === "Mission"}
+                    onClick={() => setCurrent("Mission")}
+                />
+                <MVCVNav
+                    title={"Vision"}
+                    active={current === "Vision"}
+                    onClick={() => setCurrent("Vision")}
+                />
+                <MVCVNav
+                    title={"Core Values"}
+                    active={current === "CoreValues"}
+                    onClick={() => setCurrent("CoreValues")}
+                />
+            </HStack>
+            <Box py={"4"}>
+                <MVCVPage />
             </Box>
-
-        </>
+        </Box>
     );
 };
 
