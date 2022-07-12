@@ -1,26 +1,20 @@
 import { FC, useEffect, useRef, useState } from "react";
 
+import NextLink from "next/link";
+
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Link from "next/link";
 
-import { Flex, Box, IconButton } from "@chakra-ui/react";
-import { FaBars } from "react-icons/fa";
+import { Flex, Box, Heading, IconButton } from "@chakra-ui/react";
+import { FaSearch } from "react-icons/fa";
+
+import logo from "../../public/logo.png";
+import siteRoutes from "./routes";
 
 import NavLink from "./NavLink";
 
-import siteRoutes from "./routes";
-
-interface NavbarProps {
-    offSet?: string | number;
-}
-
-const Navbar: FC<NavbarProps> = ({ offSet = 0 }) => {
-    const [showNav, setShowNav] = useState<boolean>(false);
-    const [mobile, setMobile] = useState<boolean>(true);
-    const [scrollValue, setScrollValue] = useState<number>(0);
-    const [scrolled, setScrolled] = useState<boolean>(false);
-    const [initialTop, setInitialTop] = useState<number>(-1);
+const Navbar: FC<{ isHome?: boolean }> = ({ isHome }) => {
+    const [navBg, setNavBg] = useState("transparent");
 
     const navbar = useRef<HTMLDivElement>(null);
 
@@ -30,60 +24,87 @@ const Navbar: FC<NavbarProps> = ({ offSet = 0 }) => {
 
     useEffect(() => {
         const handleScroll = () => {
-            setScrollValue(window.scrollY);
-        };
-
-        const handleChangeRoute = () => {
-            setInitialTop(-1);
+            if (navbar.current) {
+                let { offsetHeight, offsetTop } = navbar.current;
+                if (window.location.pathname === "/home") {
+                    setNavBg(
+                        (offsetTop || 0) > (offsetHeight || 0)
+                            ? "neutralizerLight"
+                            : "transparent"
+                    );
+                }
+            }
         };
 
         window.addEventListener("scroll", handleScroll);
-        router.events.on("routeChangeStart", handleChangeRoute);
 
         return () => {
             window.removeEventListener("scroll", handleScroll);
-            router.events.off("routeChangeStart", handleChangeRoute);
         };
     }, []);
 
     useEffect(() => {
-        if (navbar.current) {
-            let { offsetTop } = navbar.current;
-            if (initialTop === -1) {
-                setInitialTop(offsetTop);
-            }
-            setScrolled(scrollValue > 0);
+        if (window.location.pathname === "/home") {
+            setNavBg("transparent");
+        } else {
+            setNavBg("neutralizerLight");
         }
-    }, [scrollValue]);
+    }, [router]);
 
     return (
         <Flex
-            justifyContent={{ base: "flex-start", lg: "center" }}
-            alignItems={"center"}
-            bg={"primary"}
+            justifyContent={"space-between"}
+            alignItems={"stretch"}
             position={"sticky"}
             top={"0"}
-            // position={"fixed"}
-            // top={{
-            //     base: "0",
-            //     md: scrolled ? Math.max(0, initialTop - scrollValue) : offSet,
-            // }}
-            w={"full"}
             zIndex={"sticky"}
             ref={navbar}
+            bg={navBg}
+            transition={"all 0.2s ease"}
+            px={"10"}
         >
-            <IconButton
-                aria-label="Expand Nav"
-                icon={<FaBars />}
-                display={{ base: "inherit", lg: "none" }}
-                bg={"transparent"}
-                color={"textOnPrimary"}
-            />
-            <Box display={{ base: "none", lg: "flex" }}>
+            <NextLink href="/home" passHref>
+                <Flex
+                    as={"a"}
+                    justifyContent={"space-between"}
+                    position={"relative"}
+                    alignItems={"stretch"}
+                    my={"4"}
+                    cursor={"pointer"}
+                >
+                    <Box position={"relative"} objectFit={"contain"} px={"8"}>
+                        <Image
+                            src={logo}
+                            layout={"fill"}
+                            objectFit={"contain"}
+                        />
+                    </Box>
+                    <Heading color={"primary"}>CEAP</Heading>
+                </Flex>
+            </NextLink>
+            <Flex alignItems={"stretch"} justifyContent={"space-between"}>
                 {siteRoutes.map((route, i) => (
-                    <NavLink {...route} key={i} />
+                    <NavLink
+                        {...route}
+                        key={i}
+                        navScrolled={navBg === "neutralizerLight"}
+                    />
                 ))}
-            </Box>
+                <IconButton
+                    icon={<FaSearch />}
+                    aria-label={"search"}
+                    bg={"transparent"}
+                    color={
+                        navBg === "neutralizerLight"
+                            ? "neutralizerDark"
+                            : "neutralizerLight"
+                    }
+                    _hover={{
+                        color: "primary",
+                    }}
+                    alignSelf={"center"}
+                />
+            </Flex>
         </Flex>
     );
 };

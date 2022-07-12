@@ -16,6 +16,7 @@ interface NavLinkProps {
     color?: string;
     isSubroute?: boolean;
     activeRoutes?: string[];
+    navScrolled?: boolean;
 }
 
 const NavLink: FC<NavLinkProps> = ({
@@ -25,6 +26,7 @@ const NavLink: FC<NavLinkProps> = ({
     color,
     isSubroute = false,
     activeRoutes = [],
+    navScrolled,
 }) => {
     const [isActive, setIsActive] = useState<boolean>(false);
     const [hovered, setHovered] = useState<boolean>(false);
@@ -39,16 +41,25 @@ const NavLink: FC<NavLinkProps> = ({
     }, [router.pathname]);
 
     return (
-        <Box
+        <Flex
             position={"relative"}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            bg={isActive ? "textOnPrimary" : "transparent"}
-            color={isActive ? "primary" : "textOnPrimary"}
-            _hover={{
-                bg: isSubroute ? "primary" : "textOnPrimary",
-                color: "primary",
-            }}
+            color={
+                isSubroute
+                    ? "neutralizerDark"
+                    : isActive
+                    ? "primary"
+                    : navScrolled
+                    ? "neutralizerDark"
+                    : "neutralizerLight"
+            }
+            fontSize={"sm"}
+            fontWeight={"500"}
+            h={"full"}
+            justify={"flex-start"}
+            align={"center"}
+            bg={isSubroute ? (hovered ? "primary" : "none") : "none"}
         >
             <NextLink href={route} passHref>
                 <Link
@@ -59,11 +70,10 @@ const NavLink: FC<NavLinkProps> = ({
                     textDecor={"none"}
                     _hover={{
                         textDecor: "none",
-                        color: isSubroute ? "textOnPrimary" : "inherit",
+                        color: isSubroute ? "neutralizerLight" : "primary",
                     }}
-                    color={color || "inherit"}
-                    justifyContent={"space-around"}
-                    alignItems={"center"}
+                    justifyContent={"flex-start"}
+                    w={"full"}
                 >
                     {name.toUpperCase()}{" "}
                     {subroutes && <Box as={BsFillCaretDownFill} pl={"2"} />}
@@ -77,14 +87,12 @@ const NavLink: FC<NavLinkProps> = ({
                         position={"absolute"}
                         initial={{ height: "0%" }}
                         animate={{ height: "fit-content" }}
-                        bg={"textOnPrimary"}
+                        bg={"neutralizerLight"}
                         top={"100%"}
-                        left={"50%"}
+                        left={"0"}
                         transform={"auto"}
-                        translateX={"-50%"}
                         minW={"100%"}
                         whiteSpace={"nowrap"}
-                        textAlign={"center"}
                         zIndex={"dropdown"}
                     >
                         {subroutes.map((subroute, i) => (
@@ -98,8 +106,8 @@ const NavLink: FC<NavLinkProps> = ({
                                 }}
                             >
                                 <NavLink
+                                    color={"neutralizerDark"}
                                     {...subroute}
-                                    color={"black"}
                                     isSubroute={true}
                                 />
                             </Box>
@@ -107,7 +115,7 @@ const NavLink: FC<NavLinkProps> = ({
                     </Flex>
                 )}
             </AnimatePresence>
-        </Box>
+        </Flex>
     );
 };
 

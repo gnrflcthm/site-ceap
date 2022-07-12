@@ -2,12 +2,16 @@ import { extendTheme } from "@chakra-ui/react";
 
 export const appTheme = extendTheme({
     colors: {
-        primary: "#18167B",
-        textOnPrimary: "#EEEEEE",
-        secondary: "#DCE6FF"
+        primary: "#0F1A64",
+        primaryAccent: "#2FDACF",
+        secondary: "#F78828",
+        secondaryAccent: "#F1CC00",
+        neutralizerLight: "#FFFDFA",
+        neutralizerDark: "#303030"
+
     },
     fonts: {
-        heading: "Roboto, Helvetica, sans-serif",
-        body: "Roboto, Helvetica, sans-serif"
+        heading: "Montserrat, Helvetica, sans-serif",
+        body: "Montserrat, Helvetica, sans-serif"
     },
 });
