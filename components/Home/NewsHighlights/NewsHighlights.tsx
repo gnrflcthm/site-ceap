@@ -22,7 +22,6 @@ const NewsHighlights: FC<NewsHighlightsProps> = ({ newsData }) => {
         <Flex
             p={{ base: "2", md: "4" }}
             bg={"#EEE"}
-            my={{ base: "4", md: "0" }}
             flexDir={"column"}
             justifyContent={"space-between"}
             alignItems={"center"}

@@ -1,6 +1,9 @@
-import HeroSlider, { HeroSliderItem } from "./HeroSlider";
+import HeroSection from "./HeroSection/HeroSection";
 import NewsHighlights, { NewsHighlight } from "./NewsHighlights";
 import MediaSlider from "./MediaSlider";
+import PhotoGallerySection from "./PhotoGallerySection";
+import QuickLinksSection from "./QuickLinksSection";
+import VideoGallerySection from "./VideoGallerySection";
 
-export { HeroSlider, HeroSliderItem, NewsHighlights, MediaSlider };
+export { HeroSection, NewsHighlights, MediaSlider, PhotoGallerySection, QuickLinksSection, VideoGallerySection };
 export type { NewsHighlight };
