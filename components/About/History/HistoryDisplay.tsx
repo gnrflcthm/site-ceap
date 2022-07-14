@@ -118,7 +118,6 @@ const HistoryDisplay: FC = () => {
                 <Box
                     as={AnimatePresence}
                     position={"relative"}
-                    minH={"80vh"}
                     p={"4"}
                 >
                     <Box
