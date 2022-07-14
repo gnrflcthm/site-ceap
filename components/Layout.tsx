@@ -9,9 +9,9 @@ import { Box } from "@chakra-ui/react";
 const Layout: FC<PropsWithChildren> = ({ children }) => {
     const router = useRouter();
     return (
-        <Box position={"absolute"} top={"0"} w={"full"} pt={router.pathname === "/home" ? "4" : "initial"}>
+        <Box position={"absolute"} top={"0"} w={"full"} pt={["/home", "/"].includes(router.pathname) ? "4" : "initial"}>
             <Navbar />
-            <Box mt={router.pathname === "/home" ? "-24" : "initial"}>{children}</Box>
+            <Box mt={["/home", "/"].includes(router.pathname) ? "-24" : "initial"}>{children}</Box>
             <Footer />
         </Box>
     );

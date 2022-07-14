@@ -26,7 +26,7 @@ const Navbar: FC<{ isHome?: boolean }> = ({ isHome }) => {
         const handleScroll = () => {
             if (navbar.current) {
                 let { offsetHeight, offsetTop } = navbar.current;
-                if (window.location.pathname === "/home") {
+                if (["/home", "/"].includes(window.location.pathname)) {
                     setNavBg(
                         (offsetTop || 0) > (offsetHeight || 0)
                             ? "neutralizerLight"
@@ -44,7 +44,7 @@ const Navbar: FC<{ isHome?: boolean }> = ({ isHome }) => {
     }, []);
 
     useEffect(() => {
-        if (window.location.pathname === "/home") {
+        if (["/home", "/"].includes(window.location.pathname)) {
             setNavBg("transparent");
         } else {
             setNavBg("neutralizerLight");

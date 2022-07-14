@@ -24,10 +24,6 @@ const siteRoutes: SiteRoute[] = [
                 route: "/about/history",
             },
             {
-                name: "Vision, Mission, & Core Values",
-                route: "/about/test",
-            },
-            {
                 name: "Strategic Direction",
                 route: "/about/strategic-direction",
             },
