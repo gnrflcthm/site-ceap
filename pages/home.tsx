@@ -4,11 +4,10 @@ import Head from "next/head";
 import { Box } from "@chakra-ui/react";
 
 import {
-    HeroSlider,
-    HeroSliderItem,
-    NewsHighlights,
-    NewsHighlight,
-    MediaSlider,
+    HeroSection,
+    PhotoGallerySection,
+    QuickLinksSection,
+    VideoGallerySection
 } from "../components/Home";
 
 import i1 from "../assets/2.jpg";
@@ -18,7 +17,6 @@ import i3 from "../assets/3.jpg";
 import i4 from "../assets/4.jpg";
 import i5 from "../assets/5.jpg";
 import i6 from "../assets/6.jpg";
-import PartnersSlider from "../components/Home/PartnersSlider";
 
 const images = [i2, i3, i4, i5, i6];
 
@@ -50,23 +48,17 @@ const Home: NextPage = () => {
                 <title>Home</title>
             </Head>
             <Box
-                bg={`linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(${i1.src})`}
+                bg={`linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${i1.src})`}
                 bgAttachment={"fixed"}
                 bgPos={"center"}
                 bgRepeat={"no-repeat"}
                 bgSize={"cover"}
                 m={"0"}
             >
-                <HeroSlider>
-                    {images.map((src, i) => (
-                        <HeroSliderItem image={src} key={i} />
-                    ))}
-                </HeroSlider>
-                <NewsHighlights newsData={newsHighlights} />
-                <MediaSlider images={images.map((val) => val.src)} />
-                <PartnersSlider
-                    partners={images.map((val) => ({ logo: val.src }))}
-                />
+                <HeroSection />
+                <QuickLinksSection />
+                <VideoGallerySection />
+                <PhotoGallerySection />
             </Box>
         </>
     );
