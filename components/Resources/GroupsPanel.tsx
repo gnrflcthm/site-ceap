@@ -5,11 +5,13 @@ import { Flex, Heading, VStack, Box } from "@chakra-ui/react";
 import PanelItem from "./PanelItem";
 
 interface GroupsPanelProps {
+    groups: string[];
     selectGroup: Function;
     currentSelected: string;
 }
 
 const GroupsPanel: FC<GroupsPanelProps> = ({
+    groups,
     selectGroup: setSelectedGroup,
     currentSelected,
 }) => {
@@ -25,32 +27,21 @@ const GroupsPanel: FC<GroupsPanelProps> = ({
             overflowX={"hidden"}
             overscrollY={"auto"}
         >
-            <Heading>Search</Heading>
+            <Heading textAlign={"center"} my={"4"}>
+                Group
+            </Heading>
             <VStack w={"full"} spacing={"0"}>
-                <PanelItem
-                    text={
-                        "2021 CEAP Child Protection Summit (March 25 to 27, 2021)"
-                    }
-                    onClick={() =>
-                        setSelectedGroup(
-                            currentSelected ===
-                                "2021 CEAP Child Protection Summit (March 25 to 27, 2021)"
-                                ? ""
-                                : "2021 CEAP Child Protection Summit (March 25 to 27, 2021)"
-                        )
-                    }
-                />
-                <PanelItem
-                    text={"2021 CEAP National JEEPGY Conference"}
-                    onClick={() =>
-                        setSelectedGroup(
-                            currentSelected ===
-                                "2021 CEAP National JEEPGY Conference"
-                                ? ""
-                                : "2021 CEAP National JEEPGY Conference"
-                        )
-                    }
-                />
+                {groups.map((group, idx) => (
+                    <PanelItem
+                        key={idx}
+                        text={group}
+                        onClick={() =>
+                            setSelectedGroup(
+                                currentSelected === group ? "" : group
+                            )
+                        }
+                    />
+                ))}
             </VStack>
         </Flex>
     );
