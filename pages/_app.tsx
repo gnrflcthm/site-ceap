@@ -6,6 +6,8 @@ import { ChakraProvider } from "@chakra-ui/react";
 import Layout from "../components/Layout";
 import { appTheme } from "../style/theme";
 
+import { AuthProvider } from "../context/AuthContext";
+
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import "@fontsource/montserrat/300.css";
@@ -21,9 +23,11 @@ export default function App({ Component, pageProps }: AppProps) {
             <Head>
                 <link rel={"icon"} href={"logo.png"} />
             </Head>
-            <Layout>
-                <Component {...pageProps} />
-            </Layout>
+            <AuthProvider>
+                <Layout>
+                    <Component {...pageProps} />
+                </Layout>
+            </AuthProvider>
         </ChakraProvider>
     );
 }
