@@ -10,12 +10,88 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AccountType {
+  CEAP_ADMIN
+  MS_ADMIN
+  MS_USER
+}
+
+enum FileClassification {
+  CHRISTIAN_FORMATION
+  BASIC_EDUCATION
+  HIGHER_EDUCATION
+  TECHINICAL_VOCATION_EDUCATION
+  ALS_SPED
+  PROGRAMS
+  NATIONAL_CONVENTION
+  ADVOCACY
+  RESEARCH
+  GENERAL_CEAP
+  COCOPEA_PEAC
+  INTERNATIONAL_LINKAGES
+}
+
+enum FileType {
+  PDF
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+enum FileAccessibility {
+  PUBLIC
+  PRIVATE
+  HIDDEN
+}
+
+enum RequestStatus {
+  FOR_REVIEW
+  APPROVED
+}
+
+model User {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  username       String        @unique
+  firstName      String
+  lastName       String
+  email          String
+  accountType    AccountType
+  memberSchool   MemberSchool? @relation(fields: [memberSchoolId], references: [id])
+  memberSchoolId String?       @db.ObjectId
+  Resource       Resource[]
+}
+
+model MemberSchool {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  address String
+  User    User[]
+}
+
 model Resource {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  filename String
-  filepath String
-  downloadURL String
-  dateAdded DateTime
-  category String
-  group String
+  id             String             @id @default(auto()) @map("_id") @db.ObjectId
+  filename       String
+  filepath       String
+  dateAdded      DateTime
+  classification FileClassification
+  fileType       FileType
+  contentType    String
+  accessibility  FileAccessibility?
+  status         RequestStatus?
+  uploadedBy     User?              @relation(fields: [uploaderId], references: [id])
+  uploaderId     String?            @db.ObjectId
+}
+
+model NewsPost {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  headline   String
+  story      String
+  coverImage String?
+  date       DateTime
+}
+
+model Event {
+  id    String   @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  date  DateTime
 }
