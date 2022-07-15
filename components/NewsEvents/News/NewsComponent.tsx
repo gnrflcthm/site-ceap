@@ -12,7 +12,7 @@ interface NewsProps {
 
 const NewsComponent: FC<NewsProps> = ({ src, heading, date, story }) => {
     return (
-        <Flex borderRadius='md' w="50%" bg={"primaryAccent"} px="10" justifyContent="space-between">
+        <Flex borderRadius='md' w="50%" bg={"#dce6ff"} px="10" justifyContent="space-between">
             <Box overflow={"hidden"} position={"relative"} objectFit={"cover"} p={150} >
                 <Image layout={"fill"} objectFit={"contain"} src={src} />
             </Box>
@@ -20,7 +20,7 @@ const NewsComponent: FC<NewsProps> = ({ src, heading, date, story }) => {
                 <Heading>{heading}</Heading>
                 <Text fontSize={14}>{date}</Text>
                 <Text>{story}</Text>
-                <Button alignSelf={"flex-end"}>Read More</Button>
+                <Button color={"white"} bg="primary" alignSelf={"flex-end"}>Read More</Button>
             </VStack>
         </Flex>
     );
