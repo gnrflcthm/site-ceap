@@ -12,6 +12,7 @@ interface NewsPageProps {
 const NewsPage: NextPage<NewsPageProps> = ({ page }) => {
     return (
         <>
+            <title>News</title>
             <SectionHeading color={"primary"} my={"10"}>
                 Latest News
             </SectionHeading>

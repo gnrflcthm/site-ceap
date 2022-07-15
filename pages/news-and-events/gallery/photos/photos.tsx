@@ -11,7 +11,7 @@ const Photos: NextPage = () => {
     return (
         <>
             <Head>
-                <title>Photos</title>
+                <title>Photo Gallery</title>
             </Head>
             <SectionHeading color="primary">
                 PHOTO GALLERY

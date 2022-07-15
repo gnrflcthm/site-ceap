@@ -11,7 +11,7 @@ const Videos: NextPage = () => {
     return (
         <>
             <Head>
-                <title>Photos</title>
+                <title>Video Gallery</title>
             </Head>
             <SectionHeading color="primary">
                 VIDEO GALLERY
