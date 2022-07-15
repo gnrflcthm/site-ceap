@@ -29,13 +29,14 @@ enum FileClassification {
   GENERAL_CEAP
   COCOPEA_PEAC
   INTERNATIONAL_LINKAGES
+  OTHERS
 }
 
 enum FileType {
   PDF
   IMAGE
   VIDEO
-  DOCUMENT
+  DOCUMENTS
 }
 
 enum FileAccessibility {
@@ -51,6 +52,7 @@ enum RequestStatus {
 
 model User {
   id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  authId         String        @unique
   username       String        @unique
   firstName      String
   lastName       String

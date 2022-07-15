@@ -3,6 +3,7 @@
 *.lock
 .env
 next-env.d.ts
+**/serviceAccount.json
 
 # Directories
 node_modules
