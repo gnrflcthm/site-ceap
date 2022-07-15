@@ -11,7 +11,7 @@ interface HistoryNavProps {
 const Members: FC<HistoryNavProps> = ({ title, active, onClick }) => {
     return (
         <Button
-            rounded={"0"} size='lg' ml={"5"} mb={"10"} as='i' color={active ? "primary" : "textOnPrimary"} bg={active ? "textOnPrimary" : "primary"}
+            rounded={"0"} size='lg' ml={"5"} mb={"10"} as='i' color={active ? "primary" : "white"} bg={active ? "neutralizerWhite" : "primary"}
             onClick={onClick}
         >
             {title}
