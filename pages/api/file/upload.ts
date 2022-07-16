@@ -1,20 +1,25 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { IncomingForm, File } from "formidable";
 
-import fs from "fs";
+import { unlink } from "fs";
+import { extname } from "path";
 
-import { Dropbox } from "dropbox";
+import { getStorage, Storage } from "firebase-admin/storage";
+import "../../../firebase";
 
 import { prisma } from "../../../prisma/db";
-
-const dropbox = new Dropbox({ accessToken: process.env.DROPBOX_TOKEN });
+import { FileClassification } from "@prisma/client";
+import { getFileType } from "../../../util";
 
 type ProcessedFiles = Array<[string, File]>;
-
-type UploadFormData = { group?: string; category?: string };
+type UploadFormData = {
+    classification?: FileClassification;
+};
 type UploadFormDataKey = keyof UploadFormData;
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+    // TODO: User Validation
+
     const formData: UploadFormData = {};
     const data: ProcessedFiles | undefined = await new Promise<
         ProcessedFiles | undefined
@@ -26,7 +31,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         form.on(
             "field",
-            (field, value) => (formData[field as UploadFormDataKey] = value)
+            (field, value) =>
+                (formData[field as UploadFormDataKey] =
+                    value as FileClassification)
         );
 
         form.on("error", (err) => reject(err));
@@ -37,49 +44,53 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (data?.length) {
         for (const file of data) {
             try {
-                let {
-                    result: { path_lower, name },
-                } = await dropbox.filesUpload({
-                    path: `/uploads/${file[1].originalFilename}`,
-                    contents: fs.readFileSync(file[1].filepath),
-                });
-                let {
-                    result: { url },
-                } = await dropbox.sharingCreateSharedLinkWithSettings({
-                    path: path_lower || "",
-                    settings: {
-                        audience: {
-                            ".tag": "public",
-                        },
-                        access: {
-                            ".tag": "viewer",
-                        },
-                    },
-                });
-                await prisma.resource.create({
-                    data: {
-                        filename: name,
-                        filepath: path_lower || "",
-                        downloadURL: url.replace(
-                            "www.dropbox.com",
-                            "dl.dropboxusercontent.com"
-                        ),
-                        dateAdded: new Date(),
-                        category: "",
-                        group: formData.group || "",
-                    },
-                });
-                res.status(200).json({ msg: "File Uploaded" });
-                fs.unlink(file[1].filepath, () =>
-                    console.log(`Error Deleteing: ${file[1].filepath}`)
-                );
-            } catch (error) {
-                console.log(error);
-                res.status(500).json({ msg: "An Error Has Occured" });
+                uploadFile(file, formData.classification);
+            } catch (err) {
+                console.log(err);
             }
         }
     }
     res.end();
+};
+
+const uploadFile = async (
+    file: [string, File],
+    classification: FileClassification | string = FileClassification.OTHERS
+) => {
+    const storage: Storage = getStorage();
+
+    let bucket = storage.bucket(process.env.BUCKET_URL);
+
+    let filename = file[1].originalFilename || file[1].newFilename;
+    let destination = `${classification}/${filename}`;
+
+    // TODO: Error Handling
+
+    // TODO: Path Handling / Folder Creation
+
+    let response = await bucket.upload(file[1].filepath, {
+        destination,
+    });
+
+    let gid = response[0].metadata.id;
+
+    // Creating Record Of Resources
+    await prisma.resource.create({
+        data: {
+            classification: classification as FileClassification,
+            contentType: file[1].mimetype || "",
+            filename: file[1].originalFilename || file[1].newFilename,
+            gid,
+            dateAdded: new Date(),
+            filepath: destination,
+            fileType: getFileType(filename),
+        },
+    });
+
+    // Deleting Temp File
+    unlink(file[1].filepath, (err) => {
+        if (err) console.log(err);
+    });
 };
 
 export const config = {
