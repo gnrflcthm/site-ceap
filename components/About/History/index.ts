@@ -1,3 +1,3 @@
 import HistoryDisplay from "./HistoryDisplay";
 
-export { HistoryDisplay };
+export default HistoryDisplay;
