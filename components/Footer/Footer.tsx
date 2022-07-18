@@ -17,8 +17,9 @@ const Footer: FC = () => {
                 borderBottom={"1px"}
                 borderBottomColor={"whiteAlpha.500"}
                 pb={"8"}
+                flexDir={{base: "column", lg: "row"}}
             >
-                <Flex flexBasis={"50%"} justify={"center"} align={"center"}>
+                <Flex flexBasis={"50%"} justify={"center"} align={"center"} mb={{base: "8", lg: "0"}}>
                     <VStack w={"60%"} align={"flex-start"}>
                         <Flex alignSelf={"center"} mb={"4"}>
                             <Box
@@ -83,6 +84,7 @@ const Footer: FC = () => {
                 w={"full"}
                 fontSize={"sm"}
                 px={'2'}
+                flexDir={{base: "column", lg: "row"}}
             >
                 <Text>
                     Copyright 2020 Catholic Educational Association of the

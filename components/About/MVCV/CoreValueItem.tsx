@@ -6,7 +6,7 @@ import { Box } from "@chakra-ui/react";
 
 const CoreValueItem: FC<{ src: string | StaticImageData }> = ({ src }) => {
     return (
-        <Box position={"relative"} objectFit={"cover"} p={"20"}>
+        <Box position={"relative"} objectFit={"cover"} p={"20"} mx={'2'} mb={{base: "2", lg: "0"}}>
             <Box
                 position={"absolute"}
                 w={"full"}

@@ -41,7 +41,7 @@ const MissionComponent: FC = () => {
     return (
         <Flex flexDir={"column"} zIndex={"3"} w={"full"}>
             <MVCVHeading heading={"Our Mission And Goals"} />
-            <Flex justify={"space-around"} align={"stretch"}>
+            <Flex justify={"space-around"} align={"stretch"} flexDir={{base: "column", lg: "row"}}>
                 {missionData.map((mission, i) => (
                     <MissionItem {...mission} key={i} />
                 ))}

@@ -20,12 +20,12 @@ const HistoryItem: FC<{ heading?: string; story?: string | string[] }> = ({
             spacing={'1'}
         >
 
-                <Box p={"4"} bg={"secondary"} rounded={'md'}>
+                <Box p={"2"} px={'4'} bg={"secondary"} rounded={'md'}>
                     <Heading position={"relative"} fontSize={"xl"} textTransform={"uppercase"}>
                         {heading}
                     </Heading>
                 </Box>
-                <Box rounded={'md'} p={'4'} bg={'secondary'}>
+                <Box rounded={'md'} p={'4'} color={"neutralizerLight"}>
                     {typeof story === "string" ? (
                         <Text position={"relative"} fontSize={"md"}>
                             {story}

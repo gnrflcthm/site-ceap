@@ -16,6 +16,7 @@ const MissionItem: FC<MissionItemProps> = ({ heading, goals }) => {
             py={"4"}
             color={"neutralizerLight"}
             position={"relative"}
+            mb={{ base: "4", md: "0" }}
         >
             <Box
                 w={"full"}

@@ -30,7 +30,7 @@ const FooterEvent: FC = () => {
                     31
                 </Text>
             </Flex>
-            <VStack flex={"1"} align={"start"} px={"10"}>
+            <VStack flex={"1"} align={"start"} px={"4"}>
                 <Heading fontSize={"sm"}>
                     Lorem ipsum, dolor sit amet consectetur adipisicing elit.
                 </Heading>

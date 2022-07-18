@@ -21,7 +21,7 @@ const AboutUs: FC = () => {
             justify={"flex-start"}
             align={"stretch"}
             pb={"10"}
-            px={"8"}
+            px={{ base: "4", lg: "8" }}
             color={"neutralizerLight"}
             position={"relative"}
             overflow={"hidden"}

@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { VStack, Flex, HStack, Heading, Box } from "@chakra-ui/react";
+import { VStack,  Flex } from "@chakra-ui/react";
 
 import img1 from "../../../assets/val-1.png";
 import img2 from "../../../assets/val-2.png";
@@ -18,11 +18,11 @@ const CoreValues: FC = () => {
     return (
         <VStack w={"full"} zIndex={"3"}>
             <MVCVHeading heading={"Our Core Values"} />
-            <HStack justify={"space-evenly"}>
+            <Flex justify={"space-evenly"} flexWrap={"wrap"}>
                 {coreValues.map((value, i) => (
                     <CoreValueItem src={value} key={i} />
                 ))}
-            </HStack>
+            </Flex>
         </VStack>
     );
 };
