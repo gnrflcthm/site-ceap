@@ -37,7 +37,9 @@ const MissionItem: FC<MissionItemProps> = ({ heading, goals }) => {
             </Heading>
             <VStack as={"ul"} align={"flex-start"} zIndex={"3"}>
                 {goals.map((goal, i) => (
-                    <Text as={"li"}>{goal}</Text>
+                    <Text as={"li"} key={i}>
+                        {goal}
+                    </Text>
                 ))}
             </VStack>
         </VStack>

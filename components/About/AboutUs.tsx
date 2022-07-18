@@ -80,6 +80,7 @@ const AboutUs: FC = () => {
                 />
                 {aboutContent.map((val, i) => (
                     <Text
+                        key={i}
                         dangerouslySetInnerHTML={{ __html: val }}
                         zIndex={"3"}
                     />

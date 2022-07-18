@@ -1,9 +1,9 @@
-import {FC, PropsWithChildren} from 'react'
+import { FC, PropsWithChildren } from "react";
 
-import { Text } from '@chakra-ui/react';
+import { Text } from "@chakra-ui/react";
 
 const Bold: FC<PropsWithChildren> = ({ children }) => (
-    <Text fontWeight={"bold"} display={"inline"}>
+    <Text as={"span"} fontWeight={"bold"} display={"inline"}>
         {children}
     </Text>
 );

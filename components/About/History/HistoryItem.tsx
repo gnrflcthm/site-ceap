@@ -17,27 +17,31 @@ const HistoryItem: FC<{ heading?: string; story?: string | string[] }> = ({
             viewport={{ once: true, margin: "-20%" }}
             pl={"10"}
             position={"relative"}
-            spacing={'1'}
+            spacing={"1"}
         >
-
-                <Box p={"2"} px={'4'} bg={"secondary"} rounded={'md'}>
-                    <Heading position={"relative"} fontSize={"xl"} textTransform={"uppercase"}>
-                        {heading}
-                    </Heading>
-                </Box>
-                <Box rounded={'md'} p={'4'} color={"neutralizerLight"}>
-                    {typeof story === "string" ? (
-                        <Text position={"relative"} fontSize={"md"}>
-                            {story}
-                        </Text>
-                    ) : (
-                        <VStack position={"relative"} fontSize={"md"}>
-                            {story?.map((val, i) => (
-                                <Text key={i}>{val}</Text>
-                            ))}
-                        </VStack>
-                    )}
-                </Box>
+            <Box p={"2"} px={"4"} bg={"secondary"} rounded={"md"}>
+                <Heading
+                    position={"relative"}
+                    fontSize={"xl"}
+                    textTransform={"uppercase"}
+                    color={"neutralizerLight"}
+                >
+                    {heading}
+                </Heading>
+            </Box>
+            <Box rounded={"md"} p={"4"} color={"neutralizerLight"}>
+                {typeof story === "string" ? (
+                    <Text position={"relative"} fontSize={"md"}>
+                        {story}
+                    </Text>
+                ) : (
+                    <VStack position={"relative"} fontSize={"md"}>
+                        {story?.map((val, i) => (
+                            <Text key={i}>{val}</Text>
+                        ))}
+                    </VStack>
+                )}
+            </Box>
             <Box
                 position={"absolute"}
                 left={"0"}
