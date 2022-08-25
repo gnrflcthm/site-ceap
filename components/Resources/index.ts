@@ -1,3 +1,3 @@
-import ResourceClassification from "./ResourceClassification";
+import Catalogue from "./Catalogue";
 
-export { ResourceClassification };
+export default Catalogue;

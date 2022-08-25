@@ -1,19 +1,23 @@
 import { FC, PropsWithChildren } from "react";
 
-import { useRouter } from "next/router";
+import SideBar from "@components/SideBar";
+import TopBar from "@components/TopBar";
 
-import Navbar from "./Navbar";
-import Footer from "./Footer/Footer";
-import { Box } from "@chakra-ui/react";
+import { Flex, VStack } from "@chakra-ui/react";
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
-    const router = useRouter();
     return (
-        <Box position={"absolute"} top={"0"} w={"full"} pt={["/home", "/"].includes(router.pathname) ? "4" : "initial"}>
-            <Navbar />
-            <Box mt={["/home", "/"].includes(router.pathname) ? "-24" : "initial"}>{children}</Box>
-            <Footer />
-        </Box>
+        <Flex
+            maxW={"100vw"}
+            maxH={"100vh"}
+            bg={"neutralizerLight"}
+        >
+            <SideBar />
+            <Flex flexDir={"column"} maxH={"100vh"} flex={"1"}>
+                <TopBar />
+                {children}
+            </Flex>
+        </Flex>
     );
 };
 
