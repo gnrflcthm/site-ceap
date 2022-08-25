@@ -9,12 +9,12 @@ import {
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import "../firebase/client";
 
-type CEAPUser = User | null;
+type CoreUser = User | null;
 
-export const AuthContext = createContext<CEAPUser>(null);
+export const AuthContext = createContext<CoreUser>(null);
 
 export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState<CEAPUser>(null);
+    const [currentUser, setCurrentUser] = useState<CoreUser>(null);
 
     useEffect(() => {
         const auth = getAuth();

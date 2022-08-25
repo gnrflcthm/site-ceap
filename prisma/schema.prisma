@@ -84,17 +84,3 @@ model Resource {
   uploadedBy     User?              @relation(fields: [uploaderId], references: [id])
   uploaderId     String?            @db.ObjectId
 }
-
-model NewsPost {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  headline   String
-  story      String
-  coverImage String?
-  date       DateTime
-}
-
-model Event {
-  id    String   @id @default(auto()) @map("_id") @db.ObjectId
-  title String
-  date  DateTime
-}
