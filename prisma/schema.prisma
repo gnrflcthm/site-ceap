@@ -11,6 +11,7 @@ datasource db {
 }
 
 enum AccountType {
+  CEAP_SUPER_ADMIN
   CEAP_ADMIN
   MS_ADMIN
   MS_USER
@@ -55,19 +56,35 @@ model User {
   authId         String        @unique
   username       String        @unique
   firstName      String
+  middleName     String
   lastName       String
   email          String
+  mobileNumber   String?
   accountType    AccountType
   memberSchool   MemberSchool? @relation(fields: [memberSchoolId], references: [id])
   memberSchoolId String?       @db.ObjectId
   Resource       Resource[]
 }
+// Fix Naming Inconsistencies
+model UserRegistration {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  firstName      String
+  middleName     String
+  lastName       String
+  birthday       DateTime
+  emailAddress   String
+  mobileNumber   String?
+  organization   MemberSchool? @relation(fields: [memberSchoolId], references: [id])
+  memberSchoolId String?       @db.ObjectId
+}
 
 model MemberSchool {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  address String
-  User    User[]
+  id            String             @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  address       String
+  region        String
+  users         User[]
+  registrations UserRegistration[]
 }
 
 model Resource {
