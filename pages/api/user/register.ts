@@ -13,6 +13,8 @@ interface RegistrationData {
     schoolId?: string;
 }
 
+// TODO: Handle all possible errors (duplication, taken unique values, etc.as)
+
 export default handler().post(async (req, res) => {
     const {
         firstName,

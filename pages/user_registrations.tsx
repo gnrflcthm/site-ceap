@@ -18,11 +18,18 @@ import {
     Heading,
     Text,
     VStack,
+    Table,
+    Tbody,
+    HStack,
+    StackDivider,
+    Tr,
+    Thead,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import RegistrationData from "@components/Registrations/UserRegistrations";
 import { FaSync } from "react-icons/fa";
 import { getRegistrations } from "@util/api/registrations";
+import RegistrationTableHeader from "@components/Registrations/RegistrationTableHeader";
 
 const UserRegistrations: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -95,11 +102,28 @@ const UserRegistrations: PageWithLayout<
                         </Button>
                     )}
                 </Flex>
-                <VStack p={"4"} pt={"6"} overflow={"hidden"} overflowY={"auto"}>
-                    {data?.map((reg) => (
-                        <RegistrationData data={reg} key={reg.id} />
-                    ))}
-                </VStack>
+                <Table>
+                    <Thead bg={"blackAlpha.100"}>
+                        <Tr>
+                            <RegistrationTableHeader
+                                heading={"date registered"}
+                            />
+                            <RegistrationTableHeader
+                                heading={"full name"}
+                                subheading={"email address"}
+                                sortable
+                            />
+                            <RegistrationTableHeader heading={"mobile #"} />
+                            <RegistrationTableHeader heading={"school id"} />
+                            <RegistrationTableHeader heading={""} />
+                        </Tr>
+                    </Thead>
+                    <Tbody overflow={"hidden"} overflowY={"auto"} h={"full"}>
+                        {data?.map((reg) => (
+                            <RegistrationData data={reg} key={reg.id} />
+                        ))}
+                    </Tbody>
+                </Table>
             </Flex>
         </>
     );

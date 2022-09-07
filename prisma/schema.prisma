@@ -65,6 +65,7 @@ model User {
   memberSchoolId String?       @db.ObjectId
   Resource       Resource[]
 }
+
 // Fix Naming Inconsistencies
 model UserRegistration {
   id             String        @id @default(auto()) @map("_id") @db.ObjectId
@@ -74,6 +75,8 @@ model UserRegistration {
   birthday       DateTime
   emailAddress   String
   mobileNumber   String?
+  registeredAt   DateTime?     @default(now())
+  schoolId       String?       @unique
   organization   MemberSchool? @relation(fields: [memberSchoolId], references: [id])
   memberSchoolId String?       @db.ObjectId
 }

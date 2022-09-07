@@ -24,10 +24,23 @@ export default function AuthGetServerSideProps(
             };
         }
 
-        const auth = getAuth();
-        const { uid } = await auth.verifyIdToken(token);
+        var tokenResult;
 
-        context.uid = uid;
+        const auth = getAuth();
+        try {
+            tokenResult = await auth.verifyIdToken(token);
+        } catch (err) {
+            console.log("Invalid Token.");
+            return {
+                props: {},
+                redirect: {
+                    destination: "/",
+                    statusCode: 307,
+                },
+            };
+        }
+
+        context.uid = tokenResult.uid;
 
         return handler(context);
     };
