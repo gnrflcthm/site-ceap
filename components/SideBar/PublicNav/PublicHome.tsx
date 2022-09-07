@@ -12,7 +12,7 @@ const PublicHome: FC<{
 }> = ({ onLogin }) => {
     return (
         <VStack>
-            <Heading fontWeight={"normal"} fontSize={"2xl"}>
+            <Heading fontSize={"2xl"}>
                 Welcome to CEAP's Online Resources for Education
             </Heading>
             <VStack w={"full"}>
