@@ -26,6 +26,8 @@ const TopBar: FC = () => {
             position={"sticky"}
             top={"0"}
             h={"16"}
+            minH={"16"}
+            maxH={"16"}
         >
             <Box as={"button"} onClick={() => setCollapsed(!collapsed)}>
                 <Box

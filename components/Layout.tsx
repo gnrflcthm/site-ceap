@@ -7,13 +7,16 @@ import { Flex, VStack } from "@chakra-ui/react";
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
     return (
-        <Flex
-            maxW={"100vw"}
-            maxH={"100vh"}
-            bg={"neutralizerLight"}
-        >
+        <Flex maxW={"100vw"} maxH={"100vh"} bg={"neutralizerLight"}>
             <SideBar />
-            <Flex flexDir={"column"} maxH={"100vh"} flex={"1"}>
+            <Flex
+                flexDir={"column"}
+                maxH={"100vh"}
+                flex={"1"}
+                w={"full"}
+                overflow={"hidden"}
+                overflowY={"auto"}
+            >
                 <TopBar />
                 {children}
             </Flex>
