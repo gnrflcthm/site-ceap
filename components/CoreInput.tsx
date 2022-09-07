@@ -7,7 +7,7 @@ const CoreInput: FC<{
     type?: string;
     placeholder?: string;
     value?: any;
-    values?: Array<any>;
+    values?: { [key: string]: string[] };
     width?: string;
     bg?: string;
     placeholderColor?: string;
@@ -15,6 +15,10 @@ const CoreInput: FC<{
     required?: boolean;
     pattern?: string;
     readonly?: boolean;
+    autoComplete?: string;
+    onClick?: Function;
+    onFocus?: Function;
+    onBlur?: Function;
 }> = ({
     name,
     type,
@@ -27,11 +31,15 @@ const CoreInput: FC<{
     placeholderColor,
     required,
     readonly,
+    autoComplete,
+    onClick = () => {},
+    onFocus = () => {},
+    onBlur = () => {},
 }) => {
     const [focused, setFocused] = useState<boolean>(false);
 
     return (
-        <Box w={"full"} pos={"relative"}>
+        <Box w={"full"} pos={"relative"} onClick={() => onClick()}>
             <Text
                 pos={"absolute"}
                 fontSize={"sm"}
@@ -54,11 +62,19 @@ const CoreInput: FC<{
                     onBlur={() => setFocused(false)}
                     onChange={(e) => setValue(e.target.value)}
                     defaultValue={value}
+                    maxH={"30vh"}
                 >
                     <option disabled={true}></option>
-                    {values?.map((val) => (
-                        <option>{val}</option>
-                    ))}
+                    {values &&
+                        Object.keys(values).map((key) => (
+                            <Box as={"optgroup"} label={key}>
+                                {values[key].map((val) => (
+                                    <Box as={"option"} value={val}>
+                                        {val}
+                                    </Box>
+                                ))}
+                            </Box>
+                        ))}
                 </Select>
             ) : (
                 <Input
@@ -66,8 +82,14 @@ const CoreInput: FC<{
                     {...{ name, value, required }}
                     borderColor={value ? "secondary" : "neutralizerDark"}
                     focusBorderColor={"secondary"}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
+                    onFocus={() => {
+                        onFocus();
+                        setFocused(true);
+                    }}
+                    onBlur={() => {
+                        onBlur();
+                        setFocused(false);
+                    }}
                     onChange={(e) => setValue(e.target.value)}
                     _before={{ content: `""`, position: "absolute" }}
                     color={value ? "neutralizerDark" : "transparent"}
@@ -84,6 +106,7 @@ const CoreInput: FC<{
                             color: "neutralizerDark",
                         },
                     }}
+                    autoComplete={autoComplete}
                 />
             )}
         </Box>

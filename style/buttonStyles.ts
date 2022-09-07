@@ -34,5 +34,14 @@ export const ButtonStyles = {
                 color: "primaryAccent",
             },
         },
+        transparent: {
+            bg: "transparent",
+            color: "neutralizerLight",
+            _hover: {
+                bg: "whiteAlpha.200"
+            },
+            w: "fit-content",
+            rounded: "md"
+        }
     },
 };
