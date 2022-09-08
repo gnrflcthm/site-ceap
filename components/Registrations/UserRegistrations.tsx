@@ -12,7 +12,7 @@ const RegistrationData: FC<{ data: RegistrationData }> = ({ data }) => {
         lastName,
         middleName,
         mobileNumber,
-        emailAddress,
+        email,
         id,
         registeredAt,
         schoolId,
@@ -41,7 +41,7 @@ const RegistrationData: FC<{ data: RegistrationData }> = ({ data }) => {
                     <Heading
                         fontSize={"md"}
                     >{`${lastName}, ${firstName} ${middleName[0]}.`}</Heading>
-                    <Text fontSize={"sm"}>{emailAddress}</Text>
+                    <Text fontSize={"sm"}>{email}</Text>
                 </VStack>
             </Td>
             <Td px={"4"} py={"2"}>

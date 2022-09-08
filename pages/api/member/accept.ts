@@ -33,7 +33,7 @@ export default authenticatedHandler().post(async (req, res) => {
     try {
         const { uid, displayName } = await auth.createUser({
             displayName: `${user?.firstName} ${user?.lastName}`,
-            email: user?.emailAddress,
+            email: user?.email,
             password: "hatdog",
         });
 
@@ -41,11 +41,11 @@ export default authenticatedHandler().post(async (req, res) => {
             role: AccountType.MS_USER,
         });
 
-        const { firstName, lastName, emailAddress, memberSchoolId, mobileNumber, middleName, birthday } = user;
+        const { firstName, lastName, email, memberSchoolId, mobileNumber, middleName, birthday } = user;
 
         await prisma.user.create({
             data: {
-                ...{email: emailAddress, firstName, lastName, middleName, memberSchoolId, mobileNumber},
+                ...{email: email, firstName, lastName, middleName, memberSchoolId, mobileNumber},
                 authId: uid,
                 accountType: AccountType.MS_USER,
                 username: displayName || ""

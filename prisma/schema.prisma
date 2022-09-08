@@ -59,6 +59,7 @@ model User {
   middleName     String
   lastName       String
   email          String
+  schoolId       String?
   mobileNumber   String?
   accountType    AccountType
   memberSchool   MemberSchool? @relation(fields: [memberSchoolId], references: [id])
@@ -73,10 +74,10 @@ model UserRegistration {
   middleName     String
   lastName       String
   birthday       DateTime
-  emailAddress   String
+  email          String
   mobileNumber   String?
   registeredAt   DateTime?     @default(now())
-  schoolId       String?       @unique
+  schoolId       String?
   organization   MemberSchool? @relation(fields: [memberSchoolId], references: [id])
   memberSchoolId String?       @db.ObjectId
 }
