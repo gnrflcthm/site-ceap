@@ -3,7 +3,7 @@ import { FC, PropsWithChildren } from "react";
 import SideBar from "@components/SideBar";
 import TopBar from "@components/TopBar";
 
-import { Flex, VStack } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 
 const Layout: FC<PropsWithChildren> = ({ children }) => {
     return (
@@ -11,11 +11,11 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
             <SideBar />
             <Flex
                 flexDir={"column"}
+                h={"100vh"}
                 maxH={"100vh"}
                 flex={"1"}
                 w={"full"}
                 overflow={"hidden"}
-                overflowY={"auto"}
             >
                 <TopBar />
                 {children}

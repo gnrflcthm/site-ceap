@@ -5,7 +5,7 @@ import { serialize } from "cookie";
 export default authenticatedHandler().head((req, res) => {
     res.setHeader(
         "Set-Cookie",
-        serialize("token", req.uid, {
+        serialize("token", "", {
             expires: new Date(0),
             maxAge: 0,
             httpOnly: true,

@@ -1,11 +1,21 @@
-import { useContext } from "react";
+import { useContext, useState, createContext } from "react";
 import { PageWithLayout } from "./_app";
 
 import Head from "next/head";
 
 import UserInfo from "@components/Profile/UserInfo";
 
-import { VStack, Heading, Divider, SimpleGrid, Flex } from "@chakra-ui/react";
+import {
+    VStack,
+    Heading,
+    Divider,
+    SimpleGrid,
+    Flex,
+    Button,
+    CircularProgress,
+    CircularProgressLabel,
+    Text,
+} from "@chakra-ui/react";
 import Layout from "@components/Layout";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { MemberSchool, User } from "@prisma/client";
@@ -17,6 +27,12 @@ import AuthGetServerSideProps, {
 
 import { useQuery } from "@tanstack/react-query";
 import { getUserInfo } from "@util/api/userInfo";
+import axios, { AxiosError } from "axios";
+
+export const ProfileModeContext = createContext<[boolean, Function]>([
+    false,
+    () => {},
+]);
 
 const Profile: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -31,18 +47,50 @@ const Profile: PageWithLayout<
         staleTime: 30 * 24 * 60 * 60 * 1000,
         initialDataUpdatedAt: Date.now(),
     });
+
+    const [updating, setUpdating] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const [displayName, setDisplayName] = useState<string>(
+        data?.displayName || ""
+    );
+
+    const save = () => {
+        setLoading(true);
+        axios
+            .post("/api/user/update", {
+                displayName /* Add more fields according to updateable fields */,
+            })
+            .then((res) => {})
+            .catch((err: AxiosError) => {
+                console.log(err.response?.statusText);
+            })
+            .finally(() => {
+                setUpdating(false);
+                setLoading(false);
+            });
+    };
+
     return (
         <>
             <Head>
                 <title>Profile</title>
             </Head>
-            <VStack align={"stretch"} spacing={"2"}>
+            <VStack
+                align={"stretch"}
+                spacing={"2"}
+                flex={"1"}
+                position={"relative"}
+                overflow={"hidden"}
+                overflowY={"auto"}
+            >
                 <Flex
                     position={"sticky"}
                     top={"0"}
                     bg={"secondary"}
                     p={"4"}
                     align={"center"}
+                    zIndex={"overlay"}
                 >
                     <Heading fontSize={"2xl"} color={"neutralizerLight"}>
                         Account Information
@@ -52,31 +100,85 @@ const Profile: PageWithLayout<
                     <Heading fontSize={"2xl"}>Basic Information</Heading>
                     <Divider borderColor={"neutralizerDark"} />
                     <SimpleGrid
-                        templateRows={"1fr 1fr 1fr 1fr 1fr"}
-                        gridAutoFlow={"column"}
+                        templateColumns={"1fr 1fr"}
+                        gridAutoFlow={"row"}
                         w={"full"}
                         spacingX={"10"}
                         spacingY={"4"}
                     >
-                        <UserInfo
-                            label={"Name"}
-                            value={`${data?.firstName} ${data?.middleName[0]}. ${data?.lastName}`}
-                        />
-                        <UserInfo
-                            label={"Display Name"}
-                            value={user?.displayName || ""}
-                        />
-                        <UserInfo label={"Email"} value={`${data?.email}`} />
-                        <UserInfo
-                            label={"Contact No."}
-                            value={`${data?.mobileNumber}`}
-                        />
-                        <UserInfo
-                            label={"Member School"}
-                            value={`${data?.memberSchool?.name}`}
-                        />
+                        <ProfileModeContext.Provider
+                            value={[updating, setUpdating]}
+                        >
+                            <UserInfo
+                                label={"Name"}
+                                value={`${data?.firstName} ${data?.middleName[0]}. ${data?.lastName}`}
+                            />
+                            <UserInfo
+                                label={"Display Name"}
+                                value={displayName}
+                                setValue={setDisplayName}
+                                isEditable
+                            />
+                            <UserInfo
+                                label={"Email"}
+                                value={`${data?.email}`}
+                            />
+                            <UserInfo
+                                label={"Contact No."}
+                                value={`${data?.mobileNumber}`}
+                            />
+                            <UserInfo
+                                label={"Member School"}
+                                value={`${data?.memberSchool?.name}`}
+                            />
+                        </ProfileModeContext.Provider>
                     </SimpleGrid>
                 </VStack>
+                {updating && (
+                    <Flex
+                        position={"sticky"}
+                        bottom={"0"}
+                        bg={"secondary"}
+                        p={"4"}
+                        w={"full"}
+                        align={"center"}
+                        justify={"flex-end"}
+                    >
+                        {loading ? (
+                            <>
+                                <CircularProgress
+                                    isIndeterminate
+                                    size={8}
+                                    color={"primary"}
+                                    mr={"2"}
+                                />
+                                <Text
+                                    textTransform={"uppercase"}
+                                    fontWeight={"bold"}
+                                    color={"neutralizerLight"}
+                                >
+                                    Saving
+                                </Text>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    w={"fit-content"}
+                                    onClick={() => setUpdating(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    w={"fit-content"}
+                                    variant={"primary"}
+                                    onClick={() => save()}
+                                >
+                                    Save
+                                </Button>
+                            </>
+                        )}
+                    </Flex>
+                )}
             </VStack>
         </>
     );

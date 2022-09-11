@@ -4,6 +4,8 @@ export const ButtonStyles = {
         textTransform: "uppercase",
         border: "2px solid transparent",
         rounded: "sm",
+        bg: "neutralizerLight",
+        borderColor: "transparent",
     },
     variants: {
         primary: {

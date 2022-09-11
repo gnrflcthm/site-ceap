@@ -11,7 +11,7 @@ const RegistrationTableHeader: FC<{
     onClick?: () => {};
 }> = ({ heading, subheading, sortable, onClick }) => {
     return (
-        <Th py={"2"} px={"4"} onClick={onClick} cursor={sortable ? "pointer" : "initial"}>
+        <Th py={"2"} px={"4"} onClick={onClick} cursor={sortable ? "pointer" : "initial"} borderRight={"3px solid"} borderRightColor={"white"}>
             <Flex>
                 <Flex
                     flexDir={"column"}

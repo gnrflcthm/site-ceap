@@ -1,12 +1,12 @@
 import { FC, useState } from "react";
-import { UserRegistration as RegistrationData } from "@prisma/client";
+import { UserRegistration } from "@prisma/client";
 
 import { Flex, Heading, Text, VStack, Tr, Td, Box } from "@chakra-ui/react";
 import axios from "axios";
 
 import { FaEllipsisV } from "react-icons/fa";
 
-const RegistrationData: FC<{ data: RegistrationData }> = ({ data }) => {
+const RegistrationData: FC<{ data: UserRegistration }> = ({ data }) => {
     const {
         firstName,
         lastName,
@@ -33,7 +33,7 @@ const RegistrationData: FC<{ data: RegistrationData }> = ({ data }) => {
         >
             <Td px={"4"} py={"2"} w={"5%"}>
                 <Text fontSize={"md"}>
-                    {registeredAt ? registeredAt.toLocaleDateString() : ""}
+                    {registeredAt ? new Date(registeredAt).toLocaleDateString() : ""}
                 </Text>
             </Td>
             <Td px={"4"} py={"2"}>

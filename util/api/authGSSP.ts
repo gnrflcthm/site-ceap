@@ -1,6 +1,7 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { getAuth } from "firebase-admin/auth";
 import "../../firebase/admin";
+import { serialize } from "cookie";
 
 export interface GetServerSidePropsContextWithUser
     extends GetServerSidePropsContext {
@@ -30,7 +31,17 @@ export default function AuthGetServerSideProps(
         try {
             tokenResult = await auth.verifyIdToken(token);
         } catch (err) {
-            console.log("Invalid Token.");
+            context.res.setHeader(
+                "Set-Cookie",
+                serialize("token", "", {
+                    expires: new Date(0),
+                    maxAge: 0,
+                    httpOnly: true,
+                    sameSite: true,
+                    // secure: true
+                    path: "/",
+                })
+            );
             return {
                 props: {},
                 redirect: {

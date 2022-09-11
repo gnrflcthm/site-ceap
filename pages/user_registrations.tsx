@@ -17,11 +17,9 @@ import {
     Flex,
     Heading,
     Text,
-    VStack,
+    TableContainer,
     Table,
     Tbody,
-    HStack,
-    StackDivider,
     Tr,
     Thead,
 } from "@chakra-ui/react";
@@ -48,62 +46,49 @@ const UserRegistrations: PageWithLayout<
                 <title>User Registrations</title>
             </Head>
             <Flex
-                flexDir={"column"}
-                justify={"flex-start"}
-                align={"stretch"}
-                overflow={"hidden"}
-                h={"full"}
+                bg={"secondary"}
+                p={"4"}
+                position={"sticky"}
+                top={"0"}
+                justify={"space-between"}
+                align={"center"}
             >
-                <Flex
-                    bg={"secondary"}
-                    p={"4"}
-                    position={"sticky"}
-                    top={"0"}
-                    justify={"space-between"}
-                    align={"center"}
-                >
-                    <Heading fontSize={"2xl"} color={"neutralizerLight"}>
-                        User Registrations
-                    </Heading>
-                    {isLoading || isRefetching ? (
-                        <Flex
-                            justify={"space-between"}
-                            align={"center"}
-                            color={"neutralizerLight"}
-                            p={"2"}
+                <Heading fontSize={"2xl"} color={"neutralizerLight"}>
+                    User Registrations
+                </Heading>
+                {isLoading || isRefetching ? (
+                    <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        color={"neutralizerLight"}
+                        p={"2"}
+                    >
+                        <CircularProgress
+                            isIndeterminate
+                            size={"4"}
+                            mr={"2"}
+                            color={"secondary"}
+                            thickness={"10"}
+                        />
+                        <Text
+                            fontWeight={"bold"}
+                            textTransform={"uppercase"}
+                            color={"inherit"}
+                            fontSize={"md"}
                         >
-                            <CircularProgress
-                                isIndeterminate
-                                size={"4"}
-                                mr={"2"}
-                                color={"secondary"}
-                                thickness={"10"}
-                            />
-                            <Text
-                                fontWeight={"bold"}
-                                textTransform={"uppercase"}
-                                color={"inherit"}
-                                fontSize={"md"}
-                            >
-                                Refreshing
-                            </Text>
-                        </Flex>
-                    ) : (
-                        <Button
-                            variant={"transparent"}
-                            onClick={() => refetch({})}
-                        >
-                            <Box
-                                as={FaSync}
-                                color={"neutralizerLight"}
-                                mr={"2"}
-                            />{" "}
-                            Refresh
-                        </Button>
-                    )}
-                </Flex>
+                            Refreshing
+                        </Text>
+                    </Flex>
+                ) : (
+                    <Button variant={"transparent"} onClick={() => refetch({})}>
+                        <Box as={FaSync} color={"neutralizerLight"} mr={"2"} />{" "}
+                        Refresh
+                    </Button>
+                )}
+            </Flex>
+            <TableContainer maxH={"inherit"} overflowY={"auto"}>
                 <Table>
-                    <Thead bg={"blackAlpha.100"}>
+                    <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
                         <Tr>
                             <RegistrationTableHeader
                                 heading={"date registered"}
@@ -118,13 +103,15 @@ const UserRegistrations: PageWithLayout<
                             <RegistrationTableHeader heading={""} />
                         </Tr>
                     </Thead>
-                    <Tbody overflow={"hidden"} overflowY={"auto"} h={"full"}>
+                    <Tbody >
                         {data?.map((reg) => (
-                            <RegistrationData data={reg} key={reg.id} />
+                            <>
+                                <RegistrationData data={reg} key={reg.id} />
+                            </>
                         ))}
                     </Tbody>
                 </Table>
-            </Flex>
+            </TableContainer>
         </>
     );
 };
@@ -154,14 +141,21 @@ export const getServerSideProps: GetServerSideProps<{
             },
         });
 
+        if (!user) {
+            return {
+                props: {
+                    registrations: [],
+                },
+            };
+        }
+
         return {
             props: {
-                registrations: user
-                    ? registrations.map((reg) => ({
-                          ...reg,
-                          birthday: reg.birthday.getDate().toString(),
-                      }))
-                    : [],
+                registrations: registrations.map((reg) => ({
+                    ...reg,
+                    registeredAt: reg.registeredAt?.toString(),
+                    birthday: reg.birthday.toString(),
+                })),
             },
         };
     }

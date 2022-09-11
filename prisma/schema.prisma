@@ -54,7 +54,7 @@ enum RequestStatus {
 model User {
   id             String        @id @default(auto()) @map("_id") @db.ObjectId
   authId         String        @unique
-  username       String        @unique
+  displayName    String?
   firstName      String
   middleName     String
   lastName       String

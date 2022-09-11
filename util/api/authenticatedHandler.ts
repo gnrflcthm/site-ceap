@@ -5,6 +5,8 @@ import "../../firebase/admin";
 
 import { AccountType } from "@prisma/client";
 
+import { serialize } from "cookie";
+
 import nextConnect, { NextConnect } from "next-connect";
 interface AuthenticatedRequest extends NextApiRequest {
     role: AccountType;
@@ -41,6 +43,17 @@ export default function (): NextConnect<AuthenticatedRequest, NextApiResponse> {
             }
             next();
         } catch (err) {
+            res.setHeader(
+                "Set-Cookie",
+                serialize("token", "0", {
+                    expires: new Date(0),
+                    maxAge: 0,
+                    httpOnly: true,
+                    sameSite: true,
+                    // secure: true
+                    path: "/",
+                })
+            );
             res.statusMessage = "Invalid or Expired Token.";
             res.status(401);
             res.end();
