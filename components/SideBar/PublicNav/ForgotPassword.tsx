@@ -92,7 +92,7 @@ const ForgotPassword: FC<{ setMode: Function }> = ({ setMode }) => {
                     </Text>
                     <Button
                         variant={"primary"}
-                        onClick={() => setMode("forgot-password")}
+                        onClick={() => setMode("")}
                     >
                         Return
                     </Button>
