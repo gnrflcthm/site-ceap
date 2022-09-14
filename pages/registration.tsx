@@ -9,7 +9,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Center, Box, VStack } from "@chakra-ui/react";
+import { Center, Box, VStack, Flex } from "@chakra-ui/react";
 
 import logo from "@assets/CORE_Nav.png";
 
@@ -17,6 +17,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "prisma/db";
 
 import { RegistrationForm, SuccessPage } from "@components/Register";
+import { FaArrowLeft } from "react-icons/fa";
 
 export type RegistrationState = "fillup" | "success";
 
@@ -58,13 +59,30 @@ const RegistrationPage: NextPage<
                     boxShadow={"2xl"}
                     borderColor={"blackAlpha.200"}
                 >
-                    <Link href={"/"} passHref>
-                        <Center as={"a"} bg={"primary"} w={"full"} p={"4"}>
+                    <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        w={"full"}
+                        px={"8"}
+                        py={'4'}
+                        bg={"primary"}
+                    >
+                        <Link href={"/"} passHref>
+                            <Box as={"a"} color={"neutralizerLight"} _hover={{color: "secondary"}}>
+                                <Box
+                                    as={FaArrowLeft}
+                                    color={"inherit"}
+                                />
+                            </Box>
+                        </Link>
+                        <Link href={"/"} passHref>
                             <Box
+                                as={"a"}
                                 position={"relative"}
                                 objectFit={"contain"}
+                                h={"full"}
                                 w={"full"}
-                                py={"8"}
+                                p={"10"}
                             >
                                 <Image
                                     src={logo}
@@ -72,8 +90,8 @@ const RegistrationPage: NextPage<
                                     objectFit={"contain"}
                                 />
                             </Box>
-                        </Center>
-                    </Link>
+                        </Link>
+                    </Flex>
                     <Box p={"8"} w={"full"}>
                         <RegistrationStateWrapper
                             state={state}

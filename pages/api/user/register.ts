@@ -69,9 +69,7 @@ export default handler().post(async (req, res) => {
             },
         });
 
-        console.log(existingUser, existingRegistration);
-
-        if (existingUser.length > 0 || existingRegistration.length > 0) {
+        if (schoolId?.trim() !== "" && (existingUser.length > 0 || existingRegistration.length > 0)) {
             res.statusMessage =
                 "A user already exists with the given email or school id.";
             res.status(400);
