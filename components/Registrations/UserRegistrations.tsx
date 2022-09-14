@@ -40,7 +40,7 @@ const RegistrationData: FC<{ data: UserRegistration }> = ({ data }) => {
                 <VStack spacing={"0"} align={"flex-start"}>
                     <Heading
                         fontSize={"md"}
-                    >{`${lastName}, ${firstName} ${middleName[0]}.`}</Heading>
+                    >{`${lastName}, ${firstName} ${middleName ? middleName[0] + "." : ""}`}</Heading>
                     <Text fontSize={"sm"}>{email}</Text>
                 </VStack>
             </Td>
