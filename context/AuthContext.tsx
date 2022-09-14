@@ -6,18 +6,12 @@ import {
     useState,
 } from "react";
 
-import {
-    getAuth,
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    signOut,
-    User,
-} from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import "../firebase/client";
 import { getAccountType } from "@util/functions";
-import { AccountType } from "@prisma/client";
 import axios from "axios";
-import { StreamingQuerystring } from "formidable/parsers";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryClient } from "../pages/_app";
 
 interface CoreUser {
     uid?: string;
@@ -45,6 +39,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     );
     const [loading, setLoading] = useState<boolean>(true);
     const [role, setRole] = useState<string | undefined>(undefined);
+    const client = useQueryClient();
 
     const auth = getAuth();
 
@@ -74,6 +69,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const logout = async () => {
         let { status } = await axios.head("/api/user/logout");
+        client.clear();
         setCurrentUser(null);
     };
 

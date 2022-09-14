@@ -35,7 +35,7 @@ export const CollapseContext = createContext<[boolean, Function]>([
     () => {},
 ]);
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: ComponentWithLayout) {
     const [contentPage, setContentPage] = useState("resources");
