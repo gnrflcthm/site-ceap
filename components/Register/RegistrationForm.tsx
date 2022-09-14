@@ -81,7 +81,6 @@ const RegistrationForm: FC<{
                     placeholder={"Middle Name"}
                     value={middleName}
                     setValue={setMiddleName}
-                    required
                 />
                 <CoreInput
                     placeholder={"Birthday"}
