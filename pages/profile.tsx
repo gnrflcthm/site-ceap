@@ -13,8 +13,12 @@ import {
     Flex,
     Button,
     CircularProgress,
-    CircularProgressLabel,
     Text,
+    Modal,
+    ModalOverlay,
+    ModalHeader,
+    ModalContent,
+    ModalCloseButton,
 } from "@chakra-ui/react";
 import Layout from "@components/Layout";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -28,6 +32,7 @@ import AuthGetServerSideProps, {
 import { useQuery } from "@tanstack/react-query";
 import { getUserInfo } from "@util/api/userInfo";
 import axios, { AxiosError } from "axios";
+import UpdatePasswordModal from "@components/Profile/UpdatePasswordModal";
 
 export const ProfileModeContext = createContext<[boolean, Function]>([
     false,
@@ -50,6 +55,9 @@ const Profile: PageWithLayout<
 
     const [updating, setUpdating] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+
+    const [showUpdatePassword, setShowUpdatePassword] =
+        useState<boolean>(false);
 
     const [displayName, setDisplayName] = useState<string>(
         data?.displayName || ""
@@ -111,7 +119,11 @@ const Profile: PageWithLayout<
                         >
                             <UserInfo
                                 label={"Name"}
-                                value={`${data?.firstName} ${data?.middleName[0]}. ${data?.lastName}`}
+                                value={`${data?.firstName} ${
+                                    data?.middleName[0]
+                                        ? data?.middleName[0] + "."
+                                        : ""
+                                } ${data?.lastName}`}
                             />
                             <UserInfo
                                 label={"Display Name"}
@@ -131,9 +143,21 @@ const Profile: PageWithLayout<
                                 label={"Member School"}
                                 value={`${data?.memberSchool?.name}`}
                             />
+                            <UserInfo
+                                label={"Password"}
+                                placeholder={"Update Password"}
+                                onClick={() => setShowUpdatePassword(true)}
+                                isEditable
+                                isHidden
+                            />
                         </ProfileModeContext.Provider>
                     </SimpleGrid>
                 </VStack>
+                <UpdatePasswordModal
+                    email={data?.email}
+                    show={showUpdatePassword}
+                    setShow={setShowUpdatePassword}
+                />
                 {updating && (
                     <Flex
                         position={"sticky"}

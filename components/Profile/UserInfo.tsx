@@ -11,8 +11,18 @@ const UserInfo: FC<{
     value?: string;
     setValue?: Function;
     isEditable?: boolean;
-}> = ({ label, value, setValue = () => {}, isEditable = false }) => {
-
+    isHidden?: boolean;
+    placeholder?: string;
+    onClick?: Function;
+}> = ({
+    label,
+    value,
+    setValue = () => {},
+    isEditable = false,
+    isHidden = false,
+    placeholder,
+    onClick,
+}) => {
     const [updating, setUpdating] = useContext(ProfileModeContext);
 
     const handleClick = () => {
@@ -26,7 +36,13 @@ const UserInfo: FC<{
                 justify={"space-between"}
                 align={"center"}
                 w={"full"}
-                onClick={handleClick}
+                onClick={() => {
+                    if (onClick) {
+                        onClick();
+                        return;
+                    }
+                    handleClick();
+                }}
             >
                 <Heading fontSize={"xl"}>{label}</Heading>
                 <Flex
@@ -38,7 +54,7 @@ const UserInfo: FC<{
                     }}
                     cursor={isEditable ? "pointer" : "initial"}
                 >
-                    {updating && isEditable ? (
+                    {updating && isEditable && !onClick ? (
                         <CoreInput value={value} setValue={setValue} />
                     ) : (
                         <>
@@ -48,7 +64,7 @@ const UserInfo: FC<{
                                     isEditable ? "primary" : "neutralizerDark"
                                 }
                             >
-                                {value}
+                                {isHidden ? placeholder : value}
                             </Text>
                             {isEditable && (
                                 <Box as={FaPencilAlt} color={"primary"} />

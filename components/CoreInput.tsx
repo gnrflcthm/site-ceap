@@ -19,6 +19,7 @@ const CoreInput: FC<{
     onClick?: Function;
     onFocus?: Function;
     onBlur?: Function;
+    disabled?: boolean;
 }> = ({
     name,
     type,
@@ -31,6 +32,7 @@ const CoreInput: FC<{
     placeholderColor,
     required,
     readonly,
+    disabled = false,
     autoComplete,
     onClick = () => {},
     onFocus = () => {},
@@ -55,7 +57,7 @@ const CoreInput: FC<{
             </Text>
             {type === "select" ? (
                 <Select
-                    {...{ name, required }}
+                    {...{ name, required, disabled }}
                     borderColor={value ? "secondary" : "neutralizerDark"}
                     focusBorderColor={"secondary"}
                     onFocus={() => setFocused(true)}
@@ -79,7 +81,7 @@ const CoreInput: FC<{
             ) : (
                 <Input
                     type={type}
-                    {...{ name, value, required }}
+                    {...{ name, value, required, disabled }}
                     borderColor={value ? "secondary" : "neutralizerDark"}
                     focusBorderColor={"secondary"}
                     onFocus={() => {
