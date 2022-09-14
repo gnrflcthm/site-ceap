@@ -188,7 +188,10 @@ const Profile: PageWithLayout<
                             <>
                                 <Button
                                     w={"fit-content"}
-                                    onClick={() => setUpdating(false)}
+                                    onClick={() => {
+                                        setDisplayName(data?.displayName || "");
+                                        setUpdating(false);
+                                    }}
                                 >
                                     Cancel
                                 </Button>
