@@ -90,10 +90,7 @@ const ForgotPassword: FC<{ setMode: Function }> = ({ setMode }) => {
                         The password reset link has been successfully sent to
                         your email.
                     </Text>
-                    <Button
-                        variant={"primary"}
-                        onClick={() => setMode("")}
-                    >
+                    <Button variant={"primary"} onClick={() => setMode("")}>
                         Return
                     </Button>
                 </Center>
@@ -101,8 +98,8 @@ const ForgotPassword: FC<{ setMode: Function }> = ({ setMode }) => {
             {error && (
                 <Center as={VStack} flexDir={"column"}>
                     <Text textAlign={"center"}>
-                        An error has occured resetting password. Please if the
-                        email you have entered is valid.
+                        An error has occured resetting password. Please check if
+                        the email you have entered is valid.
                     </Text>
                     <Button variant={"primary"} onClick={() => setMode("")}>
                         Return
