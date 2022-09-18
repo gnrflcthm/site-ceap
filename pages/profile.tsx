@@ -105,10 +105,12 @@ const Profile: PageWithLayout<
                     </Heading>
                 </Flex>
                 <VStack align={"flex-start"} p={"4"}>
-                    <Heading fontSize={"2xl"}>Basic Information</Heading>
+                    <Heading fontSize={{ base: "lg", lg: "2xl" }}>
+                        Basic Information
+                    </Heading>
                     <Divider borderColor={"neutralizerDark"} />
                     <SimpleGrid
-                        templateColumns={"1fr 1fr"}
+                        templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
                         gridAutoFlow={"row"}
                         w={"full"}
                         spacingX={"10"}

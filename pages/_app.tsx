@@ -1,6 +1,7 @@
 import { NextPage } from "next";
 import { AppProps } from "next/app";
 import Head from "next/head";
+import Router from "next/router";
 
 import { ReactNode, ComponentType, useState, createContext } from "react";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -38,8 +39,7 @@ export const CollapseContext = createContext<[boolean, Function]>([
 export const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: ComponentWithLayout) {
-    const [contentPage, setContentPage] = useState("resources");
-    const [collapseSidePanel, setCollapseSidePanel] = useState<boolean>(false);
+    const [collapseSidePanel, setCollapseSidePanel] = useState<boolean>(true);
 
     return (
         <ChakraProvider resetCSS={true} theme={appTheme}>

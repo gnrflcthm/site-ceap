@@ -40,10 +40,13 @@ export const ButtonStyles = {
             bg: "transparent",
             color: "neutralizerLight",
             _hover: {
-                bg: "whiteAlpha.200"
+                bg: "whiteAlpha.200",
             },
             w: "fit-content",
-            rounded: "md"
-        }
+            rounded: "md",
+        },
+    },
+    defaultProps: {
+        variant: "primary",
     },
 };

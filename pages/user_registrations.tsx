@@ -53,7 +53,10 @@ const UserRegistrations: PageWithLayout<
                 justify={"space-between"}
                 align={"center"}
             >
-                <Heading fontSize={"2xl"} color={"neutralizerLight"}>
+                <Heading
+                    fontSize={{ base: "lg", lg: "2xl" }}
+                    color={"neutralizerLight"}
+                >
                     User Registrations
                 </Heading>
                 {isLoading || isRefetching ? (
@@ -103,7 +106,7 @@ const UserRegistrations: PageWithLayout<
                             <RegistrationTableHeader heading={""} />
                         </Tr>
                     </Thead>
-                    <Tbody >
+                    <Tbody>
                         {data?.map((reg) => (
                             <>
                                 <RegistrationData data={reg} key={reg.id} />

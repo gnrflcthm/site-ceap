@@ -64,15 +64,16 @@ const RegistrationPage: NextPage<
                         align={"center"}
                         w={"full"}
                         px={"8"}
-                        py={'4'}
+                        py={"4"}
                         bg={"primary"}
                     >
                         <Link href={"/"} passHref>
-                            <Box as={"a"} color={"neutralizerLight"} _hover={{color: "secondary"}}>
-                                <Box
-                                    as={FaArrowLeft}
-                                    color={"inherit"}
-                                />
+                            <Box
+                                as={"a"}
+                                color={"neutralizerLight"}
+                                _hover={{ color: "secondary" }}
+                            >
+                                <Box as={FaArrowLeft} color={"inherit"} />
                             </Box>
                         </Link>
                         <Link href={"/"} passHref>

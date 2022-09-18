@@ -3,7 +3,7 @@ import { CollapseContext } from "pages/_app";
 
 import Link from "next/link";
 
-import { Flex, Text, As, Tooltip, Box } from "@chakra-ui/react";
+import { Flex, Text, As, Tooltip, Box, useBreakpoint } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 
 interface CoreNavItemBaseProps {
@@ -33,14 +33,16 @@ const CoreNavItemContent: FC<{
     bg?: string;
     color?: string;
 }> = ({ collapsed, isActive, icon, name, bg, color }) => {
+    const breakpoint = useBreakpoint();
+
     return (
         <Flex
             py={"4"}
-            px={collapsed ? "4" : "6"}
+            px={{ base: "8", lg: collapsed ? "4" : "6" }}
             color={color || "neutralizerDark"}
             bg={bg ? bg : isActive ? "secondary" : "transparent"}
             boxShadow={isActive ? "md" : "none"}
-            rounded={"xl"}
+            rounded={{ base: "none", lg: "xl" }}
             position={"relative"}
             align={"center"}
             justify={collapsed ? "center" : "initial"}
@@ -71,10 +73,14 @@ const CoreNavItemContent: FC<{
                 justify={"center"}
                 align={"center"}
                 h={"full"}
-                mr={collapsed ? "0" : "8"}
+                mr={{ base: "4", lg: collapsed ? "0" : "8" }}
                 fontSize={"xl"}
             />
-            <Text fontSize={"xl"} display={collapsed ? "none" : "block"} color={"inherit"}>
+            <Text
+                fontSize={"xl"}
+                display={collapsed ? "none" : "block"}
+                color={"inherit"}
+            >
                 {name}
             </Text>
         </Flex>
@@ -87,7 +93,7 @@ const CoreNavItem: FC<CoreNavItemProps> = ({
     name,
     icon,
     bg,
-    color
+    color,
 }) => {
     const [collapsed] = useContext(CollapseContext);
     const { pathname } = useRouter();
@@ -100,12 +106,19 @@ const CoreNavItem: FC<CoreNavItemProps> = ({
             isDisabled={!collapsed}
             hasArrow
         >
-            <Box w={"90%"}>
+            <Box w={{ base: "full", lg: "90%" }}>
                 {href ? (
                     <Link href={href} passHref>
                         <Box as={"a"} w={"full"}>
                             <CoreNavItemContent
-                                {...{ collapsed, isActive, icon, name, bg, color }}
+                                {...{
+                                    collapsed,
+                                    isActive,
+                                    icon,
+                                    name,
+                                    bg,
+                                    color,
+                                }}
                             />
                         </Box>
                     </Link>
@@ -122,7 +135,3 @@ const CoreNavItem: FC<CoreNavItemProps> = ({
 };
 
 export default CoreNavItem;
-
-{
-    /*  */
-}

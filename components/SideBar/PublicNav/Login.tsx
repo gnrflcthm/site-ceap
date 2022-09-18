@@ -80,12 +80,12 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
                         Login
                     </Button>
                     <VStack mt={"4"}>
-                        <Text fontSize={"md"}>
+                        <Text fontSize={"md"} textAlign={"center"}>
                             Don't have an account?{" "}
                             <Link href={"/registration"} passHref>
-                                <Button variant={"link"} as={"a"}>
+                                <Text color={'primary'} fontWeight={"bold"} as={"a"} display={"block"}>
                                     Register Now
-                                </Button>
+                                </Text>
                             </Link>
                         </Text>
                         <Button

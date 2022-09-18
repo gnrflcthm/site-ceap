@@ -11,7 +11,14 @@ const RegistrationTableHeader: FC<{
     onClick?: () => {};
 }> = ({ heading, subheading, sortable, onClick }) => {
     return (
-        <Th py={"2"} px={"4"} onClick={onClick} cursor={sortable ? "pointer" : "initial"} borderRight={"3px solid"} borderRightColor={"white"}>
+        <Th
+            py={"2"}
+            px={"4"}
+            onClick={onClick}
+            cursor={sortable ? "pointer" : "initial"}
+            borderRight={"3px solid"}
+            borderRightColor={"white"}
+        >
             <Flex>
                 <Flex
                     flexDir={"column"}
@@ -20,15 +27,14 @@ const RegistrationTableHeader: FC<{
                     h={"full"}
                 >
                     <Heading
-                        fontSize={"md"}
+                        fontSize={{ base: "md", lg: "lg" }}
                         textTransform={"uppercase"}
-                        fontWeight={"bold"}
                     >
                         {heading}
                     </Heading>
                     {subheading && (
                         <Text
-                            fontSize={"sm"}
+                            fontSize={{ base: "sm", lg: "md" }}
                             textTransform={"uppercase"}
                             fontWeight={"bold"}
                             color={"blackAlpha.600"}
@@ -42,7 +48,7 @@ const RegistrationTableHeader: FC<{
                         flexDir={"column"}
                         justify={"center"}
                         align={"center"}
-                        ml={'4'}
+                        ml={"4"}
                     >
                         <Box as={FaCaretUp} />
                         <Box as={FaCaretDown} />

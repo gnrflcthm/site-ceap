@@ -3,24 +3,27 @@ import { FC, useContext } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Flex, Box } from "@chakra-ui/react";
+import { Flex, Box, useBreakpoint } from "@chakra-ui/react";
 import {
     TbLayoutSidebarLeftCollapse,
     TbLayoutSidebarLeftExpand,
 } from "react-icons/tb";
+import { FaBars } from "react-icons/fa";
 
 import coreNavLogo from "@assets/CORE_Nav.png";
 import { CollapseContext } from "pages/_app";
 
 const TopBar: FC = () => {
     const [collapsed, setCollapsed] = useContext(CollapseContext);
+    const breakpoint = useBreakpoint();
+
     return (
         <Flex
             w={"full"}
             borderBottom={"1px solid"}
             borderBottomColor={"blackAlpha.500"}
             bg={"primary"}
-            justify={"flex-start"}
+            justify={{ base: "center", lg: "flex-start" }}
             align={"center"}
             px={"4"}
             position={"sticky"}
@@ -29,10 +32,17 @@ const TopBar: FC = () => {
             minH={"16"}
             maxH={"16"}
         >
-            <Box as={"button"} onClick={() => setCollapsed(!collapsed)}>
+            <Box
+                as={"button"}
+                position={{ base: "absolute", lg: "relative" }}
+                onClick={() => setCollapsed(!collapsed)}
+                left={"4"}
+            >
                 <Box
                     as={
-                        collapsed
+                        !["lg", "xl", "2xl"].includes(breakpoint)
+                            ? FaBars
+                            : collapsed
                             ? TbLayoutSidebarLeftExpand
                             : TbLayoutSidebarLeftCollapse
                     }

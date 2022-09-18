@@ -1,18 +1,13 @@
 import { FC, MouseEventHandler } from "react";
 
-import Image from "next/image";
-
-import { Box, Heading, VStack, Button } from "@chakra-ui/react";
-import { motion } from "framer-motion";
-
-import coreLogo from "@assets/CORE_logo.png";
+import {  Heading, VStack, Button } from "@chakra-ui/react";
 
 const PublicHome: FC<{
     onLogin?: MouseEventHandler<HTMLButtonElement>;
 }> = ({ onLogin }) => {
     return (
         <VStack>
-            <Heading fontSize={"2xl"}>
+            <Heading fontSize={{base:"lg", lg: "2xl"}}>
                 Welcome to CEAP's Online Resources for Education
             </Heading>
             <VStack w={"full"}>

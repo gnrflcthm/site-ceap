@@ -44,7 +44,9 @@ const UserInfo: FC<{
                     handleClick();
                 }}
             >
-                <Heading fontSize={"xl"}>{label}</Heading>
+                <Heading fontSize={{ base: "md", lg: "xl" }} w={"fit-content"}>
+                    {label}
+                </Heading>
                 <Flex
                     align={"center"}
                     justify={"space-between"}
@@ -58,17 +60,21 @@ const UserInfo: FC<{
                         <CoreInput value={value} setValue={setValue} />
                     ) : (
                         <>
+                            {isEditable && (
+                                <Box
+                                    as={FaPencilAlt}
+                                    color={"primary"}
+                                    fontSize={"sm"}
+                                    mr={"2"}
+                                />
+                            )}
                             <Text
-                                mr={"2"}
                                 color={
                                     isEditable ? "primary" : "neutralizerDark"
                                 }
                             >
                                 {isHidden ? placeholder : value}
                             </Text>
-                            {isEditable && (
-                                <Box as={FaPencilAlt} color={"primary"} />
-                            )}
                         </>
                     )}
                 </Flex>

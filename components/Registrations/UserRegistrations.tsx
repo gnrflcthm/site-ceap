@@ -33,14 +33,16 @@ const RegistrationData: FC<{ data: UserRegistration }> = ({ data }) => {
         >
             <Td px={"4"} py={"2"} w={"5%"}>
                 <Text fontSize={"md"}>
-                    {registeredAt ? new Date(registeredAt).toLocaleDateString() : ""}
+                    {registeredAt
+                        ? new Date(registeredAt).toLocaleDateString()
+                        : ""}
                 </Text>
             </Td>
             <Td px={"4"} py={"2"}>
                 <VStack spacing={"0"} align={"flex-start"}>
-                    <Heading
-                        fontSize={"md"}
-                    >{`${lastName}, ${firstName} ${middleName ? middleName[0] + "." : ""}`}</Heading>
+                    <Heading fontSize={{base: "md", lg: "lg"}}>{`${lastName}, ${firstName} ${
+                        middleName ? middleName[0] + "." : ""
+                    }`}</Heading>
                     <Text fontSize={"sm"}>{email}</Text>
                 </VStack>
             </Td>

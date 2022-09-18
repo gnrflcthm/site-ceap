@@ -1,6 +1,6 @@
 import { FC, useMemo, useContext, useState } from "react";
 
-import { Box, Center, VStack, Text, CircularProgress } from "@chakra-ui/react";
+import { Box, Center, VStack, Text, CircularProgress, Flex } from "@chakra-ui/react";
 
 import {
     FaChartArea,
@@ -19,7 +19,6 @@ import CurrentUser from "./CurrentUser";
 import CoreNavItem from "./CoreNavItem";
 import { useRouter } from "next/router";
 
-import { signOut, getAuth } from "firebase/auth";
 import "../../../firebase/client";
 import { AuthContext } from "@context/AuthContext";
 
@@ -39,9 +38,9 @@ const CoreNav: FC<{
     );
 
     return (
-        <Box flex={"1"} py={"10"}>
+        <Flex flexDir={"column"} h={"full"} py={{ base: "0", lg: "10" }}>
             {loggingOut ? (
-                <Center flexDir={"column"}>
+                <Center flexDir={"column"} h={'full'}>
                     <Text mb={"4"}>Signing Out</Text>
                     <CircularProgress isIndeterminate color={"secondary"} />
                 </Center>
@@ -51,53 +50,57 @@ const CoreNav: FC<{
                         displayName={user?.displayName}
                         accountType={role}
                     />
-                    <VStack>
-                        <CoreNavItem
-                            name={"Resources"}
-                            href={"/"}
-                            icon={FaBook}
-                        />
-                        {isAdministrative && (
-                            <>
-                                <CoreNavItem
-                                    name={"Upload Requests"}
-                                    href={"/uploads"}
-                                    icon={BsCloudUpload}
-                                />
-                                <CoreNavItem
-                                    name={"Audit Logs"}
-                                    href={"/logs"}
-                                    icon={FaHistory}
-                                />
-                            </>
-                        )}
-                        {role === "Member School Admin" && (
+                    <Flex flex={"1"} flexDir={"column"} justify={"space-between"} align={'stretch'}>
+                        <VStack spacing={{ base: "1", lg: "2" }}>
                             <CoreNavItem
-                                name={"Registrations"}
-                                href={"/user_registrations"}
-                                icon={HiUsers}
+                                name={"Resources"}
+                                href={"/"}
+                                icon={FaBook}
                             />
-                        )}
-                        <CoreNavItem
-                            name={"Profile"}
-                            href={"/profile"}
-                            icon={FaUser}
-                        />
-                        <CoreNavItem
-                            name={"Logout"}
-                            onClick={() => {
-                                setLogginOut(true);
-                                router.push("/");
-                                logout();
-                            }}
-                            icon={FaSignOutAlt}
-                            bg={"red.500"}
-                            color={"neutralizerLight"}
-                        />
-                    </VStack>
+                            {isAdministrative && (
+                                <>
+                                    <CoreNavItem
+                                        name={"Upload Requests"}
+                                        href={"/uploads"}
+                                        icon={BsCloudUpload}
+                                    />
+                                    <CoreNavItem
+                                        name={"Audit Logs"}
+                                        href={"/logs"}
+                                        icon={FaHistory}
+                                    />
+                                </>
+                            )}
+                            {role === "Member School Admin" && (
+                                <CoreNavItem
+                                    name={"Registrations"}
+                                    href={"/user_registrations"}
+                                    icon={HiUsers}
+                                />
+                            )}
+                            <CoreNavItem
+                                name={"Profile"}
+                                href={"/profile"}
+                                icon={FaUser}
+                            />
+                        </VStack>
+                        <Center>
+                            <CoreNavItem
+                                name={"Logout"}
+                                onClick={() => {
+                                    setLogginOut(true);
+                                    router.push("/");
+                                    logout();
+                                }}
+                                icon={FaSignOutAlt}
+                                bg={"red.500"}
+                                color={"neutralizerLight"}
+                            />
+                        </Center>
+                    </Flex>
                 </>
             )}
-        </Box>
+        </Flex>
     );
 };
 
