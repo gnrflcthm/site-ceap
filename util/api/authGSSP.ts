@@ -2,6 +2,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { getAuth } from "firebase-admin/auth";
 import "../../firebase/admin";
 import { serialize } from "cookie";
+import axios from "axios";
 
 export interface GetServerSidePropsContextWithUser
     extends GetServerSidePropsContext {
@@ -13,9 +14,9 @@ export default function AuthGetServerSideProps(
 ): GetServerSideProps {
     return async (context: GetServerSidePropsContextWithUser) => {
         const { req } = context;
-        const { token } = req.cookies;
+        const { session } = req.cookies;
 
-        if (!token) {
+        if (!session) {
             return {
                 props: {},
                 redirect: {
@@ -29,19 +30,10 @@ export default function AuthGetServerSideProps(
 
         const auth = getAuth();
         try {
-            tokenResult = await auth.verifyIdToken(token);
+            tokenResult = await auth.verifySessionCookie(session);
         } catch (err) {
-            context.res.setHeader(
-                "Set-Cookie",
-                serialize("token", "", {
-                    expires: new Date(0),
-                    maxAge: 0,
-                    httpOnly: true,
-                    sameSite: true,
-                    // secure: true
-                    path: "/",
-                })
-            );
+            console.debug(err);
+            await axios.head("/api/user/logout");
             return {
                 props: {},
                 redirect: {

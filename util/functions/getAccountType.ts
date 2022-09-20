@@ -1,6 +1,6 @@
 import { AccountType } from "@prisma/client";
 
-export default function(accountType: string | AccountType): string {
+export default function(accountType: string | AccountType | undefined): string {
     switch (accountType) {
         case AccountType.CEAP_SUPER_ADMIN:
             return "CEAP Super Admin";

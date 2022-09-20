@@ -11,11 +11,9 @@ import {
     CircularProgress,
 } from "@chakra-ui/react";
 
-import { signInWithEmailAndPassword, getAuth, signOut } from "firebase/auth";
 import "../../../firebase/client";
 
 import CoreInput from "@components/CoreInput";
-import axios from "axios";
 import { AuthContext } from "@context/AuthContext";
 
 const Login: FC<{ setMode: Function }> = ({ setMode }) => {
@@ -29,14 +27,11 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
     const onLogin = (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        login(id, password)
-            .catch(() => {
-                setLoading(false);
-                setError("Invalid Login Credentials");
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        login(id, password).catch(() => {
+            setLoading(false);
+            setError("Invalid Login Credentials");
+            setLoading(false);
+        });
     };
 
     return (
@@ -83,7 +78,12 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
                         <Text fontSize={"md"} textAlign={"center"}>
                             Don't have an account?{" "}
                             <Link href={"/registration"} passHref>
-                                <Text color={'primary'} fontWeight={"bold"} as={"a"} display={"block"}>
+                                <Text
+                                    color={"primary"}
+                                    fontWeight={"bold"}
+                                    as={"a"}
+                                    display={"block"}
+                                >
                                     Register Now
                                 </Text>
                             </Link>

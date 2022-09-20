@@ -10,6 +10,8 @@ const RegistrationTableHeader: FC<{
     sortable?: boolean;
     onClick?: () => {};
 }> = ({ heading, subheading, sortable, onClick }) => {
+    const headingFontSize = { base: "md", lg: "lg" };
+    const textFontSize = { base: "sm", md: "md" };
     return (
         <Th
             py={"2"}
@@ -27,14 +29,14 @@ const RegistrationTableHeader: FC<{
                     h={"full"}
                 >
                     <Heading
-                        fontSize={{ base: "md", lg: "lg" }}
+                        fontSize={headingFontSize}
                         textTransform={"uppercase"}
                     >
                         {heading}
                     </Heading>
                     {subheading && (
                         <Text
-                            fontSize={{ base: "sm", lg: "md" }}
+                            fontSize={textFontSize}
                             textTransform={"uppercase"}
                             fontWeight={"bold"}
                             color={"blackAlpha.600"}

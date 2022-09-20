@@ -2,6 +2,7 @@ import { FC, useContext } from "react";
 import { CollapseContext } from "pages/_app";
 
 import { Avatar, Text, Heading, useBreakpoint, Flex } from "@chakra-ui/react";
+import { getAccountType } from "@util/functions";
 
 const CurrentUser: FC<{
     displayName?: string | null;

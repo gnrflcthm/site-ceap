@@ -1,27 +1,36 @@
-import { FC, PropsWithChildren } from "react";
+import { createContext, FC, PropsWithChildren, useMemo } from "react";
 
 import SideBar from "@components/SideBar";
 import TopBar from "@components/TopBar";
 
 import { Flex, Box, Text, useBreakpoint } from "@chakra-ui/react";
 
+export const MobileContext = createContext<boolean>(false);
+
 const Layout: FC<PropsWithChildren> = ({ children }) => {
     const breakpoint = useBreakpoint();
 
+    const isMobile = useMemo<boolean>(() => {
+        return !["lg", "xl", "2xl"].includes(breakpoint);
+    }, [breakpoint]);
+
+
     return (
         <Flex maxW={"100vw"} maxH={"100vh"} bg={"neutralizerLight"}>
-            <SideBar />
-            <Flex
-                flexDir={"column"}
-                h={"100vh"}
-                maxH={"100vh"}
-                flex={"1"}
-                w={"full"}
-                overflow={"hidden"}
-            >
-                <TopBar />
-                {children}
-            </Flex>
+            <MobileContext.Provider value={isMobile}>
+                <SideBar />
+                <Flex
+                    flexDir={"column"}
+                    h={"100vh"}
+                    maxH={"100vh"}
+                    flex={"1"}
+                    w={"full"}
+                    overflow={"hidden"}
+                >
+                    <TopBar />
+                    {children}
+                </Flex>
+            </MobileContext.Provider>
             <Box
                 rounded={"full"}
                 position={"fixed"}

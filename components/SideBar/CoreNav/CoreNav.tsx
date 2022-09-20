@@ -1,16 +1,8 @@
-import { FC, useMemo, useContext, useState } from "react";
+import { FC, useMemo, useContext, useState, useEffect } from "react";
 
-import { Box, Center, VStack, Text, CircularProgress, Flex } from "@chakra-ui/react";
+import { Center, VStack, Text, CircularProgress, Flex } from "@chakra-ui/react";
 
-import {
-    FaChartArea,
-    FaBook,
-    FaUser,
-    FaSignOutAlt,
-    FaFileAlt,
-    FaUpload,
-    FaHistory,
-} from "react-icons/fa";
+import { FaBook, FaUser, FaSignOutAlt, FaHistory } from "react-icons/fa";
 
 import { BsCloudUpload } from "react-icons/bs";
 import { HiUsers } from "react-icons/hi";
@@ -21,26 +13,46 @@ import { useRouter } from "next/router";
 
 import "../../../firebase/client";
 import { AuthContext } from "@context/AuthContext";
+import { CollapseContext } from "pages/_app";
+import { getAccountType } from "@util/functions";
+import { AccountType } from "@prisma/client";
 
 const CoreNav: FC<{
     collapsed?: boolean;
 }> = () => {
-    const { loading, user, role, logout } = useContext(AuthContext);
-    const [loggingOut, setLogginOut] = useState<boolean>(false);
+    const { user, role, logout } = useContext(AuthContext);
+    const [loggingOut, setLoggingOut] = useState<boolean>(false);
+    const [collapsed, setCollapsed] = useContext(CollapseContext);
     const router = useRouter();
 
     const isAdministrative = useMemo(
         () =>
             ["CEAP Super Admin", "CEAP Admin", "Member School Admin"].includes(
-                role || ""
+                getAccountType(user?.role)
             ),
         [role]
     );
 
+    useEffect(() => {
+        console.log(user?.role + ": ", getAccountType(user?.role));
+    }, [user]);
+
+    const onLogOut = () => {
+        setLoggingOut(true);
+        router.push("/");
+        logout();
+    };
+
     return (
-        <Flex flexDir={"column"} h={"full"} py={{ base: "0", lg: "10" }}>
-            {loggingOut ? (
-                <Center flexDir={"column"} h={'full'}>
+        <Flex
+            flexDir={"column"}
+            h={"full"}
+            flex={"1"}
+            overflow={"auto"}
+            py={{ base: "0", lg: "10" }}
+        >
+            {loggingOut && !collapsed ? (
+                <Center flexDir={"column"} h={"full"}>
                     <Text mb={"4"}>Signing Out</Text>
                     <CircularProgress isIndeterminate color={"secondary"} />
                 </Center>
@@ -48,9 +60,14 @@ const CoreNav: FC<{
                 <>
                     <CurrentUser
                         displayName={user?.displayName}
-                        accountType={role}
+                        accountType={getAccountType(user?.role)}
                     />
-                    <Flex flex={"1"} flexDir={"column"} justify={"space-between"} align={'stretch'}>
+                    <Flex
+                        flex={"1"}
+                        flexDir={"column"}
+                        justify={"space-between"}
+                        align={"stretch"}
+                    >
                         <VStack spacing={{ base: "1", lg: "2" }}>
                             <CoreNavItem
                                 name={"Resources"}
@@ -71,7 +88,7 @@ const CoreNav: FC<{
                                     />
                                 </>
                             )}
-                            {role === "Member School Admin" && (
+                            {user?.role === AccountType.MS_ADMIN && (
                                 <CoreNavItem
                                     name={"Registrations"}
                                     href={"/user_registrations"}
@@ -87,11 +104,7 @@ const CoreNav: FC<{
                         <Center>
                             <CoreNavItem
                                 name={"Logout"}
-                                onClick={() => {
-                                    setLogginOut(true);
-                                    router.push("/");
-                                    logout();
-                                }}
+                                onClick={() => onLogOut()}
                                 icon={FaSignOutAlt}
                                 bg={"red.500"}
                                 color={"neutralizerLight"}

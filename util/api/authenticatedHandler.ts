@@ -24,16 +24,16 @@ export default function (): NextConnect<AuthenticatedRequest, NextApiResponse> {
             res.end();
         },
     }).all(async (req, res, next) => {
-        const { token } = req.cookies;
+        const { session } = req.cookies;
         const auth = getAuth();
 
-        if (!token) {
+        if (!session) {
             res.statusMessage = "You Are Not Logged In.";
             res.status(401);
             res.end();
         }
         try {
-            const { uid } = await auth.verifyIdToken(token!);
+            const { uid } = await auth.verifySessionCookie(session!);
             const { customClaims } = await auth.getUser(uid);
 
             req.uid = uid;
@@ -45,12 +45,12 @@ export default function (): NextConnect<AuthenticatedRequest, NextApiResponse> {
         } catch (err) {
             res.setHeader(
                 "Set-Cookie",
-                serialize("token", "0", {
+                serialize("session", "", {
                     expires: new Date(0),
                     maxAge: 0,
                     httpOnly: true,
                     sameSite: true,
-                    // secure: true
+                    secure: process.env.NODE_ENV === "production",
                     path: "/",
                 })
             );

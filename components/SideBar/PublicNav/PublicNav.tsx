@@ -1,7 +1,6 @@
 import { FC, useState } from "react";
-import Image from "next/image";
 
-import { Box, Center, CircularProgress, Text } from "@chakra-ui/react";
+import { Box, Center } from "@chakra-ui/react";
 
 import { AnimatePresence, motion } from "framer-motion";
 

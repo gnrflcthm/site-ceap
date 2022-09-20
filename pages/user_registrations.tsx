@@ -108,9 +108,7 @@ const UserRegistrations: PageWithLayout<
                     </Thead>
                     <Tbody>
                         {data?.map((reg) => (
-                            <>
-                                <RegistrationData data={reg} key={reg.id} />
-                            </>
+                            <RegistrationData data={reg} key={reg.id} />
                         ))}
                     </Tbody>
                 </Table>

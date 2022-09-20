@@ -24,6 +24,8 @@ const RegistrationData: FC<{ data: UserRegistration }> = ({ data }) => {
         console.log("Accept Status: ", status);
     };
 
+    const textFontSize = { base: "sm", md: "md" };
+
     return (
         <Tr
             p={0}
@@ -32,7 +34,7 @@ const RegistrationData: FC<{ data: UserRegistration }> = ({ data }) => {
             }}
         >
             <Td px={"4"} py={"2"} w={"5%"}>
-                <Text fontSize={"md"}>
+                <Text fontSize={textFontSize}>
                     {registeredAt
                         ? new Date(registeredAt).toLocaleDateString()
                         : ""}
@@ -43,14 +45,14 @@ const RegistrationData: FC<{ data: UserRegistration }> = ({ data }) => {
                     <Heading fontSize={{base: "md", lg: "lg"}}>{`${lastName}, ${firstName} ${
                         middleName ? middleName[0] + "." : ""
                     }`}</Heading>
-                    <Text fontSize={"sm"}>{email}</Text>
+                    <Text fontSize={textFontSize}>{email}</Text>
                 </VStack>
             </Td>
             <Td px={"4"} py={"2"}>
-                <Text fontSize={"md"}>{mobileNumber ?? ""}</Text>
+                <Text fontSize={textFontSize}>{mobileNumber ?? ""}</Text>
             </Td>
             <Td px={"4"} py={"2"}>
-                <Text fontSize={"md"}>{schoolId ?? ""}</Text>
+                <Text fontSize={textFontSize}>{schoolId ?? ""}</Text>
             </Td>
             <Td px={"4"} py={"2"}>
                 <Box as={FaEllipsisV} onClick={() => {}} cursor={"pointer"} />

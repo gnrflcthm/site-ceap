@@ -39,7 +39,7 @@ export const CollapseContext = createContext<[boolean, Function]>([
 export const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: ComponentWithLayout) {
-    const [collapseSidePanel, setCollapseSidePanel] = useState<boolean>(true);
+    const [collapseSidePanel, setCollapseSidePanel] = useState<boolean>(false);
 
     return (
         <ChakraProvider resetCSS={true} theme={appTheme}>

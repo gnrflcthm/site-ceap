@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { Flex, Text, As, Tooltip, Box, useBreakpoint } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { MobileContext } from "@components/Layout";
 
 interface CoreNavItemBaseProps {
     name?: string;
@@ -33,8 +34,6 @@ const CoreNavItemContent: FC<{
     bg?: string;
     color?: string;
 }> = ({ collapsed, isActive, icon, name, bg, color }) => {
-    const breakpoint = useBreakpoint();
-
     return (
         <Flex
             py={"4"}
@@ -45,7 +44,7 @@ const CoreNavItemContent: FC<{
             rounded={{ base: "none", lg: "xl" }}
             position={"relative"}
             align={"center"}
-            justify={collapsed ? "center" : "initial"}
+            justify={{ base: "initial", lg: collapsed ? "center" : "initial" }}
             cursor={"pointer"}
             _hover={
                 !isActive
@@ -77,8 +76,7 @@ const CoreNavItemContent: FC<{
                 fontSize={"xl"}
             />
             <Text
-                fontSize={"xl"}
-                display={collapsed ? "none" : "block"}
+                display={{ base: "block", lg: collapsed ? "none" : "block" }}
                 color={"inherit"}
             >
                 {name}
@@ -98,12 +96,13 @@ const CoreNavItem: FC<CoreNavItemProps> = ({
     const [collapsed] = useContext(CollapseContext);
     const { pathname } = useRouter();
     const isActive: boolean = useMemo(() => pathname === href, [pathname]);
+    const isMobile = useContext(MobileContext);
 
     return (
         <Tooltip
             label={name}
             placement={"right"}
-            isDisabled={!collapsed}
+            isDisabled={!collapsed || isMobile}
             hasArrow
         >
             <Box w={{ base: "full", lg: "90%" }}>

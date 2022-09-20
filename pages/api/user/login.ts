@@ -12,14 +12,18 @@ export default handler().head(async (req, res) => {
     } else {
         try {
             await auth.verifyIdToken(token);
+            const cookieAge = 60 * 60 * 24 * 3;
+            const cookie = await auth.createSessionCookie(token, {
+                expiresIn: cookieAge * 1000,
+            });
             res.setHeader(
                 "Set-Cookie",
-                serialize("token", token, {
+                serialize("session", cookie, {
                     httpOnly: true,
                     sameSite: true,
-                    maxAge: 60 * 60 * 24 * 3,
+                    maxAge: cookieAge,
                     path: "/",
-                    // secure: true,
+                    secure: process.env.NODE_ENV === "production",
                 })
             );
             res.status(200).json({ msg: "Logged In Successfully." });

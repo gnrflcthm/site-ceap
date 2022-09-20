@@ -10,13 +10,14 @@ import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import "../firebase/client";
 import { getAccountType } from "@util/functions";
 import axios from "axios";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "../pages/_app";
+import { validateUser } from "@util/api/validateUser";
 
-interface CoreUser {
+export interface CoreUser {
     uid?: string;
     displayName?: string;
-    role?: string;
+    role: string;
 }
 
 export const AuthContext = createContext<{
@@ -34,12 +35,20 @@ export const AuthContext = createContext<{
 });
 
 export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState<CoreUser | undefined | null>(
-        undefined
-    );
+    const [user, setUser] = useState<CoreUser | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(true);
     const [role, setRole] = useState<string | undefined>(undefined);
     const client = useQueryClient();
+    const { data, remove } = useQuery<CoreUser | undefined>(
+        ["user"],
+        validateUser,
+        {
+            retry: 2,
+            staleTime: 1000 * 60 * 60 * 8,
+            refetchInterval: 1000 * 60 * 60 * 5,
+            onSettled: () => setLoading(false),
+        }
+    );
 
     const auth = getAuth();
 
@@ -47,52 +56,30 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         return signInWithEmailAndPassword(auth, email, password)
             .then(async ({ user }) => {
                 const token = await user.getIdToken(true);
-                let { status: loginStatus } = await axios.head(
-                    "/api/user/login",
-                    {
-                        headers: {
-                            Authorization: token,
-                        },
-                    }
-                );
-                let { data, status: validationStatus } =
-                    await axios.post<CoreUser>("/api/user/validate");
-                setCurrentUser(data);
-                setRole(getAccountType(data.role || ""));
-                console.log("Login Status: ", loginStatus);
-                console.log("Validation Status: ", validationStatus);
+                await axios.head("/api/user/login", {
+                    headers: {
+                        Authorization: token,
+                    },
+                });
+                client.refetchQueries(["user"]);
             })
             .finally(() => {
                 signOut(auth);
             });
     };
 
+    useEffect(() => {
+        setUser(data);
+    }, [data]);
+
     const logout = async () => {
-        let { status } = await axios.head("/api/user/logout");
+        await axios.head("/api/user/logout");
         client.clear();
-        setCurrentUser(null);
+        setUser(undefined);
     };
 
-    useEffect(() => {
-        setLoading(true);
-        (async () => {
-            try {
-                let { data } = await axios.post<CoreUser>("/api/user/validate");
-
-                setCurrentUser(data);
-                setRole(getAccountType(data.role || ""));
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, []);
-
     return (
-        <AuthContext.Provider
-            value={{ loading, user: currentUser, role, login, logout }}
-        >
+        <AuthContext.Provider value={{ loading, user, role, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

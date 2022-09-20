@@ -53,8 +53,8 @@ const RegistrationPage: NextPage<
                 <VStack
                     spacing={"0"}
                     bg={"neutralizerLight"}
-                    rounded={"lg"}
-                    w={"25%"}
+                    rounded={{ base: "none", sm: "lg" }}
+                    w={{ base: "100%", sm: "80%", md: "70%", lg: "25%" }}
                     overflow={"hidden"}
                     boxShadow={"2xl"}
                     borderColor={"blackAlpha.200"}

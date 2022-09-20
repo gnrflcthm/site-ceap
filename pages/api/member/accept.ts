@@ -48,7 +48,7 @@ export default authenticatedHandler().post(async (req, res) => {
                 ...{email: email, firstName, lastName, middleName, memberSchoolId, mobileNumber},
                 authId: uid,
                 accountType: AccountType.MS_USER,
-                username: displayName || ""
+                displayName: displayName || ""
             }
         })
 

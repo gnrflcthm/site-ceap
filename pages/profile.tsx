@@ -98,7 +98,7 @@ const Profile: PageWithLayout<
                     bg={"secondary"}
                     p={"4"}
                     align={"center"}
-                    zIndex={"overlay"}
+                    zIndex={"40"}
                 >
                     <Heading fontSize={"2xl"} color={"neutralizerLight"}>
                         Account Information

@@ -37,7 +37,7 @@ enum FileType {
   PDF
   IMAGE
   VIDEO
-  DOCUMENTS
+  DOCUMENT
 }
 
 enum FileAccessibility {
