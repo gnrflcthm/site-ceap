@@ -43,17 +43,17 @@ export default function (): NextConnect<AuthenticatedRequest, NextApiResponse> {
             }
             next();
         } catch (err) {
-            res.setHeader(
-                "Set-Cookie",
-                serialize("session", "", {
-                    expires: new Date(0),
-                    maxAge: 0,
-                    httpOnly: true,
-                    sameSite: true,
-                    secure: process.env.NODE_ENV === "production",
-                    path: "/",
-                })
-            );
+            // res.setHeader(
+            //     "Set-Cookie",
+            //     serialize("session", "", {
+            //         expires: new Date(0),
+            //         maxAge: 0,
+            //         httpOnly: true,
+            //         sameSite: true,
+            //         secure: process.env.NODE_ENV === "production",
+            //         path: "/",
+            //     })
+            // );
             res.statusMessage = "Invalid or Expired Token.";
             res.status(401);
             res.end();

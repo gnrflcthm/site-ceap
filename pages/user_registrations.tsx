@@ -47,7 +47,7 @@ const UserRegistrations: PageWithLayout<
             </Head>
             <Flex
                 bg={"secondary"}
-                p={"4"}
+                p={{base: "2", lg: "4"}}
                 position={"sticky"}
                 top={"0"}
                 justify={"space-between"}
@@ -83,9 +83,9 @@ const UserRegistrations: PageWithLayout<
                         </Text>
                     </Flex>
                 ) : (
-                    <Button variant={"transparent"} onClick={() => refetch({})}>
-                        <Box as={FaSync} color={"neutralizerLight"} mr={"2"} />{" "}
-                        Refresh
+                    <Button variant={"transparent"} p={'0'} color={"neutralizerLight"} onClick={() => refetch()}>
+                        <Box as={FaSync} color={"inherit"} mr={"2"} />{" "}
+                        <Text as={"span"} color={"inherit"}>Refresh</Text>
                     </Button>
                 )}
             </Flex>
@@ -108,7 +108,7 @@ const UserRegistrations: PageWithLayout<
                     </Thead>
                     <Tbody>
                         {data?.map((reg) => (
-                            <RegistrationData data={reg} key={reg.id} />
+                            <RegistrationData data={reg} key={reg.id} refresh={refetch} />
                         ))}
                     </Tbody>
                 </Table>
