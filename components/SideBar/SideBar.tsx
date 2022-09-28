@@ -26,7 +26,7 @@ const SideBar: FC = () => {
 
     useEffect(() => {
         const onRouteChange = () => {
-            if (isMobile) {
+            if (isMobile) {     // Fix: handler values don't change once set.
                 setCollapsed(false);
             }
         };
@@ -55,7 +55,7 @@ const SideBar: FC = () => {
 
     const sidebarPosition = useMemo<string>(() => {
         if (isMobile) {
-            return collapsed ? "0vw" : "-80vw";
+            return collapsed ? "0vw" : "-80vw"; // Fix: Inverted Values
         }
         if (user) {
             return "0vw";

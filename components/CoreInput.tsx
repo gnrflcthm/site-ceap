@@ -31,6 +31,7 @@ const CoreInput: FC<{
     bg,
     placeholderColor,
     required,
+    pattern,
     readonly,
     disabled = false,
     autoComplete,
@@ -81,7 +82,7 @@ const CoreInput: FC<{
             ) : (
                 <Input
                     type={type}
-                    {...{ name, value, required, disabled }}
+                    {...{ name, value, required, disabled, pattern }}
                     borderColor={value ? "secondary" : "neutralizerDark"}
                     focusBorderColor={"secondary"}
                     onFocus={() => {

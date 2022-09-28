@@ -1,4 +1,6 @@
-export const ButtonStyles = {
+import { ComponentStyleConfig } from "@chakra-ui/react";
+
+export const ButtonStyles: ComponentStyleConfig = {
     baseStyle: {
         w: "full",
         textTransform: "uppercase",

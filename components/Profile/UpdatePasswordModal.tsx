@@ -91,7 +91,7 @@ const UpdatePasswordModal: FC<{
                 onSubmit={updatePass}
             >
                 <ModalHeader mb={"4"}>
-                    <Heading>Update Password</Heading>
+                    <Heading textAlign={"center"}>Update Password</Heading>
                 </ModalHeader>
                 <ModalBody>
                     <VStack spacing={"8"}>

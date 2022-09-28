@@ -78,14 +78,12 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
                         <Text fontSize={"md"} textAlign={"center"}>
                             Don't have an account?{" "}
                             <Link href={"/registration"} passHref>
-                                <Text
-                                    color={"primary"}
-                                    fontWeight={"bold"}
+                                <Button
+                                    variant={"link"}
                                     as={"a"}
-                                    display={"block"}
                                 >
                                     Register Now
-                                </Text>
+                                </Button>
                             </Link>
                         </Text>
                         <Button

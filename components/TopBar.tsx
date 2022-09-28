@@ -28,9 +28,9 @@ const TopBar: FC = () => {
             px={"4"}
             position={"sticky"}
             top={"0"}
-            h={"16"}
-            minH={"16"}
-            maxH={"16"}
+            h={{base: "14", lg: "16"}}
+            minH={{base: "14", lg: "16"}}
+            maxH={{base: "14", lg: "16"}}
         >
             <Box
                 as={"button"}
@@ -46,12 +46,12 @@ const TopBar: FC = () => {
                             ? TbLayoutSidebarLeftExpand
                             : TbLayoutSidebarLeftCollapse
                     }
-                    fontSize={"4xl"}
+                    fontSize={{base: "2xl", lg: "4xl"}}
                     color={"neutralizerLight"}
                 />
             </Box>
             <Link href={"/"} passHref>
-                <Box as={"a"} position={"relative"} h={"60%"} w={"56"} mx={"4"}>
+                <Box as={"a"} position={"relative"} h={{base: "50%", lg: "60%"}} w={"56"} mx={"4"}>
                     <Image
                         src={coreNavLogo}
                         layout={"fill"}

@@ -14,11 +14,6 @@ import {
     Button,
     CircularProgress,
     Text,
-    Modal,
-    ModalOverlay,
-    ModalHeader,
-    ModalContent,
-    ModalCloseButton,
 } from "@chakra-ui/react";
 import Layout from "@components/Layout";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -96,11 +91,16 @@ const Profile: PageWithLayout<
                     position={"sticky"}
                     top={"0"}
                     bg={"secondary"}
-                    p={"4"}
+                    p={{ base: "2", lg: "4" }}
                     align={"center"}
+                    justify={{ base: "center", lg: "start" }}
                     zIndex={"40"}
                 >
-                    <Heading fontSize={"2xl"} color={"neutralizerLight"}>
+                    <Heading
+                        fontSize={{ base: "lg", lg: "2xl" }}
+                        textAlign={{ base: "center", lg: "initial" }}
+                        color={"neutralizerLight"}
+                    >
                         Account Information
                     </Heading>
                 </Flex>
@@ -160,7 +160,7 @@ const Profile: PageWithLayout<
                     show={showUpdatePassword}
                     setShow={setShowUpdatePassword}
                 />
-                {updating && (
+                {updating && ( // Fix: Update design, panget tignan.
                     <Flex
                         position={"sticky"}
                         bottom={"0"}
