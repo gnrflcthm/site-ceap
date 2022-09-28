@@ -82,13 +82,27 @@ model UserRegistration {
   memberSchoolId String?       @db.ObjectId
 }
 
+model MSAdminRegistration {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  firstName      String
+  middleName     String
+  lastName       String
+  email          String
+  mobileNumber   String?
+  registeredAt   DateTime?     @default(now())
+  memberSchool   MemberSchool? @relation(fields: [memberSchoolId], references: [id])
+  memberSchoolId String?       @db.ObjectId
+}
+
 model MemberSchool {
-  id            String             @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  address       String
-  region        String
-  users         User[]
-  registrations UserRegistration[]
+  id                 String                @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  address            String
+  region             String
+  isRegistered       Boolean
+  users              User[]
+  userRegistrations  UserRegistration[]
+  adminRegistrations MSAdminRegistration[]
 }
 
 model Resource {
