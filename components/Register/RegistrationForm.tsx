@@ -106,12 +106,14 @@ const RegistrationForm: FC<{
                     value={mobile}
                     setValue={setMobile}
                     type={"tel"}
+                    pattern={"^([+]\d{2})?\d{10}$"}
                 />
                 <CoreInput
                     placeholder={"Email Address"}
                     value={email}
                     setValue={setEmail}
                     type={"email"}
+                    pattern={"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"}
                     required
                 />
                 <Center w={"full"} flexDir={'column'}>
