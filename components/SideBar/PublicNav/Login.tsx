@@ -77,7 +77,7 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
                     <VStack mt={"4"}>
                         <Text fontSize={"md"} textAlign={"center"}>
                             Don't have an account?{" "}
-                            <Link href={"/registration"} passHref>
+                            <Link href={"/registration/user_registration"} passHref>
                                 <Button
                                     variant={"link"}
                                     as={"a"}

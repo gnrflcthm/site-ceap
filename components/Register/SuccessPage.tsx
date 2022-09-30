@@ -8,7 +8,7 @@ const SuccessPage: FC = () => {
             <Heading fontSize={"2xl"} textAlign={"center"}>
                 Thank You For Registering
             </Heading>
-            <Text>
+            <Text fontSize={{base: "lg"}} textAlign={"center"}>
                 Your administrator will be notified. Your login credentials will
                 be sent to your email in a few days.
             </Text>

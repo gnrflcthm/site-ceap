@@ -56,62 +56,40 @@ const CoreInput: FC<{
                 {placeholder}
                 {required && "*"}
             </Text>
-            {type === "select" ? (
-                <Select
-                    {...{ name, required, disabled }}
-                    borderColor={value ? "secondary" : "neutralizerDark"}
-                    focusBorderColor={"secondary"}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    onChange={(e) => setValue(e.target.value)}
-                    defaultValue={value}
-                    maxH={"30vh"}
-                >
-                    <option disabled={true}></option>
-                    {values &&
-                        Object.keys(values).map((key) => (
-                            <Box as={"optgroup"} label={key}>
-                                {values[key].map((val) => (
-                                    <Box as={"option"} value={val}>
-                                        {val}
-                                    </Box>
-                                ))}
-                            </Box>
-                        ))}
-                </Select>
-            ) : (
-                <Input
-                    type={type}
-                    {...{ name, value, required, disabled, pattern }}
-                    borderColor={value ? "secondary" : "neutralizerDark"}
-                    focusBorderColor={"secondary"}
-                    onFocus={() => {
-                        onFocus();
-                        setFocused(true);
-                    }}
-                    onBlur={() => {
-                        onBlur();
-                        setFocused(false);
-                    }}
-                    onChange={(e) => setValue(e.target.value)}
-                    _before={{ content: `""`, position: "absolute" }}
-                    color={value ? "neutralizerDark" : "transparent"}
-                    _focus={{
+            <Input
+                type={type}
+                {...{ name, value, required, disabled, pattern }}
+                borderColor={value ? "secondary" : "neutralizerDark"}
+                focusBorderColor={"secondary"}
+                onFocus={() => {
+                    onFocus();
+                    setFocused(true);
+                }}
+                onBlur={() => {
+                    onBlur();
+                    setFocused(false);
+                }}
+                onChange={(e) => setValue(e.target.value)}
+                _before={{ content: `""`, position: "absolute" }}
+                color={value ? "neutralizerDark" : "transparent"}
+                _focus={{
+                    color: "neutralizerDark",
+                    _before: {
+                        content: `""`,
                         color: "neutralizerDark",
-                        _before: {
-                            content: `""`,
-                            color: "neutralizerDark",
-                        },
-                    }}
-                    _valid={{
-                        _before: {
-                            content: `""`,
-                            color: "neutralizerDark",
-                        },
-                    }}
-                    autoComplete={autoComplete}
-                />
-            )}
+                    },
+                }}
+                _valid={{
+                    _before: {
+                        content: `""`,
+                        color: "neutralizerDark",
+                    },
+                }}
+                _hover={{
+                    borderColor: "neutralizerDark",
+                }}
+                autoComplete={autoComplete}
+            />
         </Box>
     );
 };

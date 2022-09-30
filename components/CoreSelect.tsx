@@ -1,115 +1,202 @@
-import { FC, useMemo, useState } from "react";
-import Select, { GroupBase, OptionsOrGroups } from "react-select";
-import { Box, chakra, Text, useToken } from "@chakra-ui/react";
-import { MemberSchool, Prisma } from "@prisma/client";
+import { FC, useState, useMemo, useEffect, useRef } from "react";
+import {
+    Box,
+    Input,
+    Flex,
+    Heading,
+    VStack,
+    Text,
+    Center,
+} from "@chakra-ui/react";
 
-interface OrganizationOption {
-    label: string;
-    value: string;
-}
+import { FaCaretDown } from "react-icons/fa";
+import CoreOption from "./CoreOption";
 
 const CoreSelect: FC<{
-    placeholder: string;
-    value: {label: string, value: string} | undefined;
+    options: [{ [key: string]: string }];
     setValue: Function;
-    required: boolean;
-    memberSchoolData:
-        | (Prisma.PickArray<
-              Prisma.MemberSchoolGroupByOutputType,
-              ("region" | "id" | "name" | "address")[]
-          > & {})[]
-}> = ({ placeholder, value, setValue, required, memberSchoolData }) => {
-    const [secondary, neutralizerDark] = useToken("colors", [
-        "secondary",
-        "neutralizerDark",
-    ]);
+    placeholder?: string;
+    required?: boolean;
+    isGrouped: boolean;
+}> = ({ options, isGrouped = false, setValue, placeholder, required }) => {
+    const [selected, setSelected] = useState<string>("");
+    const [query, setQuery] = useState<string>("");
     const [focused, setFocused] = useState<boolean>(false);
-    const ChakraSelect = chakra(Select<OrganizationOption>);
+    const [selectData, setSelectData] = useState<any>();
+    const [processing, setProcessing] = useState<boolean>(true);
+    const [clickWithin, setClickWithin] = useState<boolean>(false);
 
-    const options = useMemo(() => {
-        let regions = memberSchoolData
-            .map((field) => field.region)
-            .filter((val, i, self) => self.indexOf(val) === i);
+    const queriedData = useMemo<[{ [key: string]: string }]>(() => {
+        setProcessing(true);
+        if (query.trim() === "") {
+            return {};
+        }
+        let tempData = structuredClone(selectData);
 
-        let selectData = regions.map((region) => {
-            let schools = memberSchoolData.filter(
-                (field) => field.region === region
+        Object.keys(tempData).forEach((key) => {
+            // @ts-ignore
+            tempData[key] = tempData[key].filter((val) =>
+                val.name.toLowerCase().includes(query.toLowerCase())
             );
-            return {
-                region,
-                schools: schools.sort((a, b) => {
-                    let fa = a.name.toLowerCase(),
-                        fb = b.name.toLowerCase();
-
-                    if (fa < fb) {
-                        return -1;
-                    }
-                    if (fa > fb) {
-                        return 1;
-                    }
-                    return 0;
-                }),
-            };
         });
+        setTimeout(() => setProcessing(false), 1500);
+        return tempData;
+    }, [query, selectData]);
 
-        return selectData
-            ? selectData.map(({ region, schools }) => ({
-                  label: region,
-                  options: schools
-                      ? schools.map(({ name, id }) => ({
-                            label: name,
-                            value: id,
-                        }))
-                      : [],
-              }))
-            : [];
-    }, [memberSchoolData]);
+    const isEmpty = useMemo<boolean>(() => {
+        let total = 0;
+        Object.keys(queriedData).forEach((key) => {
+            // @ts-ignore
+            total += queriedData[key].length || 0;
+        });
+        return total === 0;
+    }, [queriedData]);
+
+    useEffect(() => {
+        if (isGrouped) {
+            setProcessing(true);
+            let data = {};
+            for (let option of options) {
+                // @ts-ignore
+                data[option.region] = data[option.region] || [];
+                // @ts-ignore
+                data[option.region].push(option);
+            }
+            Object.keys(data).forEach((key) => {
+                // @ts-ignore
+                data[key].sort((a, b) => a.name.localeCompare(b.name));
+            });
+            setSelectData(data);
+        }
+        setProcessing(false);
+    }, []);
 
     return (
-        <Box w={"full"} position={"relative"}>
-            <ChakraSelect
-                placeholder={""}
-                onChange={(val) => setValue(val)}
-                openMenuOnFocus={true}
-                value={value ? { label: value.label, value: value.value } : undefined}
-                options={options}
-                styles={{
-                    control: (base, { isFocused }) => ({
-                        ...base,
-                        borderColor: isFocused || value ? secondary : neutralizerDark,
-                        boxShadow: isFocused
-                            ? `0 0 0 1px ${secondary}`
-                            : "none",
-                        ":hover": {
-                            borderColor: isFocused
-                                ? secondary
-                                : "hsl(0, 0%, 70%)",
-                        },
-                    }),
-                    dropdownIndicator: (base, state) => ({
-                        ...base,
-                        color: state.isFocused ? secondary : base.color,
-                        ":hover": {
-                            color: state.isFocused ? secondary : base.color,
-                        },
-                    }),
+        <Flex
+            justify={"space-between"}
+            align={"stretch"}
+            w={"full"}
+            position={"relative"}
+        >
+            <Input
+                w={"full"}
+                placeholder={focused ? `Input ${placeholder}` : ""}
+                autoComplete={"none"}
+                type="text"
+                borderColor={
+                    query || selected ? "secondary" : "neutralizerDark"
+                }
+                _hover={{
+                    borderColor: "neutralizerDark",
+                }}
+                value={query}
+                focusBorderColor={"secondary"}
+                onChange={(e) => {
+                    setQuery(e.target.value);
+                    setSelected("");
+                }}
+                onFocus={() => setFocused(true)}
+                onBlur={(e) => {
+                    if (!clickWithin || isEmpty) {
+                        setFocused(false);
+                    }
                 }}
             />
-            <Text
-                pos={"absolute"}
-                fontSize={"sm"}
-                color={focused || value ? "secondary" : "neutralizerDark"}
-                top={focused || value ? "-30%" : "50%"}
-                left={focused || value ? "0" : "4"}
-                transform={"auto"}
+            <Center
+                position={"absolute"}
+                right={"4"}
+                top={"50%"}
                 translateY={"-50%"}
-                transition={"all 0.2s ease"}
+                transform={"auto"}
+                color={focused || query ? "secondary" : "neutralizerDark"}
+            >
+                <Box as={FaCaretDown} />
+            </Center>
+            <Text
+                position={"absolute"}
+                top={focused || query ? "-30%" : "50%"}
+                left={focused || query ? "0" : "4"}
+                translateY={"-50%"}
+                transform={"auto"}
                 pointerEvents={"none"}
+                fontSize={"sm"}
+                color={focused || query ? "secondary" : "neutralizerDark"}
+                transition={"all 0.2s ease"}
             >
                 {placeholder}
                 {required && "*"}
             </Text>
-        </Box>
+            {!processing && focused && (
+                <Box
+                    onMouseDown={() => setClickWithin(true)}
+                    zIndex={"dropdown"}
+                    maxH={"20vh"}
+                    w={"full"}
+                    position={"absolute"}
+                    top={"100%"}
+                    bg={"white"}
+                    shadow={"dark-lg"}
+                    overflow={"auto"}
+                    rounded={"md"}
+                    border={"1px solid"}
+                    borderColor={"gray.100"}
+                    py={"4"}
+                    display={focused ? "block" : "none"}
+                >
+                    {isEmpty ? (
+                        <Center>
+                            <Text textAlign={"center"}>
+                                No schools found. Check if your school is
+                                registered.
+                            </Text>
+                        </Center>
+                    ) : (
+                        Object.keys(queriedData || {}).map((key) => (
+                            <>
+                                {/* @ts-ignore */}
+                                {queriedData[key].length > 0 && (
+                                    <VStack
+                                        position={"relative"}
+                                        w={"full"}
+                                        align={"flex-start"}
+                                        spacing={"0"}
+                                    >
+                                        <Heading
+                                            fontSize={"md"}
+                                            color={"gray.500"}
+                                            px={"2"}
+                                        >
+                                            {key}
+                                        </Heading>
+                                        {/* @ts-ignore */}
+                                        {queriedData[key].map(
+                                            /* @ts-ignore */
+                                            ({ name, id }) => (
+                                                <CoreOption
+                                                    label={name}
+                                                    value={id}
+                                                    select={() => {
+                                                        setValue(id);
+                                                        setSelected(name);
+                                                        setQuery(name);
+                                                        console.log(
+                                                            `${name}: ${id}`
+                                                        );
+                                                        setFocused(false);
+                                                        setClickWithin(false);
+                                                    }}
+                                                    key={id}
+                                                />
+                                            )
+                                        )}
+                                    </VStack>
+                                )}
+                            </>
+                        ))
+                    )}
+                </Box>
+            )}
+        </Flex>
     );
 };
 

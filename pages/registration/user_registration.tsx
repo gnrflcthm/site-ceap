@@ -9,9 +9,9 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Center, Box, VStack, Flex } from "@chakra-ui/react";
+import { Box, VStack, Flex } from "@chakra-ui/react";
 
-import logo from "@assets/CORE_Nav.png";
+import logo from "@assets/CORE_L.png";
 
 import { Prisma } from "@prisma/client";
 import { prisma } from "prisma/db";
@@ -39,7 +39,7 @@ const RegistrationStateWrapper: FC<{
     }
 };
 
-const RegistrationPage: NextPage<
+const UserRegistrationPage: NextPage<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ memberSchools }) => {
     const [state, setState] = useState<RegistrationState>("fillup");
@@ -49,14 +49,13 @@ const RegistrationPage: NextPage<
             <Head>
                 <title>CORE: Registration</title>
             </Head>
-            <Center bg={"secondary"} minH={"100vh"} w={"100vw"}>
+            <Flex bg={"neutralizerDark"} minH={"100vh"} w={"100vw"}>
                 <VStack
                     spacing={"0"}
                     bg={"neutralizerLight"}
-                    rounded={{ base: "none", sm: "lg" }}
-                    w={{ base: "100%", sm: "80%", md: "70%", lg: "25%" }}
-                    overflow={"hidden"}
-                    boxShadow={"2xl"}
+                    w={{ base: "100%", md: "70%", lg: "35%", xl: "25%" }}
+                    overflowY={"auto"}
+                    overflowX={"hidden"}
                     borderColor={"blackAlpha.200"}
                 >
                     <Flex
@@ -65,12 +64,12 @@ const RegistrationPage: NextPage<
                         w={"full"}
                         px={"8"}
                         py={"4"}
-                        bg={"primary"}
+                        // bg={"primary"}
                     >
                         <Link href={"/"} passHref>
                             <Box
                                 as={"a"}
-                                color={"neutralizerLight"}
+                                color={"neutralizerDark"}
                                 _hover={{ color: "secondary" }}
                             >
                                 <Box as={FaArrowLeft} color={"inherit"} />
@@ -83,7 +82,7 @@ const RegistrationPage: NextPage<
                                 objectFit={"contain"}
                                 h={"full"}
                                 w={"full"}
-                                p={"10"}
+                                p={"20"}
                             >
                                 <Image
                                     src={logo}
@@ -93,7 +92,7 @@ const RegistrationPage: NextPage<
                             </Box>
                         </Link>
                     </Flex>
-                    <Box p={"8"} w={"full"}>
+                    <Box px={"8"} py={"2"} w={"full"}>
                         <RegistrationStateWrapper
                             state={state}
                             setState={setState}
@@ -101,7 +100,7 @@ const RegistrationPage: NextPage<
                         />
                     </Box>
                 </VStack>
-            </Center>
+            </Flex>
         </>
     );
 };
@@ -115,6 +114,9 @@ export const getServerSideProps: GetServerSideProps<{
 }> = async () => {
     const memberSchools = await prisma.memberSchool.groupBy({
         by: ["region", "name", "id", "address"],
+        where: {
+            isRegistered: true,
+        },
     });
     return {
         props: {
@@ -123,4 +125,4 @@ export const getServerSideProps: GetServerSideProps<{
     };
 };
 
-export default RegistrationPage;
+export default UserRegistrationPage;

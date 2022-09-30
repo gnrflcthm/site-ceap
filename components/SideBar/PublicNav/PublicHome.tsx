@@ -14,7 +14,7 @@ const PublicHome: FC<{
                 <Button variant={"secondary"} onClick={onLogin}>
                     Login
                 </Button>
-                <Button variant={"primary"} as={"a"} href={"/registration"}>
+                <Button variant={"primary"} as={"a"} href={"/registration/user_registration"}>
                     Register
                 </Button>
             </VStack>

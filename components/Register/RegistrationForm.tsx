@@ -1,4 +1,5 @@
 import { FC, useState, FormEvent } from "react";
+import Link from "next/link";
 
 import {
     VStack,
@@ -20,14 +21,8 @@ const RegistrationForm: FC<{
     const [lastName, setLastName] = useState<string>("");
     const [firstName, setFirstName] = useState<string>("");
     const [middleName, setMiddleName] = useState<string>("");
-    const [birthday, setBirthday] = useState<Date | null>(null);
-    const [organization, setOrganization] = useState<
-        | {
-              label: string;
-              value: string;
-          }
-        | undefined
-    >(undefined);
+    const [birthday, setBirthday] = useState<Date | "">("");
+    const [organization, setOrganization] = useState<string>("");
     const [mobile, setMobile] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [schoolId, setSchoolId] = useState<string>("");
@@ -45,7 +40,7 @@ const RegistrationForm: FC<{
                 lastName,
                 middleName,
                 birthday,
-                organizationId: organization?.value,
+                organizationId: organization,
                 email,
                 mobile,
                 schoolId,
@@ -64,7 +59,13 @@ const RegistrationForm: FC<{
             <Heading fontSize={"3xl"} textAlign={"center"} mb={"4"}>
                 Registration
             </Heading>
-            <VStack spacing={"8"} w={"full"} as={"form"} onSubmit={register} onFocus={() => setError("")}>
+            <VStack
+                spacing={"8"}
+                w={"full"}
+                as={"form"}
+                onSubmit={register}
+                onFocus={() => setError("")}
+            >
                 <CoreInput
                     placeholder={"Last Name"}
                     value={lastName}
@@ -91,10 +92,11 @@ const RegistrationForm: FC<{
                 />
                 <CoreSelect
                     placeholder={"School or Organization"}
-                    value={organization}
                     setValue={setOrganization}
-                    memberSchoolData={memberSchools}
+                    // @ts-ignore
+                    options={memberSchools}
                     required
+                    isGrouped
                 />
                 <CoreInput
                     placeholder={"School ID"}
@@ -106,17 +108,17 @@ const RegistrationForm: FC<{
                     value={mobile}
                     setValue={setMobile}
                     type={"tel"}
-                    pattern={"^([+]\d{2})?\d{10}$"}
+                    pattern={"^([+]d{2})?d{10}$"}
                 />
                 <CoreInput
                     placeholder={"Email Address"}
                     value={email}
                     setValue={setEmail}
                     type={"email"}
-                    pattern={"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"}
+                    pattern={"^[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}$"}
                     required
                 />
-                <Center w={"full"} flexDir={'column'}>
+                <Center w={"full"} flexDir={"column"}>
                     {error && (
                         <Text color={"red"} fontSize={"sm"} as={"small"}>
                             {error}
@@ -139,6 +141,21 @@ const RegistrationForm: FC<{
                     </Button>
                 </Center>
             </VStack>
+            <Text mt={"4"} textAlign={"center"}>
+                Can't find your school at the list?
+                <Link href={"/registration/admin_registration"} passHref>
+                    <Text
+                        display={"block"}
+                        as={"a"}
+                        color={"primary"}
+                        textDecor={"underline"}
+                        cursor={"pointer"}
+                    >
+                        Register As An Administrator Of Your School
+                    </Text>
+                </Link>
+                .
+            </Text>
         </>
     );
 };
