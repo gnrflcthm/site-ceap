@@ -1,3 +1,4 @@
+import { useContext, useEffect, useState } from "react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 
@@ -9,7 +10,12 @@ import AuthGetServerSideProps, {
 } from "@util/api/authGSSP";
 
 import { prisma } from "../prisma/db";
-import { AccountType, UserRegistration } from "@prisma/client";
+import {
+    AccountType,
+    UserRegistration,
+    MSAdminRegistration,
+    MemberSchool,
+} from "@prisma/client";
 import {
     Box,
     Button,
@@ -22,32 +28,34 @@ import {
     Tbody,
     Tr,
     Thead,
+    Center,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import RegistrationData from "@components/Registrations/UserRegistrations";
+import UserRegistrationData from "@components/Registrations/UserRegistrationData";
 import { FaSync } from "react-icons/fa";
 import { getRegistrations } from "@util/api/registrations";
 import RegistrationTableHeader from "@components/Registrations/RegistrationTableHeader";
+import { AuthContext } from "@context/AuthContext";
+import AdminRegistrationData from "@components/Registrations/AdminRegistrationData";
+import { useData } from "@util/hooks/useData";
 
 const UserRegistrations: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ registrations }) => {
-    const { data, isLoading, isError, refetch, isRefetching } = useQuery<
-        UserRegistration[]
-    >(["registrations"], getRegistrations, {
-        initialData: registrations,
-        staleTime: 60 * 10 * 1000,
-        initialDataUpdatedAt: Date.now(),
-    });
+    const { user, loading } = useContext(AuthContext);
+
+    const { data, isLoading, error, refetch } = useData<
+        UserRegistration[] | MSAdminRegistration[]
+    >("/api/member/registrations", registrations);
 
     return (
         <>
             <Head>
-                <title>User Registrations</title>
+                <title>Registrations</title>
             </Head>
             <Flex
                 bg={"secondary"}
-                p={{base: "2", lg: "4"}}
+                p={{ base: "2", lg: "4" }}
                 position={"sticky"}
                 top={"0"}
                 justify={"space-between"}
@@ -57,9 +65,9 @@ const UserRegistrations: PageWithLayout<
                     fontSize={{ base: "lg", lg: "2xl" }}
                     color={"neutralizerLight"}
                 >
-                    User Registrations
+                    Registrations
                 </Heading>
-                {isLoading || isRefetching ? (
+                {isLoading || !data ? (
                     <Flex
                         justify={"space-between"}
                         align={"center"}
@@ -83,42 +91,86 @@ const UserRegistrations: PageWithLayout<
                         </Text>
                     </Flex>
                 ) : (
-                    <Button variant={"transparent"} p={'0'} color={"neutralizerLight"} onClick={() => refetch()}>
+                    <Button
+                        variant={"transparent"}
+                        p={"0"}
+                        color={"neutralizerLight"}
+                        onClick={() => refetch()}
+                    >
                         <Box as={FaSync} color={"inherit"} mr={"2"} />{" "}
-                        <Text as={"span"} color={"inherit"}>Refresh</Text>
+                        <Text as={"span"} color={"inherit"}>
+                            Refresh
+                        </Text>
                     </Button>
                 )}
             </Flex>
-            <TableContainer maxH={"inherit"} overflowY={"auto"}>
-                <Table>
-                    <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
-                        <Tr>
-                            <RegistrationTableHeader
-                                heading={"date registered"}
-                            />
-                            <RegistrationTableHeader
-                                heading={"full name"}
-                                subheading={"email address"}
-                                sortable
-                            />
-                            <RegistrationTableHeader heading={"mobile #"} />
-                            <RegistrationTableHeader heading={"school id"} />
-                            <RegistrationTableHeader heading={""} />
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {data?.map((reg) => (
-                            <RegistrationData data={reg} key={reg.id} refresh={refetch} />
-                        ))}
-                    </Tbody>
-                </Table>
-            </TableContainer>
+            {loading || !user ? (
+                <Center w={"full"} h={"full"}>
+                    <CircularProgress isIndeterminate />
+                </Center>
+            ) : (
+                <TableContainer maxH={"inherit"} overflowY={"auto"}>
+                    <Table>
+                        <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
+                            <Tr>
+                                <RegistrationTableHeader
+                                    heading={"date registered"}
+                                />
+                                <RegistrationTableHeader
+                                    heading={"full name"}
+                                    subheading={"email address"}
+                                    sortable
+                                />
+                                <RegistrationTableHeader heading={"mobile #"} />
+                                <RegistrationTableHeader
+                                    heading={
+                                        ["CEAP_ADMIN", "CEAP_SUPER_ADMIN"].includes(user.role)
+                                            ? "member school"
+                                            : "school id"
+                                    }
+                                />
+                                <RegistrationTableHeader heading={""} />
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                            {/** @ts-ignore */}
+                            {data?.map((reg) => {
+                                switch (user.role) {
+                                    case AccountType.CEAP_SUPER_ADMIN:
+                                    case AccountType.CEAP_ADMIN:
+                                        return (
+                                            <AdminRegistrationData
+                                                data={
+                                                    reg as MSAdminRegistration & {
+                                                        memberSchool: MemberSchool;
+                                                    }
+                                                }
+                                                key={reg.id}
+                                                refresh={refetch}
+                                            />
+                                        );
+                                    case AccountType.MS_ADMIN:
+                                        return (
+                                            <UserRegistrationData
+                                                data={reg as UserRegistration}
+                                                key={reg.id}
+                                                refresh={refetch}
+                                            />
+                                        );
+                                }
+                            })}
+                        </Tbody>
+                    </Table>
+                </TableContainer>
+            )}
         </>
     );
 };
 
 export const getServerSideProps: GetServerSideProps<{
-    registrations?: UserRegistration[];
+    registrations?:
+        | UserRegistration[]
+        | (MSAdminRegistration & { memberSchool: MemberSchool })[];
 }> = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
         const user = await prisma.user.findFirst({
@@ -127,7 +179,7 @@ export const getServerSideProps: GetServerSideProps<{
             },
         });
 
-        if (user?.accountType !== AccountType.MS_ADMIN || !user) {
+        if (!user) {
             return {
                 redirect: {
                     destination: "/",
@@ -135,30 +187,53 @@ export const getServerSideProps: GetServerSideProps<{
                 },
             };
         }
+        let registrations = undefined;
 
-        const registrations = await prisma.userRegistration.findMany({
-            where: {
-                memberSchoolId: user?.memberSchoolId,
-            },
-        });
+        switch (user?.accountType) {
+            case AccountType.CEAP_ADMIN:
+            case AccountType.CEAP_SUPER_ADMIN:
+                registrations = await prisma.mSAdminRegistration.findMany({
+                    include: {
+                        memberSchool: true,
+                    },
+                });
 
-        if (!user) {
-            return {
-                props: {
-                    registrations: [],
-                },
-            };
+                console.table(registrations);
+
+                return {
+                    props: {
+                        registrations: registrations.map((reg) => ({
+                            ...reg,
+                            registeredAt: reg.registeredAt?.toString(),
+                        })),
+                    },
+                };
+            case AccountType.MS_ADMIN:
+                registrations = await prisma.userRegistration.findMany({
+                    where: {
+                        memberSchoolId: user?.memberSchoolId,
+                    },
+                });
+
+                console.table(registrations);
+
+                return {
+                    props: {
+                        registrations: registrations.map((reg) => ({
+                            ...reg,
+                            registeredAt: reg.registeredAt?.toString(),
+                            birthday: reg.birthday.toString(),
+                        })),
+                    },
+                };
+            default:
+                return {
+                    redirect: {
+                        destination: "/",
+                        statusCode: 301,
+                    },
+                };
         }
-
-        return {
-            props: {
-                registrations: registrations.map((reg) => ({
-                    ...reg,
-                    registeredAt: reg.registeredAt?.toString(),
-                    birthday: reg.birthday.toString(),
-                })),
-            },
-        };
     }
 );
 

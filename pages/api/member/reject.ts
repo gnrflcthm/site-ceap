@@ -2,8 +2,9 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 
 import { prisma } from "../../../prisma/db";
 import { sendRejectEmail } from "@util/email";
+import { AccountType } from "@prisma/client";
 
-export default authenticatedHandler().post(async (req, res) => {
+export default authenticatedHandler([AccountType.MS_ADMIN]).post(async (req, res) => {
     const { id } = req.body;
 
     try {

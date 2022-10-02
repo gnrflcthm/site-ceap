@@ -18,7 +18,17 @@ const CoreSelect: FC<{
     placeholder?: string;
     required?: boolean;
     isGrouped: boolean;
-}> = ({ options, isGrouped = false, setValue, placeholder, required }) => {
+    name?: string;
+    disabled?: boolean;
+}> = ({
+    options,
+    isGrouped = false,
+    setValue,
+    placeholder,
+    required,
+    name,
+    disabled = false,
+}) => {
     const [selected, setSelected] = useState<string>("");
     const [query, setQuery] = useState<string>("");
     const [focused, setFocused] = useState<boolean>(false);
@@ -79,6 +89,20 @@ const CoreSelect: FC<{
             position={"relative"}
         >
             <Input
+                opacity={"0"}
+                pointerEvents={"none"}
+                value={selected}
+                name={name}
+                onChange={() => {}}
+                required={required}
+                position={"absolute"}
+                top={"0"}
+                left={"0"}
+                w={"full"}
+                h={"full"}
+                tabIndex={-1}
+            />
+            <Input
                 w={"full"}
                 placeholder={focused ? `Input ${placeholder}` : ""}
                 autoComplete={"none"}
@@ -101,6 +125,7 @@ const CoreSelect: FC<{
                         setFocused(false);
                     }
                 }}
+                disabled={disabled}
             />
             <Center
                 position={"absolute"}

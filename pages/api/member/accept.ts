@@ -7,7 +7,7 @@ import { AccountType } from "@prisma/client";
 import { sendAcceptEmail } from "@util/email";
 import { randomBytes } from "crypto";
 
-export default authenticatedHandler().post(async (req, res) => {
+export default authenticatedHandler([AccountType.MS_ADMIN]).post(async (req, res) => {
     const { id } = req.body;
 
     const auth = getAuth();

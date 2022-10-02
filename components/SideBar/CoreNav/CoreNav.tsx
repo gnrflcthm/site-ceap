@@ -15,12 +15,11 @@ import "../../../firebase/client";
 import { AuthContext } from "@context/AuthContext";
 import { CollapseContext } from "pages/_app";
 import { getAccountType } from "@util/functions";
-import { AccountType } from "@prisma/client";
 
 const CoreNav: FC<{
     collapsed?: boolean;
 }> = () => {
-    const { user, role, logout } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
     const [loggingOut, setLoggingOut] = useState<boolean>(false);
     const [collapsed, setCollapsed] = useContext(CollapseContext);
     const router = useRouter();
@@ -30,7 +29,7 @@ const CoreNav: FC<{
             ["CEAP Super Admin", "CEAP Admin", "Member School Admin"].includes(
                 getAccountType(user?.role)
             ),
-        [role]
+        [user?.role]
     );
 
     useEffect(() => {
@@ -86,14 +85,12 @@ const CoreNav: FC<{
                                         href={"/logs"}
                                         icon={FaHistory}
                                     />
+                                    <CoreNavItem
+                                        name={"Registrations"}
+                                        href={"/user_registrations"}
+                                        icon={HiUsers}
+                                    />
                                 </>
-                            )}
-                            {user?.role === AccountType.MS_ADMIN && (
-                                <CoreNavItem
-                                    name={"Registrations"}
-                                    href={"/user_registrations"}
-                                    icon={HiUsers}
-                                />
                             )}
                             <CoreNavItem
                                 name={"Profile"}

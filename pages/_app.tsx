@@ -44,7 +44,7 @@ export default function App({ Component, pageProps }: ComponentWithLayout) {
     return (
         <ChakraProvider resetCSS={true} theme={appTheme}>
             <Head>
-                <link rel={"icon"} href={"logo.png"} />
+                <link rel={"icon"} href={"/logo.png"} type={"image/icon type"} />
             </Head>
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>

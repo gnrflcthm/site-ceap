@@ -37,16 +37,6 @@ export const ProfileModeContext = createContext<[boolean, Function]>([
 const Profile: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ userInfo }) => {
-    const { user } = useContext(AuthContext);
-    const { data } = useQuery<
-        | (User & { memberSchool: MemberSchool | undefined | null })
-        | undefined
-        | null
-    >(["userInfo"], getUserInfo, {
-        initialData: userInfo,
-        staleTime: 30 * 24 * 60 * 60 * 1000,
-        initialDataUpdatedAt: Date.now(),
-    });
 
     const [updating, setUpdating] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -55,7 +45,7 @@ const Profile: PageWithLayout<
         useState<boolean>(false);
 
     const [displayName, setDisplayName] = useState<string>(
-        data?.displayName || ""
+        userInfo?.displayName || ""
     );
 
     const save = () => {
@@ -121,11 +111,11 @@ const Profile: PageWithLayout<
                         >
                             <UserInfo
                                 label={"Name"}
-                                value={`${data?.firstName} ${
-                                    data?.middleName[0]
-                                        ? data?.middleName[0] + "."
+                                value={`${userInfo?.firstName} ${
+                                    userInfo?.middleName[0]
+                                        ? userInfo?.middleName[0] + "."
                                         : ""
-                                } ${data?.lastName}`}
+                                } ${userInfo?.lastName}`}
                             />
                             <UserInfo
                                 label={"Display Name"}
@@ -135,15 +125,15 @@ const Profile: PageWithLayout<
                             />
                             <UserInfo
                                 label={"Email"}
-                                value={`${data?.email}`}
+                                value={`${userInfo?.email}`}
                             />
                             <UserInfo
                                 label={"Contact No."}
-                                value={`${data?.mobileNumber}`}
+                                value={`${userInfo?.mobileNumber}`}
                             />
                             <UserInfo
                                 label={"Member School"}
-                                value={`${data?.memberSchool?.name}`}
+                                value={`${userInfo?.memberSchool?.name}`}
                             />
                             <UserInfo
                                 label={"Password"}
@@ -156,7 +146,7 @@ const Profile: PageWithLayout<
                     </SimpleGrid>
                 </VStack>
                 <UpdatePasswordModal
-                    email={data?.email}
+                    email={userInfo?.email}
                     show={showUpdatePassword}
                     setShow={setShowUpdatePassword}
                 />
@@ -191,7 +181,7 @@ const Profile: PageWithLayout<
                                 <Button
                                     w={"fit-content"}
                                     onClick={() => {
-                                        setDisplayName(data?.displayName || "");
+                                        setDisplayName(userInfo?.displayName || "");
                                         setUpdating(false);
                                     }}
                                 >

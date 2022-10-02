@@ -8,10 +8,8 @@ import {
 
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import "../firebase/client";
-import { getAccountType } from "@util/functions";
 import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { queryClient } from "../pages/_app";
 import { validateUser } from "@util/api/validateUser";
 
 export interface CoreUser {
@@ -23,13 +21,11 @@ export interface CoreUser {
 export const AuthContext = createContext<{
     loading: boolean;
     user: CoreUser | null | undefined;
-    role: string | undefined;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
 }>({
     loading: false,
     user: null,
-    role: undefined,
     login: async () => {},
     logout: async () => {},
 });
@@ -37,18 +33,13 @@ export const AuthContext = createContext<{
 export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const [user, setUser] = useState<CoreUser | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(true);
-    const [role, setRole] = useState<string | undefined>(undefined);
     const client = useQueryClient();
-    const { data, remove } = useQuery<CoreUser | undefined>(
-        ["user"],
-        validateUser,
-        {
-            retry: 2,
-            staleTime: 1000 * 60 * 60 * 8,
-            refetchInterval: 1000 * 60 * 60 * 5,
-            onSettled: () => setLoading(false),
-        }
-    );
+    const { data } = useQuery<CoreUser | undefined>(["user"], validateUser, {
+        retry: 2,
+        staleTime: 1000 * 60 * 60 * 8,
+        refetchInterval: 1000 * 60 * 60 * 5,
+        onSettled: () => setLoading(false),
+    });
 
     const auth = getAuth();
 
@@ -70,6 +61,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     useEffect(() => {
         setUser(data);
+        console.table(data);
     }, [data]);
 
     const logout = async () => {
@@ -79,7 +71,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ loading, user, role, login, logout }}>
+        <AuthContext.Provider value={{ loading, user, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

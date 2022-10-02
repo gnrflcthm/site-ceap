@@ -28,7 +28,7 @@ const CurrentUser: FC<{
                     />
                     {!collapsed && (
                         <>
-                            <Heading fontSize={"3xl"}>{displayName}</Heading>
+                            <Heading fontSize={"3xl"} textAlign={"center"}>{displayName}</Heading>
                             <Text fontSize={"lg"}>{accountType}</Text>
                         </>
                     )}

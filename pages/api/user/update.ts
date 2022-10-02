@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { prisma } from "../../../prisma/db";
+import { prisma } from "prisma/db";
 import { getAuth } from "firebase-admin/auth";
 
 export default authenticatedHandler().post(async (req, res) => {

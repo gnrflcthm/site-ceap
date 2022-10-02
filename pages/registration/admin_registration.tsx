@@ -3,26 +3,58 @@ import {
     InferGetServerSidePropsType,
     NextPage,
 } from "next";
+import Head from "next/head";
+import Image from "next/image";
 import { Prisma } from "@prisma/client";
 import { prisma } from "prisma/db";
-import { Button, Flex } from "@chakra-ui/react";
+import AdminRegistrationForm from "@components/Register/AdminRegistrationForm";
+import { Box, Center, Flex, Heading } from "@chakra-ui/react";
+
+import logo from "@assets/CORE_L.png";
 import { useState } from "react";
-import CoreSelect from "@components/CoreSelect";
+import { SuccessPage } from "@components/Register";
 
 const AdminRegistrationPage: NextPage<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ memberSchools }) => {
-    const [organization, setOrganization] = useState<string>("");
+    const [state, setState] = useState<"registration" | "success">(
+        "registration"
+    );
+
     return (
-        <Flex p={"10"}>
-            <CoreSelect
-                // @ts-ignore
-                options={memberSchools}
-                placeholder={"School or Organization"}
-                setValue={setOrganization}
-                isGrouped
-            />
-        </Flex>
+        <>
+            <Head>
+                <title>CORE Admin Registration</title>
+            </Head>
+            <Center minH={"100vh"} minW={"100vw"} bg={"neutralizerDark"}>
+                <Flex
+                    flexDir={"column"}
+                    bg="neutralizerLight"
+                    rounded={"md"}
+                    shadow={"lg"}
+                    py={"4"}
+                    w={{ base: "100%%", md: "50%", lg: "25%" }}
+                >
+                    <Center position={"relative"} p={"20"} w={"full"} mb={"4"}>
+                        <Image
+                            src={logo}
+                            layout={"fill"}
+                            objectFit={"contain"}
+                        />
+                    </Center>
+                    <Box w={"full"} px={"10"} py={'4'}>
+                        {state === "success" ? (
+                            <SuccessPage />
+                        ) : (
+                            <AdminRegistrationForm
+                                memberSchools={memberSchools}
+                                setState={setState}
+                            />
+                        )}
+                    </Box>
+                </Flex>
+            </Center>
+        </>
     );
 };
 

@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { UserRegistration } from "@prisma/client";
+import { MemberSchool, MSAdminRegistration } from "@prisma/client";
 
 import {
     Heading,
@@ -14,16 +14,18 @@ import {
     MenuItem,
     MenuList,
     useToast,
+    Center,
+    CircularProgress,
 } from "@chakra-ui/react";
 import axios from "axios";
 
 import { FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-const RegistrationData: FC<{ data: UserRegistration; refresh: Function }> = ({
-    data,
-    refresh,
-}) => {
+const AdminRegistrationData: FC<{
+    data: MSAdminRegistration & { memberSchool: MemberSchool };
+    refresh: Function;
+}> = ({ data, refresh }) => {
     const {
         firstName,
         lastName,
@@ -32,13 +34,16 @@ const RegistrationData: FC<{ data: UserRegistration; refresh: Function }> = ({
         email,
         id,
         registeredAt,
-        schoolId,
+        memberSchool,
     } = data;
 
     const toast = useToast();
 
+    const [processing, setProcessing] = useState<boolean>(false);
+
     const accept = async () => {
-        let { status } = await axios.post("/api/member/accept", { id });
+        setProcessing(true);
+        let { status } = await axios.post("/api/admin/accept", { id });
         console.log("Accept Status:", status);
         toast({
             title: "Success",
@@ -49,7 +54,8 @@ const RegistrationData: FC<{ data: UserRegistration; refresh: Function }> = ({
     };
 
     const reject = async () => {
-        let { status } = await axios.post("/api/member/reject", { id });
+        setProcessing(true);
+        let { status } = await axios.post("/api/admin/reject", { id });
         console.log("Reject Status:", status);
         toast({
             title: "Account Has Been Removed",
@@ -67,9 +73,6 @@ const RegistrationData: FC<{ data: UserRegistration; refresh: Function }> = ({
             p={0}
             _hover={{
                 bg: "blackAlpha.50",
-            }}
-            onClick={() => {
-                accept();
             }}
         >
             <Td px={"4"} py={"2"} w={"5%"}>
@@ -92,34 +95,44 @@ const RegistrationData: FC<{ data: UserRegistration; refresh: Function }> = ({
             <Td px={"4"} py={"2"}>
                 <Text fontSize={textFontSize}>{mobileNumber ?? ""}</Text>
             </Td>
-            <Td px={"4"} py={"2"}>
-                <Text fontSize={textFontSize}>{schoolId ?? ""}</Text>
+            <Td px={"4"} py={"2"} fontWeight={"bold"}>
+                <Text fontSize={textFontSize}>{memberSchool.name ?? ""}</Text>
             </Td>
             <Td px={"4"} py={"2"}>
-                <Menu>
-                    <MenuButton w={"full"}>
-                        <Box as={FaEllipsisV} m={"auto"} cursor={"pointer"} />
-                    </MenuButton>
-                    <MenuList>
-                        <MenuGroup title="Actions">
-                            <MenuItem
-                                color={"green.500"}
-                                onClick={() => accept()}
-                            >
-                                Accept
-                            </MenuItem>
-                            <MenuItem
-                                color={"red.500"}
-                                onClick={() => reject()}
-                            >
-                                Reject
-                            </MenuItem>
-                        </MenuGroup>
-                    </MenuList>
-                </Menu>
+                {processing ? (
+                    <Center>
+                        <CircularProgress isIndeterminate color={"secondary"} size={8} />
+                    </Center>
+                ) : (
+                    <Menu>
+                        <MenuButton w={"full"}>
+                            <Box
+                                as={FaEllipsisV}
+                                m={"auto"}
+                                cursor={"pointer"}
+                            />
+                        </MenuButton>
+                        <MenuList>
+                            <MenuGroup title="Actions">
+                                <MenuItem
+                                    color={"green.500"}
+                                    onClick={() => accept()}
+                                >
+                                    Accept
+                                </MenuItem>
+                                <MenuItem
+                                    color={"red.500"}
+                                    onClick={() => reject()}
+                                >
+                                    Reject
+                                </MenuItem>
+                            </MenuGroup>
+                        </MenuList>
+                    </Menu>
+                )}
             </Td>
         </Tr>
     );
 };
 
-export default RegistrationData;
+export default AdminRegistrationData;

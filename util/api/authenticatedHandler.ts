@@ -13,7 +13,9 @@ interface AuthenticatedRequest extends NextApiRequest {
     uid: string;
 }
 
-export default function (): NextConnect<AuthenticatedRequest, NextApiResponse> {
+export default function (
+    authorizedRoles?: AccountType[]
+): NextConnect<AuthenticatedRequest, NextApiResponse> {
     return nextConnect<AuthenticatedRequest, NextApiResponse>({
         onError: (err, req, res) => {
             console.log("Error: ", err);
@@ -31,6 +33,7 @@ export default function (): NextConnect<AuthenticatedRequest, NextApiResponse> {
             res.statusMessage = "You Are Not Logged In.";
             res.status(401);
             res.end();
+            return;
         }
         try {
             const { uid } = await auth.verifySessionCookie(session!);
@@ -41,19 +44,27 @@ export default function (): NextConnect<AuthenticatedRequest, NextApiResponse> {
             if (customClaims?.role) {
                 req.role = customClaims.role;
             }
+
+            if (authorizedRoles && !authorizedRoles.includes(req.role)) {
+                res.statusMessage =
+                    "You do not have sufficient permission to perform this action.";
+                res.status(403);
+                res.end();
+                return;
+            }
             next();
         } catch (err) {
-            // res.setHeader(
-            //     "Set-Cookie",
-            //     serialize("session", "", {
-            //         expires: new Date(0),
-            //         maxAge: 0,
-            //         httpOnly: true,
-            //         sameSite: true,
-            //         secure: process.env.NODE_ENV === "production",
-            //         path: "/",
-            //     })
-            // );
+            res.setHeader(
+                "Set-Cookie",
+                serialize("session", "", {
+                    expires: new Date(0),
+                    maxAge: 0,
+                    httpOnly: true,
+                    sameSite: true,
+                    secure: process.env.NODE_ENV === "production",
+                    path: "/",
+                })
+            );
             res.statusMessage = "Invalid or Expired Token.";
             res.status(401);
             res.end();

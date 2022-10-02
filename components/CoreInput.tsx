@@ -44,6 +44,7 @@ const CoreInput: FC<{
     return (
         <Box w={"full"} pos={"relative"} onClick={() => onClick()}>
             <Text
+                as={"label"}
                 pos={"absolute"}
                 fontSize={"sm"}
                 color={focused || value ? "secondary" : "neutralizerDark"}
