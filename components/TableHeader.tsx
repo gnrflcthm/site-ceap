@@ -4,7 +4,7 @@ import { Tr, Th, Flex, Heading, Text, Center, Box } from "@chakra-ui/react";
 
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 
-const RegistrationTableHeader: FC<{
+const TableHeader: FC<{
     heading: string;
     subheading?: string;
     sortable?: boolean;
@@ -61,4 +61,4 @@ const RegistrationTableHeader: FC<{
     );
 };
 
-export default RegistrationTableHeader;
+export default TableHeader;
