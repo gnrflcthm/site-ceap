@@ -2,7 +2,7 @@ import { FC, useMemo, useContext, useState, useEffect } from "react";
 
 import { Center, VStack, Text, CircularProgress, Flex } from "@chakra-ui/react";
 
-import { FaBook, FaUser, FaSignOutAlt, FaHistory } from "react-icons/fa";
+import { FaBook, FaUser, FaSignOutAlt, FaHistory, FaUserCog } from "react-icons/fa";
 
 import { BsCloudUpload } from "react-icons/bs";
 import { HiUsers } from "react-icons/hi";
@@ -89,6 +89,11 @@ const CoreNav: FC<{
                                         name={"Registrations"}
                                         href={"/user_registrations"}
                                         icon={HiUsers}
+                                    />
+                                    <CoreNavItem
+                                        name={"Manage Accounts"}
+                                        href={"/manage_accounts"}
+                                        icon={FaUserCog}
                                     />
                                 </>
                             )}

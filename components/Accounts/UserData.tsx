@@ -1,72 +1,44 @@
-import { FC, useState } from "react";
-import { UserRegistration } from "@prisma/client";
-
+import { AccountType, MemberSchool, User } from "@prisma/client";
+import { motion } from "framer-motion";
+import { FC, useContext, useState } from "react";
+import { FaEllipsisV } from "react-icons/fa";
 import {
-    Heading,
     Text,
-    VStack,
     Tr,
     Td,
-    Box,
+    VStack,
+    Heading,
+    Center,
+    CircularProgress,
     Menu,
     MenuButton,
+    Box,
+    MenuList,
     MenuGroup,
     MenuItem,
-    MenuList,
-    useToast,
-    CircularProgress,
-    Center,
 } from "@chakra-ui/react";
-import axios from "axios";
+import { AuthContext } from "@context/AuthContext";
+import { getAccountType } from "@util/functions";
 
-import { FaEllipsisV } from "react-icons/fa";
-import { motion } from "framer-motion";
-
-const UserRegistrationData: FC<{
-    data: UserRegistration;
-    refresh: Function;
-}> = ({ data, refresh }) => {
+const UserData: FC<{ user: User & { memberSchool?: MemberSchool } }> = ({
+    user,
+}) => {
     const {
         firstName,
-        lastName,
         middleName,
-        mobileNumber,
+        lastName,
         email,
-        id,
-        registeredAt,
+        mobileNumber,
         schoolId,
-    } = data;
+        accountType,
+        memberSchool,
+    } = user;
 
-    const toast = useToast();
+    const { user: admin } = useContext(AuthContext);
 
     const [processing, setProcessing] = useState<boolean>(false);
 
-    const accept = async () => {
-        setProcessing(true)
-        let { status } = await axios.post("/api/member/accept", { id });
-        console.log("Accept Status:", status);
-        toast({
-            title: "Success",
-            description: "Account has been created successfully.",
-            status: "success",
-        });
-        refresh();
-    };
-
-    const reject = async () => {
-        setProcessing(true)
-        let { status } = await axios.post("/api/member/reject", { id });
-        console.log("Reject Status:", status);
-        toast({
-            title: "Account Has Been Removed",
-            description: "The user will be notified shortly.",
-            status: "success",
-        });
-        refresh();
-    };
-
     const textFontSize = { base: "sm", md: "md" };
-
     return (
         <Tr
             as={motion.tr}
@@ -75,13 +47,9 @@ const UserRegistrationData: FC<{
                 bg: "blackAlpha.50",
             }}
         >
-            <Td px={"4"} py={"2"} w={"5%"}>
-                <Text fontSize={textFontSize}>
-                    {registeredAt
-                        ? new Date(registeredAt).toLocaleDateString()
-                        : ""}
-                </Text>
-            </Td>
+            {/* <Td px={"4"} py={"2"} w={"5%"}>
+                <Text fontSize={textFontSize}></Text>
+            </Td> */}
             <Td px={"4"} py={"2"}>
                 <VStack spacing={"0"} align={"flex-start"}>
                     <Heading
@@ -95,13 +63,34 @@ const UserRegistrationData: FC<{
             <Td px={"4"} py={"2"}>
                 <Text fontSize={textFontSize}>{mobileNumber ?? ""}</Text>
             </Td>
-            <Td px={"4"} py={"2"}>
-                <Text fontSize={textFontSize}>{schoolId ?? ""}</Text>
-            </Td>
+            {admin && admin.role === AccountType.CEAP_SUPER_ADMIN && (
+                <Td px={"4"} py={"2"}>
+                    <Text fontSize={textFontSize}>
+                        {getAccountType(accountType)}
+                    </Text>
+                </Td>
+            )}
+            {admin && ["CEAP_SUPER_ADMIN", "CEAP_ADMIN"].includes(admin.role) && (
+                <Td px={"4"} py={"2"}>
+                    <Text fontSize={textFontSize}>
+                        {(memberSchool && memberSchool.name) || "N/A"}
+                    </Text>
+                </Td>
+            )}
+            {admin && admin.role === AccountType.MS_ADMIN && (
+                <Td px={"4"} py={"2"}>
+                    <Text fontSize={textFontSize}>{schoolId ?? "N/A"}</Text>
+                </Td>
+            )}
+
             <Td px={"4"} py={"2"}>
                 {processing ? (
                     <Center>
-                        <CircularProgress isIndeterminate color={"secondary"} size={8} />
+                        <CircularProgress
+                            isIndeterminate
+                            color={"secondary"}
+                            size={8}
+                        />
                     </Center>
                 ) : (
                     <Menu>
@@ -116,14 +105,11 @@ const UserRegistrationData: FC<{
                             <MenuGroup title="Actions">
                                 <MenuItem
                                     color={"green.500"}
-                                    onClick={() => accept()}
+                                    onClick={() => {}}
                                 >
                                     Accept
                                 </MenuItem>
-                                <MenuItem
-                                    color={"red.500"}
-                                    onClick={() => reject()}
-                                >
+                                <MenuItem color={"red.500"} onClick={() => {}}>
                                     Reject
                                 </MenuItem>
                             </MenuGroup>
@@ -135,4 +121,4 @@ const UserRegistrationData: FC<{
     );
 };
 
-export default UserRegistrationData;
+export default UserData;
