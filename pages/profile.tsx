@@ -1,4 +1,4 @@
-import { useContext, useState, createContext } from "react";
+import { useState, createContext } from "react";
 import { PageWithLayout } from "./_app";
 
 import Head from "next/head";
@@ -19,15 +19,13 @@ import Layout from "@components/Layout";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { MemberSchool, User } from "@prisma/client";
 import { prisma } from "../prisma/db";
-import { AuthContext } from "@context/AuthContext";
 import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
 
-import { useQuery } from "@tanstack/react-query";
-import { getUserInfo } from "@util/api/userInfo";
 import axios, { AxiosError } from "axios";
 import UpdatePasswordModal from "@components/Profile/UpdatePasswordModal";
+import TopPanel from "@components/TopPanel";
 
 export const ProfileModeContext = createContext<[boolean, Function]>([
     false,
@@ -54,7 +52,6 @@ const Profile: PageWithLayout<
             .post("/api/user/update", {
                 displayName /* Add more fields according to updateable fields */,
             })
-            .then((res) => {})
             .catch((err: AxiosError) => {
                 console.log(err.response?.statusText);
             })
@@ -77,23 +74,7 @@ const Profile: PageWithLayout<
                 overflow={"hidden"}
                 overflowY={"auto"}
             >
-                <Flex
-                    position={"sticky"}
-                    top={"0"}
-                    bg={"secondary"}
-                    p={{ base: "2", lg: "4" }}
-                    align={"center"}
-                    justify={{ base: "center", lg: "start" }}
-                    zIndex={"40"}
-                >
-                    <Heading
-                        fontSize={{ base: "lg", lg: "2xl" }}
-                        textAlign={{ base: "center", lg: "initial" }}
-                        color={"neutralizerLight"}
-                    >
-                        Account Information
-                    </Heading>
-                </Flex>
+                <TopPanel title={"Profile"} />
                 <VStack align={"flex-start"} p={"4"}>
                     <Heading fontSize={{ base: "lg", lg: "2xl" }}>
                         Basic Information

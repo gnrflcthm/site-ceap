@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 
@@ -30,14 +30,13 @@ import {
     Thead,
     Center,
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
 import UserRegistrationData from "@components/Registrations/UserRegistrationData";
 import { FaSync } from "react-icons/fa";
-import { getRegistrations } from "@util/api/registrations";
-import RegistrationTableHeader from "@components/Registrations/RegistrationTableHeader";
+import TableHeader from "@components/TableHeader";
 import { AuthContext } from "@context/AuthContext";
 import AdminRegistrationData from "@components/Registrations/AdminRegistrationData";
 import { useData } from "@util/hooks/useData";
+import TopPanel from "@components/TopPanel";
 
 const UserRegistrations: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -53,57 +52,7 @@ const UserRegistrations: PageWithLayout<
             <Head>
                 <title>Registrations</title>
             </Head>
-            <Flex
-                bg={"secondary"}
-                p={{ base: "2", lg: "4" }}
-                position={"sticky"}
-                top={"0"}
-                justify={"space-between"}
-                align={"center"}
-            >
-                <Heading
-                    fontSize={{ base: "lg", lg: "2xl" }}
-                    color={"neutralizerLight"}
-                >
-                    Registrations
-                </Heading>
-                {isLoading || !data ? (
-                    <Flex
-                        justify={"space-between"}
-                        align={"center"}
-                        color={"neutralizerLight"}
-                        p={"2"}
-                    >
-                        <CircularProgress
-                            isIndeterminate
-                            size={"4"}
-                            mr={"2"}
-                            color={"secondary"}
-                            thickness={"10"}
-                        />
-                        <Text
-                            fontWeight={"bold"}
-                            textTransform={"uppercase"}
-                            color={"inherit"}
-                            fontSize={"md"}
-                        >
-                            Refreshing
-                        </Text>
-                    </Flex>
-                ) : (
-                    <Button
-                        variant={"transparent"}
-                        p={"0"}
-                        color={"neutralizerLight"}
-                        onClick={() => refetch()}
-                    >
-                        <Box as={FaSync} color={"inherit"} mr={"2"} />{" "}
-                        <Text as={"span"} color={"inherit"}>
-                            Refresh
-                        </Text>
-                    </Button>
-                )}
-            </Flex>
+            <TopPanel title={"User Registrations"} actionIcon={FaSync} actionText={"Refresh"} onActionClick={refetch} actionIsProcessing={isLoading} hasAction />
             {loading || !user ? (
                 <Center w={"full"} h={"full"}>
                     <CircularProgress isIndeterminate />
@@ -113,23 +62,24 @@ const UserRegistrations: PageWithLayout<
                     <Table>
                         <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
                             <Tr>
-                                <RegistrationTableHeader
-                                    heading={"date registered"}
-                                />
-                                <RegistrationTableHeader
+                                <TableHeader heading={"date registered"} />
+                                <TableHeader
                                     heading={"full name"}
                                     subheading={"email address"}
                                     sortable
                                 />
-                                <RegistrationTableHeader heading={"mobile #"} />
-                                <RegistrationTableHeader
+                                <TableHeader heading={"mobile #"} />
+                                <TableHeader
                                     heading={
-                                        ["CEAP_ADMIN", "CEAP_SUPER_ADMIN"].includes(user.role)
+                                        [
+                                            "CEAP_ADMIN",
+                                            "CEAP_SUPER_ADMIN",
+                                        ].includes(user.role)
                                             ? "member school"
                                             : "school id"
                                     }
                                 />
-                                <RegistrationTableHeader heading={""} />
+                                <TableHeader heading={""} />
                             </Tr>
                         </Thead>
                         <Tbody>
