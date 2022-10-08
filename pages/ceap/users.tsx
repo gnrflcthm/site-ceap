@@ -123,7 +123,7 @@ const CEAPUsers: PageWithLayout<
                             w={"40%"}
                         >
                             <Flex>
-                                // TODO: Add Search Functionality
+                                {/* TODO: Add Search Functionality */}
                                 <SearchBar />
                                 <Tooltip
                                     label={"Search"}
