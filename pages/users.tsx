@@ -20,6 +20,8 @@ import {
     Box,
     Button,
     Tooltip,
+    useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 
 import { prisma } from "prisma/db";
@@ -37,15 +39,47 @@ import TabButton from "@components/Accounts/TabButton";
 import { useData } from "@util/hooks/useData";
 import SearchBar from "@components/Accounts/SearchBar";
 import { FaSearch, FaPlus } from "react-icons/fa";
+import { AnimatePresence } from "framer-motion";
+import EditUserModal from "@components/Accounts/EditUserModal";
+import axios from "axios";
 
 // TODO: Add accepted roles for every GetServersideProps page if applicable
 
 const ManageAccounts: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ accounts }) => {
+    const toast = useToast();
     const [current, setCurrent] = useState<"admin" | "user">("admin");
     const { user, loading } = useContext(AuthContext);
     const { data, isLoading, refetch } = useData("", accounts);
+
+    const {
+        isOpen: openEditUser,
+        onClose: closeEditUser,
+        onOpen: showEditUserModal,
+    } = useDisclosure();
+    const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
+
+    const deleteUser = (id: string) => {
+        axios
+            .post("/api/member/delete", { id })
+            .then(() => {
+                toast({
+                    title: "User Deleted Successfully.",
+                    status: "success",
+                });
+                refetch(`/api/member/${current}`);
+            })
+            .catch(() =>
+                toast({ title: "Error In Deleting User.", status: "error" })
+            );
+    };
+
+    const showEditModal = (id: string) => {
+        let targetUser = data?.find((u) => u.id === id);
+        setCurrentUser(targetUser);
+        showEditUserModal();
+    };
 
     return (
         <>
@@ -81,11 +115,7 @@ const ManageAccounts: PageWithLayout<
                                 Users
                             </TabButton>
                         </Flex>
-                        <Flex
-                            justify={"space-between"}
-                            align={"stretch"}
-                            w={"40%"}
-                        >
+                        <Flex justify={"flex-end"} align={"stretch"}>
                             <SearchBar />
                             <Tooltip
                                 label={"Search"}
@@ -101,27 +131,6 @@ const ManageAccounts: PageWithLayout<
                                     >
                                         <Box
                                             as={FaSearch}
-                                            m={"auto"}
-                                            cursor={"pointer"}
-                                            fontSize={"2xl"}
-                                        />
-                                    </Button>
-                                </Center>
-                            </Tooltip>
-                            <Tooltip
-                                label={"Create Admin"}
-                                placement={"bottom"}
-                                hasArrow
-                            >
-                                <Center px={"4"}>
-                                    <Button
-                                        w={"full"}
-                                        _hover={{ color: "secondary" }}
-                                        bg={"transparent"}
-                                        color={"neutralizerDark"}
-                                    >
-                                        <Box
-                                            as={FaPlus}
                                             m={"auto"}
                                             cursor={"pointer"}
                                             fontSize={"2xl"}
@@ -151,7 +160,16 @@ const ManageAccounts: PageWithLayout<
                             </Thead>
                             <Tbody>
                                 {data?.map((account) => (
-                                    <UserData user={account} key={account.id} />
+                                    <UserData
+                                        user={account}
+                                        key={account.id}
+                                        onDelete={(id: string) =>
+                                            deleteUser(id)
+                                        }
+                                        showEdit={(id: string) =>
+                                            showEditModal(id)
+                                        }
+                                    />
                                 ))}
                                 {isLoading && (
                                     <Tr>
@@ -174,6 +192,23 @@ const ManageAccounts: PageWithLayout<
                     <CircularProgress isIndeterminate color={"secondary"} />
                 </Center>
             )}
+            <AnimatePresence>
+                {openEditUser && currentUser && (
+                    <EditUserModal
+                        user={currentUser}
+                        accountTypes={[
+                            AccountType.MS_ADMIN,
+                            AccountType.MS_USER,
+                        ]}
+                        onClose={() => {
+                            setCurrentUser(undefined);
+                            closeEditUser();
+                            refetch(`/api/member/${current}`);
+                        }}
+                        hasSchoolId
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 };

@@ -18,9 +18,10 @@ import axios, { AxiosError } from "axios";
 
 const EditUserModal: FC<{
     user: User;
+    hasSchoolId?: boolean;
     accountTypes: AccountType[];
     onClose: Function;
-}> = ({ user, accountTypes, onClose }) => {
+}> = ({ user, hasSchoolId = false, accountTypes, onClose }) => {
     const toast = useToast();
     const [firstName, setFirstName] = useState<string>(user.firstName);
     const [lastName, setLastName] = useState<string>(user.lastName);
@@ -32,6 +33,7 @@ const EditUserModal: FC<{
     const [mobileNumber, setMobileNumber] = useState<string>(
         user.mobileNumber || ""
     );
+    const [schoolId, setSchoolId] = useState<string>("");
     const [accountType, setAccountType] = useState<AccountType>(
         user.accountType
     );
@@ -53,6 +55,7 @@ const EditUserModal: FC<{
                 email,
                 mobileNumber,
                 accountType,
+                schoolId: hasSchoolId ? schoolId : "",
             })
             .then((res) => {
                 toast({
@@ -142,6 +145,14 @@ const EditUserModal: FC<{
                             placeholder={"Contact Number"}
                             disabled={loading}
                         />
+                        {hasSchoolId && (
+                            <CoreInput
+                                value={schoolId}
+                                setValue={setSchoolId}
+                                placeholder={"School ID"}
+                                disabled={loading}
+                            />
+                        )}
                         <CoreInput
                             value={accountType}
                             setValue={setAccountType}
