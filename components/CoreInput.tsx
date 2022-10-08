@@ -7,7 +7,7 @@ const CoreInput: FC<{
     type?: string;
     placeholder?: string;
     value?: any;
-    values?: { [key: string]: string[] };
+    values?: { name: string; value: string }[];
     width?: string;
     bg?: string;
     placeholderColor?: string;
@@ -57,40 +57,82 @@ const CoreInput: FC<{
                 {placeholder}
                 {required && "*"}
             </Text>
-            <Input
-                type={type}
-                {...{ name, value, required, disabled, pattern }}
-                borderColor={value ? "secondary" : "neutralizerDark"}
-                focusBorderColor={"secondary"}
-                onFocus={() => {
-                    onFocus();
-                    setFocused(true);
-                }}
-                onBlur={() => {
-                    onBlur();
-                    setFocused(false);
-                }}
-                onChange={(e) => setValue(e.target.value)}
-                _before={{ content: `""`, position: "absolute" }}
-                color={value ? "neutralizerDark" : "transparent"}
-                _focus={{
-                    color: "neutralizerDark",
-                    _before: {
-                        content: `""`,
+            {type === "select" ? (
+                <Select
+                    {...{ name, value, required, disabled, pattern }}
+                    borderColor={value ? "secondary" : "neutralizerDark"}
+                    focusBorderColor={"secondary"}
+                    onFocus={() => {
+                        onFocus();
+                        setFocused(true);
+                    }}
+                    onBlur={() => {
+                        onBlur();
+                        setFocused(false);
+                    }}
+                    onChange={(e) => setValue(e.target.value)}
+                    _before={{ content: `""`, position: "absolute" }}
+                    color={value ? "neutralizerDark" : "transparent"}
+                    _focus={{
                         color: "neutralizerDark",
-                    },
-                }}
-                _valid={{
-                    _before: {
-                        content: `""`,
+                        _before: {
+                            content: `""`,
+                            color: "neutralizerDark",
+                        },
+                    }}
+                    _valid={{
+                        _before: {
+                            content: `""`,
+                            color: "neutralizerDark",
+                        },
+                    }}
+                    _hover={{
+                        borderColor: "neutralizerDark",
+                    }}
+                >
+                    {values &&
+                        values.map(({ name, value }) => (
+                            <option value={value} key={name}>
+                                {name}
+                            </option>
+                        ))}
+                </Select>
+            ) : (
+                <Input
+                    type={type}
+                    {...{ name, value, required, disabled, pattern }}
+                    borderColor={value ? "secondary" : "neutralizerDark"}
+                    focusBorderColor={"secondary"}
+                    onFocus={() => {
+                        onFocus();
+                        setFocused(true);
+                    }}
+                    onBlur={() => {
+                        onBlur();
+                        setFocused(false);
+                    }}
+                    onChange={(e) => setValue(e.target.value)}
+                    _before={{ content: `""`, position: "absolute" }}
+                    color={value ? "neutralizerDark" : "transparent"}
+                    _focus={{
                         color: "neutralizerDark",
-                    },
-                }}
-                _hover={{
-                    borderColor: "neutralizerDark",
-                }}
-                autoComplete={autoComplete}
-            />
+                        _before: {
+                            content: `""`,
+                            color: "neutralizerDark",
+                        },
+                    }}
+                    _valid={{
+                        _before: {
+                            content: `""`,
+                            color: "neutralizerDark",
+                        },
+                    }}
+                    _hover={{
+                        borderColor: "neutralizerDark",
+                    }}
+                    autoComplete={autoComplete}
+                />
+            )}
         </Box>
     );
 };

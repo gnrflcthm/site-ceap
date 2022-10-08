@@ -29,7 +29,7 @@ const TopPanel: FC<{
     return (
         <Flex
             bg={"secondary"}
-            p={{ base: "2", lg: "4" }}
+            p={{ base: "4", lg: "4" }}
             position={"sticky"}
             top={"0"}
             justify={"space-between"}
@@ -48,6 +48,7 @@ const TopPanel: FC<{
                     p={"0"}
                     color={"neutralizerLight"}
                     onClick={() => onActionClick()}
+                    m={"0"}
                 >
                     <Center
                         as={motion.div}

@@ -1,26 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 export const useData = <T>(url: string, initialData?: T) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [data, setData] = useState<T | undefined>(initialData);
+    const [data, setData] = useState<T | undefined>(undefined);
     const [error, setError] = useState<any | undefined>(undefined);
+    const firstLoading = useRef<boolean>(true);
 
     useEffect(() => {
-        if (!data) {
+        if (initialData) {
+            setData(initialData);
+        } else {
             fetch();
         }
     }, []);
 
-    const fetch = () => {
+    const fetch = (u?: string) => {
         setIsLoading(true);
-        return axios
-            .post<T>(url, {})
+        setData(undefined);
+        axios
+            .post<T>(u || url, {})
             .then(({ data }) => {
                 setData(data);
+                setIsLoading(false);
             })
-            .catch((err) => setError(err))
-            .finally(() => setIsLoading(false));
+            .catch((err) => {
+                setError(err);
+                setIsLoading(false);
+            });
     };
 
     return { data, isLoading, error, refetch: fetch };

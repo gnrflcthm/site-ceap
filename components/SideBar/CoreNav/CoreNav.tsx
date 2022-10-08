@@ -2,7 +2,13 @@ import { FC, useMemo, useContext, useState, useEffect } from "react";
 
 import { Center, VStack, Text, CircularProgress, Flex } from "@chakra-ui/react";
 
-import { FaBook, FaUser, FaSignOutAlt, FaHistory, FaUserCog } from "react-icons/fa";
+import {
+    FaBook,
+    FaUser,
+    FaSignOutAlt,
+    FaHistory,
+    FaUserCog,
+} from "react-icons/fa";
 
 import { BsCloudUpload } from "react-icons/bs";
 import { HiUsers } from "react-icons/hi";
@@ -15,6 +21,8 @@ import "../../../firebase/client";
 import { AuthContext } from "@context/AuthContext";
 import { CollapseContext } from "pages/_app";
 import { getAccountType } from "@util/functions";
+import Routes from "./Routes";
+import { AccountType } from "@prisma/client";
 
 const CoreNav: FC<{
     collapsed?: boolean;
@@ -50,12 +58,7 @@ const CoreNav: FC<{
             overflow={"auto"}
             py={{ base: "0", lg: "10" }}
         >
-            {loggingOut && !collapsed ? (
-                <Center flexDir={"column"} h={"full"}>
-                    <Text mb={"4"}>Signing Out</Text>
-                    <CircularProgress isIndeterminate color={"secondary"} />
-                </Center>
-            ) : (
+            {!loggingOut && user ? (
                 <>
                     <CurrentUser
                         displayName={user?.displayName}
@@ -73,30 +76,7 @@ const CoreNav: FC<{
                                 href={"/"}
                                 icon={FaBook}
                             />
-                            {isAdministrative && (
-                                <>
-                                    <CoreNavItem
-                                        name={"Upload Requests"}
-                                        href={"/uploads"}
-                                        icon={BsCloudUpload}
-                                    />
-                                    <CoreNavItem
-                                        name={"Audit Logs"}
-                                        href={"/logs"}
-                                        icon={FaHistory}
-                                    />
-                                    <CoreNavItem
-                                        name={"Registrations"}
-                                        href={"/user_registrations"}
-                                        icon={HiUsers}
-                                    />
-                                    <CoreNavItem
-                                        name={"Manage Accounts"}
-                                        href={"/manage_accounts"}
-                                        icon={FaUserCog}
-                                    />
-                                </>
-                            )}
+                            <Routes role={user.role as AccountType} />
                             <CoreNavItem
                                 name={"Profile"}
                                 href={"/profile"}
@@ -113,6 +93,18 @@ const CoreNav: FC<{
                             />
                         </Center>
                     </Flex>
+                </>
+            ) : (
+                <>
+                    {!collapsed && loggingOut &&  (
+                        <Center flexDir={"column"} h={"full"}>
+                            <Text mb={"4"}>Signing Out</Text>
+                            <CircularProgress
+                                isIndeterminate
+                                color={"secondary"}
+                            />
+                        </Center>
+                    )}
                 </>
             )}
         </Flex>

@@ -1,7 +1,7 @@
 import { AccountType, MemberSchool, User } from "@prisma/client";
 import { motion } from "framer-motion";
 import { FC, useContext, useState } from "react";
-import { FaEllipsisV } from "react-icons/fa";
+import { FaEllipsisV, FaPencilAlt, FaTrash } from "react-icons/fa";
 import {
     Text,
     Tr,
@@ -14,16 +14,18 @@ import {
     MenuButton,
     Box,
     MenuList,
-    MenuGroup,
     MenuItem,
 } from "@chakra-ui/react";
 import { AuthContext } from "@context/AuthContext";
 import { getAccountType } from "@util/functions";
 
-const UserData: FC<{ user: User & { memberSchool?: MemberSchool } }> = ({
-    user,
-}) => {
+const UserData: FC<{
+    user: User & { memberSchool?: MemberSchool };
+    showEdit?: Function;
+    onDelete?: Function;
+}> = ({ user, showEdit = () => {}, onDelete = () => {} }) => {
     const {
+        id,
         firstName,
         middleName,
         lastName,
@@ -47,9 +49,6 @@ const UserData: FC<{ user: User & { memberSchool?: MemberSchool } }> = ({
                 bg: "blackAlpha.50",
             }}
         >
-            {/* <Td px={"4"} py={"2"} w={"5%"}>
-                <Text fontSize={textFontSize}></Text>
-            </Td> */}
             <Td px={"4"} py={"2"}>
                 <VStack spacing={"0"} align={"flex-start"}>
                     <Heading
@@ -102,17 +101,23 @@ const UserData: FC<{ user: User & { memberSchool?: MemberSchool } }> = ({
                             />
                         </MenuButton>
                         <MenuList>
-                            <MenuGroup title="Actions">
-                                <MenuItem
-                                    color={"green.500"}
-                                    onClick={() => {}}
-                                >
-                                    Accept
-                                </MenuItem>
-                                <MenuItem color={"red.500"} onClick={() => {}}>
-                                    Reject
-                                </MenuItem>
-                            </MenuGroup>
+                            <MenuItem onClick={() => showEdit(id)}>
+                                <Box as={FaPencilAlt} mr={"2"} />
+                                <Text fontSize={"md"} lineHeight={"0"}>
+                                    Edit
+                                </Text>
+                            </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    setProcessing(true);
+                                    onDelete(id);
+                                }}
+                            >
+                                <Box as={FaTrash} mr={"2"} />
+                                <Text fontSize={"md"} lineHeight={"0"}>
+                                    Delete
+                                </Text>
+                            </MenuItem>
                         </MenuList>
                     </Menu>
                 )}

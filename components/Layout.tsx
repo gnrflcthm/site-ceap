@@ -20,12 +20,13 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
             <MobileContext.Provider value={isMobile}>
                 <SideBar />
                 <Flex
+                    flex={"1"}
                     flexDir={"column"}
+                    w={"full"}
                     h={"100vh"}
                     maxH={"100vh"}
-                    flex={"1"}
-                    w={"full"}
                     overflow={"hidden"}
+                    align={"stretch"}
                 >
                     <TopBar />
                     {children}
