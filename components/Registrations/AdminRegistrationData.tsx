@@ -17,7 +17,7 @@ import {
     Center,
     CircularProgress,
 } from "@chakra-ui/react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import { FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -41,28 +41,48 @@ const AdminRegistrationData: FC<{
 
     const [processing, setProcessing] = useState<boolean>(false);
 
-    const accept = async () => {
+    const accept = () => {
         setProcessing(true);
-        let { status } = await axios.post("/api/admin/accept", { id });
-        console.log("Accept Status:", status);
-        toast({
-            title: "Success",
-            description: "Account has been created successfully.",
-            status: "success",
-        });
-        refresh();
+        axios
+            .post("/api/admin/accept", { id })
+            .then((res) => {
+                if (res.status === 200) {
+                    console.log("Accept Status:", res.status);
+                    toast({
+                        title: "Success",
+                        description: "Account has been created successfully.",
+                        status: "success",
+                    });
+                    refresh();
+                }
+                refresh();
+            })
+            .catch((err: AxiosError) => {
+                console.log(err);
+                setProcessing(false);
+            });
     };
 
-    const reject = async () => {
+    const reject = () => {
         setProcessing(true);
-        let { status } = await axios.post("/api/admin/reject", { id });
-        console.log("Reject Status:", status);
-        toast({
-            title: "Account Has Been Removed",
-            description: "The user will be notified shortly.",
-            status: "success",
-        });
-        refresh();
+        axios
+            .post("/api/admin/reject", { id })
+            .then((res) => {
+                if (res.status === 200) {
+                    console.log("Reject Status:", res.status);
+                    toast({
+                        title: "Account Has Been Removed",
+                        description: "The user will be notified shortly.",
+                        status: "success",
+                    });
+                    refresh();
+                }
+                refresh();
+            })
+            .catch((err: AxiosError) => {
+                console.log(err);
+                setProcessing(false);
+            });
     };
 
     const textFontSize = { base: "sm", md: "md" };
@@ -101,7 +121,11 @@ const AdminRegistrationData: FC<{
             <Td px={"4"} py={"2"}>
                 {processing ? (
                     <Center>
-                        <CircularProgress isIndeterminate color={"secondary"} size={8} />
+                        <CircularProgress
+                            isIndeterminate
+                            color={"secondary"}
+                            size={8}
+                        />
                     </Center>
                 ) : (
                     <Menu>

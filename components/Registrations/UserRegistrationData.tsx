@@ -17,7 +17,7 @@ import {
     CircularProgress,
     Center,
 } from "@chakra-ui/react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import { FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -41,28 +41,48 @@ const UserRegistrationData: FC<{
 
     const [processing, setProcessing] = useState<boolean>(false);
 
-    const accept = async () => {
-        setProcessing(true)
-        let { status } = await axios.post("/api/member/accept", { id });
-        console.log("Accept Status:", status);
-        toast({
-            title: "Success",
-            description: "Account has been created successfully.",
-            status: "success",
-        });
-        refresh();
+    const accept = () => {
+        setProcessing(true);
+        axios
+            .post("/api/member/accept", { id })
+            .then((res) => {
+                if (res.status === 200) {
+                    console.log("Accept Status:", res.status);
+                    toast({
+                        title: "Success",
+                        description: "Account has been created successfully.",
+                        status: "success",
+                    });
+                    refresh();
+                }
+                refresh();
+            })
+            .catch((err: AxiosError) => {
+                console.log(err);
+                setProcessing(false);
+            });
     };
 
-    const reject = async () => {
-        setProcessing(true)
-        let { status } = await axios.post("/api/member/reject", { id });
-        console.log("Reject Status:", status);
-        toast({
-            title: "Account Has Been Removed",
-            description: "The user will be notified shortly.",
-            status: "success",
-        });
-        refresh();
+    const reject = () => {
+        setProcessing(true);
+        axios
+            .post("/api/member/reject", { id })
+            .then((res) => {
+                if (res.status === 200) {
+                    console.log("Reject Status:", res.status);
+                    toast({
+                        title: "Account Has Been Removed",
+                        description: "The user will be notified shortly.",
+                        status: "success",
+                    });
+                    refresh();
+                }
+                refresh();
+            })
+            .catch((err: AxiosError) => {
+                console.log(err);
+                setProcessing(false);
+            });
     };
 
     const textFontSize = { base: "sm", md: "md" };

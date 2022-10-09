@@ -54,7 +54,6 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(async (req, res
             memberSchoolId,
             mobileNumber,
             middleName,
-            birthday,
         } = user;
 
         const newUser = await prisma.user.create({
@@ -81,15 +80,12 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(async (req, res
 
         await sendAcceptEmail(newUser, tempPassword);
 
-        console.log("User Has Been Accepted.");
-
         res.statusMessage = "User Created Successfully.";
         res.status(200);
-        res.end();
     } catch (error) {
         console.log(error);
         res.statusMessage = "Error in adding user.";
         res.status(500);
-        res.end();
     }
+    res.end();
 });
