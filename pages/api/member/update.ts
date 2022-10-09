@@ -11,12 +11,7 @@ export default authenticatedHandler([
 ]).patch(async (req, res) => {
     const {
         id,
-        firstName,
-        lastName,
-        middleName,
-        displayName,
         email,
-        mobileNumber,
         accountType,
     } = req.body;
 
@@ -26,8 +21,6 @@ export default authenticatedHandler([
     const registrationExists = await prisma.userRegistration.findFirst({
         where: { email },
     });
-
-    console.log("Current Response is ", res.statusMessage);
 
     try {
         if ((userExists && userExists.id !== id) || registrationExists) {
@@ -41,17 +34,12 @@ export default authenticatedHandler([
             let updated: string[] = [];
             Object.keys(req.body).map((key) => {
                 if (req.body[key] !== undefined) {
-                    console.log(
-                        req.body[key].trim() === user[key as keyof User]
-                            ? `${key} is the same`
-                            : `${key} has changed`
-                    );
                     if (req.body[key].trim() !== user[key as keyof User]) {
                         updated.push(key);
                     }
                 }
             });
-            console.table(updated);
+
             // Firebase Updates
             let newData: { [key: string]: string } = {};
             for (let key of updated) {
