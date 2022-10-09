@@ -34,6 +34,17 @@ const RegistrationForm: FC<{
         e.preventDefault();
         setLoading(true);
 
+        console.table({
+            firstName,
+            lastName,
+            middleName,
+            birthday,
+            organizationId: organization,
+            email,
+            mobile,
+            schoolId,
+        });
+
         axios
             .post("/api/user/register", {
                 firstName,

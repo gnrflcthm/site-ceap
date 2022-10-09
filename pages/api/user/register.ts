@@ -27,6 +27,8 @@ export default handler().post(async (req, res) => {
         schoolId,
     } = req.body as RegistrationData;
 
+    console.table(req.body);
+
     try {
         // Validating if a user or user registration exists.
         let existingRegistration = await prisma.userRegistration.findMany({

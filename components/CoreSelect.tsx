@@ -196,21 +196,21 @@ const CoreSelect: FC<{
                                         {/* @ts-ignore */}
                                         {queriedData[key].map(
                                             /* @ts-ignore */
-                                            ({ name, _id }) => (
+                                            ({ name, id }) => (
                                                 <CoreOption
                                                     label={name}
-                                                    value={_id}
+                                                    value={id}
                                                     select={() => {
-                                                        setValue(_id);
+                                                        setValue(id);
                                                         setSelected(name);
                                                         setQuery(name);
                                                         console.log(
-                                                            `${name}: ${_id}`
+                                                            `${name}: ${id}`
                                                         );
                                                         setFocused(false);
                                                         setClickWithin(false);
                                                     }}
-                                                    key={_id}
+                                                    key={id}
                                                 />
                                             )
                                         )}
