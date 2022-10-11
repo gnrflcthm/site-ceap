@@ -45,7 +45,7 @@ const AdminRegistrationForm: FC<{
     return (
         <VStack as={"form"} onSubmit={register} w={"full"} spacing={"8"}>
             <Heading fontSize={"2xl"} w={"full"} textAlign={"center"}>
-                Admin Registration
+                Member School Admin Registration
             </Heading>
             <CoreInput
                 name="lastName"

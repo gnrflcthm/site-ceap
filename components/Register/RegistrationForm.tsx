@@ -68,7 +68,7 @@ const RegistrationForm: FC<{
     return (
         <>
             <Heading fontSize={"3xl"} textAlign={"center"} mb={"4"}>
-                Registration
+                Member School User Registration
             </Heading>
             <VStack
                 spacing={"8"}
@@ -115,7 +115,7 @@ const RegistrationForm: FC<{
                     setValue={setSchoolId}
                 />
                 <CoreInput
-                    placeholder={"Mobile Number."}
+                    placeholder={"Mobile Number (+639xxxxxxxxx)"}
                     value={mobile}
                     setValue={setMobile}
                     type={"tel"}
@@ -162,7 +162,7 @@ const RegistrationForm: FC<{
                         textDecor={"underline"}
                         cursor={"pointer"}
                     >
-                        Register As An Administrator Of Your School
+                        Register as an Administrator of your school
                     </Text>
                 </Link>
                 .
