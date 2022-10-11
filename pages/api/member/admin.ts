@@ -18,6 +18,11 @@ export default authenticatedHandler().post(async (req, res) => {
                         where: {
                             accountType: AccountType.MS_ADMIN,
                             memberSchoolId: admin.memberSchoolId,
+                            AND: {
+                                id: {
+                                    not: admin.id
+                                }
+                            },
                         },
                     });
                     break;

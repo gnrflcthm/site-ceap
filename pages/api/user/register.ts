@@ -31,52 +31,40 @@ export default handler().post(async (req, res) => {
 
     try {
         // Validating if a user or user registration exists.
-        let existingRegistration = await prisma.userRegistration.findMany({
-            where: {
-                OR: [
-                    {
-                        email,
-                    },
-                    {
-                        AND: [
-                            {
-                                memberSchoolId: organizationId,
-                            },
-                            {
-                                schoolId,
-                            },
-                        ],
-                    },
-                ],
-            },
-        });
+        if (schoolId?.trim() !== "") {
 
-        let existingUser = await prisma.user.findMany({
-            where: {
-                OR: [
-                    {
-                        email,
-                    },
-                    {
-                        AND: [
-                            {
-                                memberSchoolId: organizationId,
-                            },
-                            {
-                                schoolId,
-                            },
-                        ],
-                    },
-                ],
-            },
-        });
+            const existingRegistration = await prisma.userRegistration.findFirst({
+                where: {
+                    email,
+                    OR: {
+                        memberSchoolId: organizationId,
+                        AND: {
+                            schoolId,
+                        }
+                    }
+                }
+            });
 
-        if (schoolId?.trim() !== "" && (existingUser.length > 0 || existingRegistration.length > 0)) {
-            res.statusMessage =
+            const existingUser = await prisma.user.findFirst({
+                where: {
+                    email,
+                    OR: {
+                        memberSchoolId: organizationId,
+                        AND: {
+                            schoolId
+                        }
+                    }
+                }
+            })
+
+            
+            if (existingUser || existingRegistration) {
+                res.statusMessage =
                 "A user already exists with the given email or school id.";
-            res.status(400);
-            res.end();
-            return;
+                res.status(400);
+                res.end();
+                return;
+            }
         }
 
         // Creates New User Registration Record
