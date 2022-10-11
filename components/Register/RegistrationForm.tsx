@@ -119,7 +119,7 @@ const RegistrationForm: FC<{
                     value={mobile}
                     setValue={setMobile}
                     type={"tel"}
-                    pattern={"^([+]d{2})?d{10}$"}
+                    pattern={"^\\+63\\d{10}$"}
                 />
                 <CoreInput
                     placeholder={"Email Address"}
