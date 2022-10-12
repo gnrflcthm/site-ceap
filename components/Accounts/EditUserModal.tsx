@@ -144,6 +144,7 @@ const EditUserModal: FC<{
                             setValue={setMobileNumber}
                             placeholder={"Contact Number"}
                             disabled={loading}
+                            pattern={"^\\+63\\d{10}$"}
                         />
                         {hasSchoolId && (
                             <CoreInput
