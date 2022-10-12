@@ -50,7 +50,7 @@ const ManageAccounts: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ accounts }) => {
     const toast = useToast();
-    const [current, setCurrent] = useState<"admin" | "user">("admin");
+    const [current, setCurrent] = useState<"admin" | "users">("admin");
     const { user, loading } = useContext(AuthContext);
     const { data, isLoading, refetch } = useData("", accounts);
 
@@ -117,10 +117,10 @@ const ManageAccounts: PageWithLayout<
                             </TabButton>
                             <TabButton
                                 onClick={() => {
-                                    setCurrent("user");
+                                    setCurrent("users");
                                     refetch("/api/member/users");
                                 }}
-                                isActive={current === "user"}
+                                isActive={current === "users"}
                             >
                                 Users
                             </TabButton>
