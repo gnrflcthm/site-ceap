@@ -31,40 +31,43 @@ export default handler().post(async (req, res) => {
 
     try {
         // Validating if a user or user registration exists.
-        if (schoolId?.trim() !== "") {
-
-            const existingRegistration = await prisma.userRegistration.findFirst({
+        const existingRegistration =
+            await prisma.userRegistration.findFirst({
                 where: {
-                    email,
-                    OR: {
-                        memberSchoolId: organizationId,
-                        AND: {
-                            schoolId,
+                    OR: [
+                        {
+                            email: email.trim()
+                        },
+                        {
+                            memberSchoolId: organizationId,
+                            schoolId: schoolId?.trim()
                         }
-                    }
-                }
+                    ]
+                },
             });
 
-            const existingUser = await prisma.user.findFirst({
-                where: {
-                    email,
-                    OR: {
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    {
+                        email: email.trim()
+                    },
+                    {
                         memberSchoolId: organizationId,
-                        AND: {
-                            schoolId
-                        }
+                        schoolId: schoolId?.trim()
                     }
-                }
-            })
+                ]
+            },
+        });
 
-            
-            if (existingUser || existingRegistration) {
-                res.statusMessage =
+        console.log(existingUser, existingRegistration);
+
+        if (existingUser || existingRegistration) {
+            res.statusMessage =
                 "A user already exists with the given email or school id.";
-                res.status(400);
-                res.end();
-                return;
-            }
+            res.status(400);
+            res.end();
+            return;
         }
 
         // Creates New User Registration Record
