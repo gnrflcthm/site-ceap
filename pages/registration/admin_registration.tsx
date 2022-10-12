@@ -3,16 +3,19 @@ import {
     InferGetServerSidePropsType,
     NextPage,
 } from "next";
+import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
 import { Prisma } from "@prisma/client";
 import { prisma } from "prisma/db";
 import AdminRegistrationForm from "@components/Register/AdminRegistrationForm";
-import { Box, Center, Flex, Heading } from "@chakra-ui/react";
+import { Box, Center, Flex } from "@chakra-ui/react";
 
 import logo from "@assets/CORE_L.png";
 import { useState } from "react";
 import { SuccessPage } from "@components/Register";
+
+import { FaArrowLeft } from "react-icons/fa";
 
 const AdminRegistrationPage: NextPage<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -35,14 +38,41 @@ const AdminRegistrationPage: NextPage<
                     py={"4"}
                     w={{ base: "100%%", md: "50%", lg: "25%" }}
                 >
-                    <Center position={"relative"} p={"20"} w={"full"} mb={"4"}>
-                        <Image
-                            src={logo}
-                            layout={"fill"}
-                            objectFit={"contain"}
-                        />
-                    </Center>
-                    <Box w={"full"} px={"10"} py={'4'}>
+                    <Flex
+                        justify={"space-between"}
+                        align={"center"}
+                        w={"full"}
+                        px={"8"}
+                        py={"4"}
+                        // bg={"primary"}
+                    >
+                        <Link href={"/"} passHref>
+                            <Box
+                                as={"a"}
+                                color={"neutralizerDark"}
+                                _hover={{ color: "secondary" }}
+                            >
+                                <Box as={FaArrowLeft} color={"inherit"} />
+                            </Box>
+                        </Link>
+                        <Link href={"/"} passHref>
+                            <Box
+                                as={"a"}
+                                position={"relative"}
+                                objectFit={"contain"}
+                                h={"full"}
+                                w={"full"}
+                                p={"20"}
+                            >
+                                <Image
+                                    src={logo}
+                                    layout={"fill"}
+                                    objectFit={"contain"}
+                                />
+                            </Box>
+                        </Link>
+                    </Flex>
+                    <Box w={"full"} px={"10"} py={"4"}>
                         {state === "success" ? (
                             <SuccessPage />
                         ) : (
