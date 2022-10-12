@@ -1,6 +1,6 @@
 import { AccountType, MemberSchool, User } from "@prisma/client";
 import { motion } from "framer-motion";
-import { FC, useContext, useState } from "react";
+import { FC, useContext } from "react";
 import { FaEllipsisV, FaPencilAlt, FaTrash } from "react-icons/fa";
 import {
     Text,
@@ -8,8 +8,6 @@ import {
     Td,
     VStack,
     Heading,
-    Center,
-    CircularProgress,
     Menu,
     MenuButton,
     Box,
@@ -37,8 +35,6 @@ const UserData: FC<{
     } = user;
 
     const { user: admin } = useContext(AuthContext);
-
-    const [processing, setProcessing] = useState<boolean>(false);
 
     const textFontSize = { base: "sm", md: "md" };
     return (
@@ -83,44 +79,29 @@ const UserData: FC<{
             )}
 
             <Td px={"4"} py={"2"}>
-                {processing ? (
-                    <Center>
-                        <CircularProgress
-                            isIndeterminate
-                            color={"secondary"}
-                            size={8}
-                        />
-                    </Center>
-                ) : (
-                    <Menu>
-                        <MenuButton w={"full"}>
-                            <Box
-                                as={FaEllipsisV}
-                                m={"auto"}
-                                cursor={"pointer"}
-                            />
-                        </MenuButton>
-                        <MenuList>
-                            <MenuItem onClick={() => showEdit(id)}>
-                                <Box as={FaPencilAlt} mr={"2"} />
-                                <Text fontSize={"md"} lineHeight={"0"}>
-                                    Edit
-                                </Text>
-                            </MenuItem>
-                            <MenuItem
-                                onClick={() => {
-                                    setProcessing(true);
-                                    onDelete(id);
-                                }}
-                            >
-                                <Box as={FaTrash} mr={"2"} />
-                                <Text fontSize={"md"} lineHeight={"0"}>
-                                    Delete
-                                </Text>
-                            </MenuItem>
-                        </MenuList>
-                    </Menu>
-                )}
+                <Menu>
+                    <MenuButton w={"full"}>
+                        <Box as={FaEllipsisV} m={"auto"} cursor={"pointer"} />
+                    </MenuButton>
+                    <MenuList>
+                        <MenuItem onClick={() => showEdit(id)}>
+                            <Box as={FaPencilAlt} mr={"2"} />
+                            <Text fontSize={"md"} lineHeight={"0"}>
+                                Edit
+                            </Text>
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() => {
+                                onDelete(id);
+                            }}
+                        >
+                            <Box as={FaTrash} mr={"2"} />
+                            <Text fontSize={"md"} lineHeight={"0"}>
+                                Delete
+                            </Text>
+                        </MenuItem>
+                    </MenuList>
+                </Menu>
             </Td>
         </Tr>
     );

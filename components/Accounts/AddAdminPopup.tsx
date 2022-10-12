@@ -1,6 +1,14 @@
 import { FC, FormEvent, useState } from "react";
 
-import { Button, Flex, Heading, VStack, Text, Switch } from "@chakra-ui/react";
+import {
+    Button,
+    Flex,
+    Heading,
+    VStack,
+    Text,
+    Switch,
+    CircularProgress,
+} from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
 import axios, { AxiosError } from "axios";
 
@@ -56,26 +64,36 @@ const AddAdminPopup: FC<{ hideForm: Function }> = ({ hideForm }) => {
                         value={lastName}
                         setValue={setLastName}
                         placeholder={"Last Name"}
+                        disabled={loading}
+                        required
                     />
                     <CoreInput
                         value={firstName}
                         setValue={setFirstName}
                         placeholder={"First Name"}
+                        disabled={loading}
+                        required
                     />
                     <CoreInput
                         value={middleName}
                         setValue={setMiddleName}
                         placeholder={"Middle Name"}
+                        disabled={loading}
                     />
                     <CoreInput
                         value={email}
                         setValue={setEmail}
                         placeholder={"Email Address"}
+                        disabled={loading}
+                        pattern={"^[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}$"}
+                        required
                     />
                     <CoreInput
                         value={mobileNumber}
                         setValue={setMobileNumber}
                         placeholder={"Contact Number"}
+                        pattern={"^\\+63\\d{10}$"}
+                        disabled={loading}
                     />
                 </VStack>
                 <Flex
@@ -90,6 +108,8 @@ const AddAdminPopup: FC<{ hideForm: Function }> = ({ hideForm }) => {
                             setIsSuperAdmin((val) => !val);
                         }}
                         isChecked={isSuperAdmin}
+                        
+                        disabled={loading}
                     />
                     <Text fontSize={"lg"}>CEAP Super Admin</Text>
                 </Flex>
@@ -98,8 +118,16 @@ const AddAdminPopup: FC<{ hideForm: Function }> = ({ hideForm }) => {
                         {error}
                     </Text>
                 )}
-                <Button variant={"secondary"} rounded={"md"} type={"submit"}>
-                    Create Administrator
+                <Button variant={"secondary"} rounded={"md"} type={"submit"} disabled={loading}>
+                    {loading ? (
+                        <CircularProgress
+                            isIndeterminate
+                            size={8}
+                            color={"primary"}
+                        />
+                    ) : (
+                        "Create Administrator"
+                    )}
                 </Button>
             </form>
         </Flex>

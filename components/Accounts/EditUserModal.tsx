@@ -57,7 +57,7 @@ const EditUserModal: FC<{
                 accountType,
                 schoolId: hasSchoolId ? schoolId : "",
             })
-            .then((res) => {
+            .then(() => {
                 toast({
                     status: "success",
                     title: "User Updated Successfully",
@@ -123,7 +123,6 @@ const EditUserModal: FC<{
                             setValue={setMiddleName}
                             placeholder={"Middle Name"}
                             disabled={loading}
-                            required
                         />
                         <CoreInput
                             value={displayName}
