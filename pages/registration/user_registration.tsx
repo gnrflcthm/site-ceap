@@ -49,7 +49,13 @@ const UserRegistrationPage: NextPage<
             <Head>
                 <title>CORE: Registration</title>
             </Head>
-            <Flex bg={"neutralizerDark"} minH={"100vh"} w={"100vw"}>
+            <Flex
+                bg={"neutralizerDark"}
+                minH={"100vh"}
+                w={"100vw"}
+                overflow={"hidden"}
+                overflowY={"auto"}
+            >
                 <VStack
                     spacing={"0"}
                     bg={"neutralizerLight"}
