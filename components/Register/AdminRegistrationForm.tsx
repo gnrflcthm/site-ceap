@@ -68,7 +68,6 @@ const AdminRegistrationForm: FC<{
                 setValue={setMiddleName}
                 placeholder={"Middle Name"}
                 value={middleName}
-                required
                 disabled={loading}
             />
             <CoreInput
