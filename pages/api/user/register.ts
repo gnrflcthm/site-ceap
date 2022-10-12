@@ -31,7 +31,7 @@ export default handler().post(async (req, res) => {
 
     try {
         // Validating if a user or user registration exists.
-        const existingRegistration = await prisma.userRegistration.findFirst({
+        let existingRegistration = await prisma.userRegistration.findFirst({
             where: {
                 OR: [
                     {
@@ -40,15 +40,20 @@ export default handler().post(async (req, res) => {
                     {
                         memberSchoolId: organizationId,
                         schoolId: schoolId?.trim(),
+                        NOT: [
+                            {
+                                schoolId: ""
+                            },
+                            {
+                                schoolId: null
+                            }
+                        ],
                     },
                 ],
-                NOT: {
-                    schoolId: "",
-                },
             },
         });
 
-        const existingUser = await prisma.user.findFirst({
+        let existingUser = await prisma.user.findFirst({
             where: {
                 OR: [
                     {
@@ -57,20 +62,31 @@ export default handler().post(async (req, res) => {
                     {
                         memberSchoolId: organizationId,
                         schoolId: schoolId?.trim(),
+                        NOT: [
+                            {
+                                schoolId: ""
+                            },
+                            {
+                                schoolId: null
+                            }
+                        ],
                     },
                 ],
-                NOT: {
-                    schoolId: "",
-                },
             },
         });
 
-        const existingAdminRegistration =
+        let existingAdminRegistration =
             await prisma.mSAdminRegistration.findFirst({
                 where: {
                     email,
                 },
             });
+
+        console.log(
+            existingRegistration,
+            existingUser,
+            existingAdminRegistration
+        );
 
         if (existingUser || existingRegistration || existingAdminRegistration) {
             res.statusMessage =
