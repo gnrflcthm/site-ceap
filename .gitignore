@@ -1,6 +1,7 @@
 
 # Misc Files Files
 *.lock
+package-lock.json
 .env
 next-env.d.ts
 **/serviceAccount.json
