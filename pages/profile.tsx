@@ -35,7 +35,6 @@ export const ProfileModeContext = createContext<[boolean, Function]>([
 const Profile: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ userInfo }) => {
-
     const [updating, setUpdating] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -131,55 +130,35 @@ const Profile: PageWithLayout<
                     show={showUpdatePassword}
                     setShow={setShowUpdatePassword}
                 />
-                {updating && ( // Fix: Update design, panget tignan.
-                    <Flex
-                        position={"sticky"}
-                        bottom={"0"}
-                        bg={"secondary"}
-                        p={"4"}
-                        w={"full"}
-                        align={"center"}
-                        justify={"flex-end"}
-                    >
-                        {loading ? (
-                            <>
-                                <CircularProgress
-                                    isIndeterminate
-                                    size={8}
-                                    color={"primary"}
-                                    mr={"2"}
-                                />
-                                <Text
-                                    textTransform={"uppercase"}
-                                    fontWeight={"bold"}
-                                    color={"neutralizerLight"}
-                                >
-                                    Saving
-                                </Text>
-                            </>
-                        ) : (
-                            <>
-                                <Button
-                                    w={"fit-content"}
-                                    onClick={() => {
-                                        setDisplayName(userInfo?.displayName || "");
-                                        setUpdating(false);
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    w={"fit-content"}
-                                    variant={"primary"}
-                                    onClick={() => save()}
-                                >
-                                    Save
-                                </Button>
-                            </>
-                        )}
+            </VStack>
+            {updating && (
+                    <Flex justify={"flex-end"} align={"center"} p={"4"} bg={"primary"}>
+                        <Button
+                            w={"fit-content"}
+                            onClick={() => {
+                                setDisplayName(userInfo?.displayName || "");
+                                setUpdating(false);
+                            }}
+                            mr={"2"}
+                            bg={'red.500'}
+                            _hover={{
+                                bg: "red.300"
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            w={"fit-content"}
+                            bg={"green.500"}
+                            _hover={{
+                                bg: "green.300"
+                            }}
+                            onClick={() => save()}
+                        >
+                            Save Changes
+                        </Button>
                     </Flex>
                 )}
-            </VStack>
         </>
     );
 };
