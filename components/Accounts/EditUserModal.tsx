@@ -34,7 +34,7 @@ const EditUserModal: FC<{
     const [mobileNumber, setMobileNumber] = useState<string>(
         user.mobileNumber || ""
     );
-    const [schoolId, setSchoolId] = useState<string>("");
+    const [schoolId, setSchoolId] = useState<string>(user.schoolId || "");
     const [accountType, setAccountType] = useState<AccountType>(
         user.accountType
     );
