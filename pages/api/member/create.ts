@@ -34,7 +34,12 @@ export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
                     email,
                 },
             });
-            if (userExists || registrationExists) {
+            const msRegistrationExists = await prisma.mSAdminRegistration.findFirst({
+                where: {
+                    email,
+                },
+            });
+            if (userExists || registrationExists || msRegistrationExists) {
                 res.statusMessage = "Email already in use.";
                 res.status(401);
                 res.end();

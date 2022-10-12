@@ -60,9 +60,13 @@ export default handler().post(async (req, res) => {
             },
         });
 
-        console.log(existingUser, existingRegistration);
+        const existingAdminRegistration = await prisma.mSAdminRegistration.findFirst({
+            where: {
+                email
+            },
+        });
 
-        if (existingUser || existingRegistration) {
+        if (existingUser || existingRegistration || existingAdminRegistration) {
             res.statusMessage =
                 "A user already exists with the given email or school id.";
             res.status(400);

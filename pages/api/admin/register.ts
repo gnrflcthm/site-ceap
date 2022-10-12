@@ -21,7 +21,15 @@ export default handler().post(async (req, res) => {
             }
         );
 
-        if (existingUser || existingRegistration) {
+        const existingUserRegistration = await prisma.mSAdminRegistration.findFirst(
+            {
+                where: {
+                    email: registrationData.email,
+                },
+            }
+        );
+
+        if (existingUser || existingRegistration || existingUserRegistration) {
             res.status(400);
             res.statusMessage = "A user with the given email already exists.";
             res.end();
