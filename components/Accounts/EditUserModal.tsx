@@ -20,8 +20,9 @@ const EditUserModal: FC<{
     user: User;
     hasSchoolId?: boolean;
     accountTypes: AccountType[];
-    onClose: Function;
-}> = ({ user, hasSchoolId = false, accountTypes, onClose }) => {
+    onSave: Function;
+    onCancel: Function;
+}> = ({ user, hasSchoolId = false, accountTypes, onSave, onCancel }) => {
     const toast = useToast();
     const [firstName, setFirstName] = useState<string>(user.firstName);
     const [lastName, setLastName] = useState<string>(user.lastName);
@@ -63,7 +64,7 @@ const EditUserModal: FC<{
                     title: "User Updated Successfully",
                     duration: 2000,
                 });
-                onClose();
+                onSave();
             })
             .catch((err: AxiosError) => {
                 setError(err.response?.statusText || "Error in updating user.");
@@ -196,7 +197,7 @@ const EditUserModal: FC<{
                         variant={"outline"}
                         mt={"4"}
                         rounded={"md"}
-                        onClick={() => onClose()}
+                        onClick={() => onCancel()}
                         disabled={loading}
                     >
                         Cancel

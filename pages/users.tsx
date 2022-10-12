@@ -214,10 +214,14 @@ const ManageAccounts: PageWithLayout<
                             AccountType.MS_ADMIN,
                             AccountType.MS_USER,
                         ]}
-                        onClose={() => {
+                        onSave={() => {
                             setCurrentUser(undefined);
                             closeEditUser();
                             refetch(`/api/member/${current}`);
+                        }}
+                        onCancel={() => {
+                            setCurrentUser(undefined);
+                            closeEditUser();
                         }}
                         hasSchoolId
                     />
