@@ -5,6 +5,7 @@ import { getAuth } from "firebase-admin/auth";
 import { randomBytes } from "crypto";
 
 import { prisma } from "prisma/db";
+import { sendAcceptEmail } from "@util/email";
 
 export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
     async (req, res) => {
@@ -68,7 +69,10 @@ export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
                     mobileNumber,
                 },
             });
-            console.log(tempPassword);
+
+            // TODO: Send Email notification to new user about login credentials.
+            await sendAcceptEmail(newUser, tempPassword, true);
+
             res.status(200);
         } catch (err) {
             try {
