@@ -2,14 +2,17 @@ import { User } from "@prisma/client";
 import transport from "./transport";
 
 
-export async function sendAcceptEmail(receiver: User, initialPassword: string = "yes mommie") {
+export async function sendAcceptEmail(receiver: User, initialPassword: string = "random_password", sendCredentials: boolean = false) {
     const {
         firstName, lastName, email
     } = receiver;
+
+    const subject = sendCredentials ? "Account Creation" : "Account Registration";
+
     await transport.sendMail({
         from: process.env.SERVICE_EMAIL,
         to: email,
-        subject: "Account Registration",
+        subject: subject,
         html: `
             <p>Hi ${firstName} ${lastName},</p>
             <br />
