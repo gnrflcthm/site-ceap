@@ -48,6 +48,9 @@ export default authenticatedHandler([
                         req.body[key];
                 }
             }
+
+            if (req.body.mobileNumber.trim() === "") delete newData["phoneNumber"];
+
             await auth.updateUser(fbUser.uid, newData);
             if (updated.includes("accountType")) {
                 await auth.setCustomUserClaims(fbUser.uid, {
