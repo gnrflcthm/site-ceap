@@ -76,6 +76,7 @@ const AdminRegistrationForm: FC<{
                 placeholder={"Mobile Number"}
                 value={mobileNumber}
                 disabled={loading}
+                pattern={"^\\+63\\d{10}$"}
             />
             <CoreInput
                 name="email"
