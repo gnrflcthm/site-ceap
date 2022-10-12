@@ -1,5 +1,6 @@
 import { AccountType } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
+import { sendRejectEmail } from "@util/email";
 
 import { prisma } from "prisma/db";
 
@@ -10,11 +11,14 @@ export default authenticatedHandler([
     const { id } = req.body;
 
     try {
-        await prisma.mSAdminRegistration.delete({
+        const rejectedUser = await prisma.mSAdminRegistration.delete({
             where: {
                 id,
             },
         });
+
+        await sendRejectEmail(rejectedUser);
+        
         res.statusMessage = "Successfully Removed User.";
         res.status(200);
     } catch (err) {
