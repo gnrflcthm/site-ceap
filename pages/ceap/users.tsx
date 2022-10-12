@@ -277,7 +277,12 @@ const CEAPUsers: PageWithLayout<
                             },
                         }}
                     >
-                        <AddAdminPopup hideForm={() => closeCreateAdmin()} />
+                        <AddAdminPopup
+                            hideForm={() => {
+                                refetch("/api/member/ceap");
+                                closeCreateAdmin();
+                            }}
+                        />
                     </Box>
                 )}
                 {openEditUser && currentUser && (
@@ -309,6 +314,7 @@ const CEAPUsers: PageWithLayout<
                             hideDeleteConfirmation();
                         }}
                         onAccept={() => deleteUser()}
+                        willProcessOnAccept
                     />
                 )}
             </AnimatePresence>
