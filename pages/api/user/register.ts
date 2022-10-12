@@ -42,7 +42,10 @@ export default handler().post(async (req, res) => {
                             memberSchoolId: organizationId,
                             schoolId: schoolId?.trim()
                         }
-                    ]
+                    ],
+                    NOT: {
+                        schoolId: ""
+                    }
                 },
             });
 
@@ -56,7 +59,10 @@ export default handler().post(async (req, res) => {
                         memberSchoolId: organizationId,
                         schoolId: schoolId?.trim()
                     }
-                ]
+                ],
+                NOT: {
+                    schoolId: ""
+                }
             },
         });
 
@@ -65,6 +71,8 @@ export default handler().post(async (req, res) => {
                 email
             },
         });
+
+        console.log(existingUser, existingRegistration, existingAdminRegistration);
 
         if (existingUser || existingRegistration || existingAdminRegistration) {
             res.statusMessage =
