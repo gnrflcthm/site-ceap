@@ -1,7 +1,7 @@
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import { prisma } from "../../../prisma/db";
 import "../../../firebase/admin";
-import { getAuth } from "firebase-admin/auth";
+import { CreateRequest, getAuth } from "firebase-admin/auth";
 import { randomBytes } from "crypto";
 import { AccountType } from "@prisma/client";
 import { sendAcceptEmail } from "@util/email";
@@ -32,13 +32,17 @@ export default authenticatedHandler([
 
             const tempPassword = randomBytes(10).toString("hex");
 
-            let authResult = await auth.createUser({
+            const fbData: CreateRequest = {
                 email,
                 displayName: `${firstName} ${lastName}`,
                 password: tempPassword,
-                phoneNumber:
-                    mobileNumber?.trim() === "" ? undefined : mobileNumber,
-            });
+            };
+
+            if (mobileNumber) {
+                fbData["phoneNumber"] = mobileNumber;
+            }
+
+            let authResult = await auth.createUser(fbData);
 
             auth.setCustomUserClaims(authResult.uid, {
                 role: AccountType.MS_ADMIN,
