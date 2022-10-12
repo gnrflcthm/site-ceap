@@ -72,7 +72,6 @@ export default handler().post(async (req, res) => {
                 },
             });
 
-
         if (existingUser || existingRegistration || existingAdminRegistration) {
             res.statusMessage =
                 "A user already exists with the given email or school id.";
