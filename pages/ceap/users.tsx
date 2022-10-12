@@ -43,39 +43,51 @@ import AddAdminPopup from "@components/Accounts/AddAdminPopup";
 import { AnimatePresence, motion } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
 import axios from "axios";
+import ConfirmationModal from "@components/ConfirmationModal";
 
 const CEAPUsers: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ accounts }) => {
     const toast = useToast();
     const [current, setCurrent] = useState<"ceap" | "admin">("ceap");
+
     const {
         isOpen: openCreateAdmin,
         onToggle: toggleCreateAdmin,
         onClose: closeCreateAdmin,
     } = useDisclosure();
+
     const {
         isOpen: openEditUser,
         onClose: closeEditUser,
         onOpen: showEditUser,
     } = useDisclosure();
+
+    const {
+        isOpen: openDeleteConfirmation,
+        onClose: hideDeleteConfirmation,
+        onOpen: showDeleteConfirmation,
+    } = useDisclosure();
+
     const { user, loading } = useContext(AuthContext);
     const { data, isLoading, refetch } = useData("", accounts);
     const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
 
-    const deleteUser = (id: string) => {
+    const deleteUser = () => {
         axios
-            .post("/api/member/delete", { id })
+            .post("/api/member/delete", { id: currentUser?.id })
             .then(() => {
                 toast({
                     title: "User Deleted Successfully.",
                     status: "success",
                 });
                 refetch(`/api/member/${current}`);
+                hideDeleteConfirmation();
             })
-            .catch(() =>
-                toast({ title: "Error In Deleting User.", status: "error" })
-            );
+            .catch(() => {
+                toast({ title: "Error In Deleting User.", status: "error" });
+                hideDeleteConfirmation();
+            });
     };
 
     return (
@@ -201,9 +213,13 @@ const CEAPUsers: PageWithLayout<
                                     <UserData
                                         user={account}
                                         key={account.id}
-                                        onDelete={(id: string) =>
-                                            deleteUser(id)
-                                        }
+                                        onDelete={(id: string) => {
+                                            showDeleteConfirmation();
+                                            let currentUser = data.find(
+                                                (u) => u.id === id
+                                            );
+                                            setCurrentUser(currentUser);
+                                        }}
                                         showEdit={(id: string) => {
                                             let targetUser = data.find(
                                                 (u) => u.id === id
@@ -280,6 +296,19 @@ const CEAPUsers: PageWithLayout<
                             closeEditUser();
                             refetch(`/api/member/${current}`);
                         }}
+                    />
+                )}
+                {openDeleteConfirmation && currentUser && (
+                    <ConfirmationModal
+                        title={"Delete User"}
+                        prompt={`Are you sure you want to delete ${currentUser.displayName}'s account?`}
+                        rejectText={"Cancel"}
+                        acceptText={"Confirm"}
+                        onReject={() => {
+                            setCurrentUser(undefined);
+                            hideDeleteConfirmation();
+                        }}
+                        onAccept={() => deleteUser()}
                     />
                 )}
             </AnimatePresence>

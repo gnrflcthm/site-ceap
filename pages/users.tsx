@@ -42,6 +42,7 @@ import { FaSearch, FaPlus } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
 import axios from "axios";
+import ConfirmationModal from "@components/ConfirmationModal";
 
 // TODO: Add accepted roles for every GetServersideProps page if applicable
 
@@ -58,21 +59,30 @@ const ManageAccounts: PageWithLayout<
         onClose: closeEditUser,
         onOpen: showEditUserModal,
     } = useDisclosure();
+
+    const {
+        isOpen: openDeleteConfirmation,
+        onClose: hideDeleteConfirmation,
+        onOpen: showDeleteConfirmation,
+    } = useDisclosure();
+
     const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
 
-    const deleteUser = (id: string) => {
+    const deleteUser = () => {
         axios
-            .post("/api/member/delete", { id })
+            .post("/api/member/delete", { id: currentUser?.id })
             .then(() => {
                 toast({
                     title: "User Deleted Successfully.",
                     status: "success",
                 });
                 refetch(`/api/member/${current}`);
+                hideDeleteConfirmation();
             })
-            .catch(() =>
-                toast({ title: "Error In Deleting User.", status: "error" })
-            );
+            .catch(() => {
+                toast({ title: "Error In Deleting User.", status: "error" });
+                hideDeleteConfirmation();
+            });
     };
 
     const showEditModal = (id: string) => {
@@ -163,9 +173,13 @@ const ManageAccounts: PageWithLayout<
                                     <UserData
                                         user={account}
                                         key={account.id}
-                                        onDelete={(id: string) =>
-                                            deleteUser(id)
-                                        }
+                                        onDelete={(id: string) => {
+                                            showDeleteConfirmation();
+                                            let currentUser = data.find(
+                                                (u) => u.id === id
+                                            );
+                                            setCurrentUser(currentUser);
+                                        }}
                                         showEdit={(id: string) =>
                                             showEditModal(id)
                                         }
@@ -206,6 +220,20 @@ const ManageAccounts: PageWithLayout<
                             refetch(`/api/member/${current}`);
                         }}
                         hasSchoolId
+                    />
+                )}
+                {openDeleteConfirmation && currentUser && (
+                    <ConfirmationModal
+                        title={"Delete User"}
+                        prompt={`Are you sure you want to delete ${currentUser.displayName}'s account?`}
+                        rejectText={"Cancel"}
+                        acceptText={"Confirm"}
+                        onReject={() => {
+                            setCurrentUser(undefined);
+                            hideDeleteConfirmation();
+                        }}
+                        onAccept={() => deleteUser()}
+                        willProcessOnAccept
                     />
                 )}
             </AnimatePresence>
