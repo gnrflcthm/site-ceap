@@ -8,6 +8,7 @@ import {
     Text,
     Switch,
     CircularProgress,
+    useToast,
 } from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
 import axios, { AxiosError } from "axios";
@@ -20,33 +21,41 @@ const AddAdminPopup: FC<{ hideForm: Function }> = ({ hideForm }) => {
     const [mobileNumber, setMobileNumber] = useState<string>("");
     const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(false);
 
-    const [error, setError] = useState<string>("");
+    const [error, setError] = useState<string | undefined>("");
     const [loading, setLoading] = useState<boolean>(false);
 
-    const submit = async (e: FormEvent) => {
+    const toast = useToast();
+
+    const submit = (e: FormEvent) => {
         e.preventDefault();
 
         setLoading(true);
 
-        try {
-            let res = await axios.post("/api/member/create", {
+        axios
+            .post("/api/member/create", {
                 firstName,
                 lastName,
                 middleName,
                 email,
                 mobileNumber,
                 isSuperAdmin,
-            });
-
-            if (res.status === 200) {
-                console.log("User Created");
+            })
+            .then(() => {
                 hideForm();
-            }
-        } catch (err) {
-            console.log(err);
-        }
-
-        setLoading(false);
+                toast({
+                    status: "success",
+                    title: "Successfully Created Admin",
+                });
+                setLoading(false);
+            })
+            .catch((error: AxiosError) => {
+                setError(error.response?.statusText);
+                toast({
+                    status: "error",
+                    title: "Error In Creating Account",
+                });
+                setLoading(false);
+            });
     };
 
     return (
@@ -108,7 +117,6 @@ const AddAdminPopup: FC<{ hideForm: Function }> = ({ hideForm }) => {
                             setIsSuperAdmin((val) => !val);
                         }}
                         isChecked={isSuperAdmin}
-                        
                         disabled={loading}
                     />
                     <Text fontSize={"lg"}>CEAP Super Admin</Text>
@@ -118,7 +126,12 @@ const AddAdminPopup: FC<{ hideForm: Function }> = ({ hideForm }) => {
                         {error}
                     </Text>
                 )}
-                <Button variant={"secondary"} rounded={"md"} type={"submit"} disabled={loading}>
+                <Button
+                    variant={"secondary"}
+                    rounded={"md"}
+                    type={"submit"}
+                    disabled={loading}
+                >
                     {loading ? (
                         <CircularProgress
                             isIndeterminate
