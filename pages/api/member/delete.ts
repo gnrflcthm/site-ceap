@@ -15,6 +15,27 @@ export default authenticatedHandler([
     const auth = getAuth();
 
     try {
+        const findUser = await prisma.user.findFirst({
+            where: {
+                id,
+            },
+        });
+
+        if (findUser?.accountType === AccountType.MS_ADMIN) {
+            const adminCount = await prisma.user.count({
+                where: {
+                    memberSchoolId: findUser.memberSchoolId,
+                    accountType: AccountType.MS_ADMIN,
+                },
+            });
+
+            if (adminCount === 1) {
+                res.statusMessage = "Cannot delete the only admin."
+                res.status(400);
+                throw new Error("Cannot delete the only admin.")
+            }
+        }
+
         const deletedUser = await prisma.user.delete({
             where: { id },
         });
@@ -26,7 +47,7 @@ export default authenticatedHandler([
         res.status(200);
     } catch (err) {
         console.log(err);
-        res.statusMessage = "Error in deleting user.";
+        res.statusMessage = res.statusMessage || "Error in Deleteing User.";
         res.status(418);
     }
     res.end();
