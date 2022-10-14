@@ -42,7 +42,7 @@ import SearchBar from "@components/Accounts/SearchBar";
 import AddAdminPopup from "@components/Accounts/AddAdminPopup";
 import { AnimatePresence, motion } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@components/ConfirmationModal";
 
 const CEAPUsers: PageWithLayout<
@@ -84,8 +84,8 @@ const CEAPUsers: PageWithLayout<
                 refetch(`/api/member/${current}`);
                 hideDeleteConfirmation();
             })
-            .catch(() => {
-                toast({ title: "Error In Deleting User.", status: "error" });
+            .catch((err: AxiosError) => {
+                toast({ title: err.response?.statusText || "Error In Deleting User.", status: "error" });
                 hideDeleteConfirmation();
             });
     };
