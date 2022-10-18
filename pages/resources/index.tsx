@@ -66,8 +66,7 @@ const Resources: PageWithLayout = () => {
                     >
                         <Image src={coreNavLogo.src} w={"25%"} />
                         <Text color={"neutralizerLight"}>
-                            Browse thousands of resources contributed by the
-                            community.
+                            CORE is a repository of educational resources and institutional documents for CEAP member schools' teachers and administrators.
                         </Text>
                         <SearchBar {...{ query, setQuery }} />
                     </VStack>
