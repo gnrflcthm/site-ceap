@@ -1,5 +1,5 @@
 import { extname } from "path";
-import { FileType } from "@prisma/client";
+import { FileType, FileClassification } from "@prisma/client";
 
 function getFileType(filename: string): FileType {
     let extension = extname(filename);
@@ -19,4 +19,24 @@ function getFileType(filename: string): FileType {
     return fileType;
 }
 
-export { getFileType };
+const Classifications = {
+    "CHRISTIAN_FORMATION": "Christian Formation",
+    "BASIC_EDUCATION": "Basic Education",
+    "HIGHER_EDUCATION": "Higher Education",
+    "TECHINICAL_VOCATION_EDUCATION": "Techinical Vocation Education",
+    "ALS_SPED": "ALS & SPED",
+    "PROGRAMS": "Programs",
+    "NATIONAL_CONVENTION": "National Convention",
+    "ADVOCACY": "Advocacy",
+    "RESEARCH": "Research",
+    "GENERAL_CEAP": "General CEAP",
+    "COCOPEA_PEAC": "COCOPEA & PEAC",
+    "INTERNATIONAL_LINKAGES": "International Linkages",
+    "OTHERS": "Others", 
+}
+
+function getFileClassification(classification: FileClassification): string {
+    return Classifications[classification as keyof typeof Classifications];
+}
+
+export { getFileType, getFileClassification };
