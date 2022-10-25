@@ -73,7 +73,7 @@ const UserInfo: FC<{
                                     isEditable ? "primary" : "neutralizerDark"
                                 }
                             >
-                                {isHidden ? placeholder : value}
+                                {isHidden ? placeholder : value || "N/A"}
                             </Text>
                         </>
                     )}
