@@ -11,7 +11,7 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
             return (
                 <>
                     <CoreNavItem
-                        name={"Upload Requests"}
+                        name={"Uploads"}
                         href={"/uploads"}
                         icon={BsCloudUpload}
                     />
@@ -36,7 +36,7 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
             return (
                 <>
                     <CoreNavItem
-                        name={"Upload Requests"}
+                        name={"Uploads"}
                         href={"/uploads"}
                         icon={BsCloudUpload}
                     />
@@ -56,7 +56,7 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
             return (
                 <>
                     <CoreNavItem
-                        name={"Upload Requests"}
+                        name={"Upload"}
                         href={"/uploads"}
                         icon={BsCloudUpload}
                     />
