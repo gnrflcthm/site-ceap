@@ -4,7 +4,6 @@ import {
     SerializedPrimaryKey,
     Property,
     ManyToOne,
-    DateType,
     Unique,
 } from "@mikro-orm/core";
 import { ObjectId } from "@mikro-orm/mongodb";
@@ -28,7 +27,7 @@ export class UserRegistration {
     middleName?: string;
 
     @Property({ type: "date" })
-    birthday?: DateType;
+    birthday?: Date;
 
     @Property({ type: "string" })
     @Unique()
@@ -41,7 +40,7 @@ export class UserRegistration {
     schoolId?: string;
 
     @Property({ type: "datetime" })
-    registerdAt = new Date();
+    registeredAt = new Date();
 
     @ManyToOne({ entity: "MemberSchool" })
     memberSchool!: MemberSchool;

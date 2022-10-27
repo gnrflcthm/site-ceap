@@ -35,7 +35,7 @@ export class MSAdminRegistration {
     mobileNumber?: string;
 
     @Property({ type: "datetime" })
-    registerdAt = new Date();
+    registeredAt = new Date();
 
     @ManyToOne({ entity: "MemberSchool" })
     memberSchool!: MemberSchool;
