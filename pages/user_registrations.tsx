@@ -1,6 +1,8 @@
 import { useContext } from "react";
+
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 
 import { PageWithLayout } from "./_app";
 import Layout from "@components/Layout";
@@ -9,34 +11,42 @@ import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
 
-import { prisma } from "../prisma/db";
 import {
-    AccountType,
-    UserRegistration,
-    MSAdminRegistration,
-    MemberSchool,
-} from "@prisma/client";
-import {
-    Box,
-    Button,
     CircularProgress,
-    Flex,
-    Heading,
-    Text,
     TableContainer,
     Table,
     Tbody,
     Tr,
     Thead,
     Center,
+    Td,
 } from "@chakra-ui/react";
-import UserRegistrationData from "@components/Registrations/UserRegistrationData";
+
 import { FaSync } from "react-icons/fa";
+
 import TableHeader from "@components/TableHeader";
 import { AuthContext } from "@context/AuthContext";
-import AdminRegistrationData from "@components/Registrations/AdminRegistrationData";
-import { useData } from "@util/hooks/useData";
 import TopPanel from "@components/TopPanel";
+
+import { useData } from "@util/hooks/useData";
+
+import {
+    connectDB,
+    IUserRegistrationSchema,
+    IMSAdminRegistrationSchema,
+    User,
+    MSAdminRegistration,
+    UserRegistration,
+} from "@db/index";
+
+const AdminRegistrationData = dynamic(
+    () => import("@components/Registrations/AdminRegistrationData")
+);
+const UserRegistrationData = dynamic(
+    () => import("@components/Registrations/UserRegistrationData")
+);
+
+import { AccountType } from "@util/Enums";
 
 const UserRegistrations: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -44,7 +54,16 @@ const UserRegistrations: PageWithLayout<
     const { user, loading } = useContext(AuthContext);
 
     const { data, isLoading, error, refetch } = useData<
-        UserRegistration[] | MSAdminRegistration[]
+        | (IUserRegistrationSchema & {
+              id: string;
+              registeredAt: string;
+              birthday?: string;
+          })[]
+        | (IMSAdminRegistrationSchema & {
+              id: string;
+              registeredAt: string;
+              memberSchool: { id: string; name: string };
+          })[]
     >("/api/member/registrations", registrations);
 
     return (
@@ -52,7 +71,14 @@ const UserRegistrations: PageWithLayout<
             <Head>
                 <title>Registrations</title>
             </Head>
-            <TopPanel title={"User Registrations"} actionIcon={FaSync} actionText={"Refresh"} onActionClick={refetch} actionIsProcessing={isLoading} hasAction />
+            <TopPanel
+                title={"User Registrations"}
+                actionIcon={FaSync}
+                actionText={"Refresh"}
+                onActionClick={refetch}
+                actionIsProcessing={isLoading}
+                hasAction
+            />
             {loading || !user ? (
                 <Center w={"full"} h={"full"}>
                     <CircularProgress isIndeterminate />
@@ -83,32 +109,41 @@ const UserRegistrations: PageWithLayout<
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {/** @ts-ignore */}
-                            {data?.map((reg) => {
-                                switch (user.role) {
-                                    case AccountType.CEAP_SUPER_ADMIN:
-                                    case AccountType.CEAP_ADMIN:
-                                        return (
-                                            <AdminRegistrationData
-                                                data={
-                                                    reg as MSAdminRegistration & {
-                                                        memberSchool: MemberSchool;
-                                                    }
-                                                }
-                                                key={reg.id}
-                                                refresh={refetch}
+                            {isLoading ? (
+                                <Tr>
+                                    <Td colSpan={5}>
+                                        <Center>
+                                            <CircularProgress
+                                                isIndeterminate
+                                                color={"primary"}
+                                                size={8}
                                             />
-                                        );
-                                    case AccountType.MS_ADMIN:
-                                        return (
-                                            <UserRegistrationData
-                                                data={reg as UserRegistration}
-                                                key={reg.id}
-                                                refresh={refetch}
-                                            />
-                                        );
-                                }
-                            })}
+                                        </Center>
+                                    </Td>
+                                </Tr>
+                            ) : (
+                                data?.map((reg) => {
+                                    switch (user.role) {
+                                        case AccountType.CEAP_SUPER_ADMIN:
+                                        case AccountType.CEAP_ADMIN:
+                                            return (
+                                                <AdminRegistrationData
+                                                    data={reg}
+                                                    key={reg.id}
+                                                    refresh={refetch}
+                                                />
+                                            );
+                                        case AccountType.MS_ADMIN:
+                                            return (
+                                                <UserRegistrationData
+                                                    data={reg}
+                                                    key={reg.id}
+                                                    refresh={refetch}
+                                                />
+                                            );
+                                    }
+                                })
+                            )}
                         </Tbody>
                     </Table>
                 </TableContainer>
@@ -119,15 +154,21 @@ const UserRegistrations: PageWithLayout<
 
 export const getServerSideProps: GetServerSideProps<{
     registrations?:
-        | UserRegistration[]
-        | (MSAdminRegistration & { memberSchool: MemberSchool })[];
+        | (IUserRegistrationSchema & {
+              id: string;
+              registeredAt: string;
+              birthday?: string;
+          })[]
+        | (IMSAdminRegistrationSchema & {
+              id: string;
+              registeredAt: string;
+              memberSchool: { id: string; name: string };
+          })[];
 }> = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        const user = await prisma.user.findFirst({
-            where: {
-                authId: uid,
-            },
-        });
+        await connectDB();
+
+        const user = await User.findOne({ authId: uid });
 
         if (!user) {
             return {
@@ -137,42 +178,37 @@ export const getServerSideProps: GetServerSideProps<{
                 },
             };
         }
-        let registrations = undefined;
 
-        switch (user?.accountType) {
+        let registrations = [];
+
+        switch (user.accountType) {
             case AccountType.CEAP_ADMIN:
             case AccountType.CEAP_SUPER_ADMIN:
-                registrations = await prisma.mSAdminRegistration.findMany({
-                    include: {
-                        memberSchool: true,
-                    },
-                });
-
-                console.table(registrations);
+                registrations = await MSAdminRegistration.find()
+                    .populate("memberSchool", ["id", "name"])
+                    .exec();
 
                 return {
                     props: {
                         registrations: registrations.map((reg) => ({
-                            ...reg,
-                            registeredAt: reg.registeredAt?.toString(),
+                            ...reg.toJSON(),
+                            registeredAt: reg.registeredAt.toDateString(),
                         })),
                     },
                 };
             case AccountType.MS_ADMIN:
-                registrations = await prisma.userRegistration.findMany({
-                    where: {
-                        memberSchoolId: user?.memberSchoolId,
-                    },
-                });
-
-                console.table(registrations);
+                registrations = await UserRegistration.find({
+                    memberSchool: user?.memberSchool,
+                })
+                    .populate("memberSchool", ["id", "name"])
+                    .exec();
 
                 return {
                     props: {
                         registrations: registrations.map((reg) => ({
-                            ...reg,
-                            registeredAt: reg.registeredAt?.toString(),
-                            birthday: reg.birthday.toString(),
+                            ...reg.toJSON(),
+                            birthday: reg.birthday?.toDateString(),
+                            registeredAt: reg.registeredAt.toDateString(),
                         })),
                     },
                 };

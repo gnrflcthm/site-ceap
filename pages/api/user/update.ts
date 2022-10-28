@@ -1,19 +1,16 @@
-import { User } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { prisma } from "prisma/db";
 import { getAuth } from "firebase-admin/auth";
 
+import { connectDB, User } from "@db/index";
+
 export default authenticatedHandler().post(async (req, res) => {
-    const data: User = req.body;
+    const data = req.body;
     const uid = req.uid;
 
     try {
-        await prisma.user.update({
-            where: {
-                authId: uid,
-            },
-            data,
-        });
+        await connectDB();
+
+        await User.findOneAndUpdate({ authId: uid }, { ...data });
 
         if (data.displayName) {
             const auth = getAuth();

@@ -1,26 +1,22 @@
 import "../../../firebase/admin";
 import { getAuth } from "firebase-admin/auth";
-import { AccountType, User } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 
-import { prisma } from "prisma/db";
+import { connectDB, IUserSchema, User, UserRegistration } from "@db/index";
+import { AccountType } from "@util/Enums";
 
 export default authenticatedHandler([
     AccountType.CEAP_SUPER_ADMIN,
     AccountType.MS_ADMIN,
 ]).patch(async (req, res) => {
-    const {
-        id,
-        email,
-        accountType,
-    } = req.body;
+    const { id, email, accountType } = req.body;
 
     const auth = getAuth();
 
-    const userExists = await prisma.user.findFirst({ where: { email } });
-    const registrationExists = await prisma.userRegistration.findFirst({
-        where: { email },
-    });
+    await connectDB();
+
+    const userExists = await User.findOne({ email });
+    const registrationExists = await UserRegistration.findOne({ email });
 
     try {
         if ((userExists && userExists.id !== id) || registrationExists) {
@@ -28,13 +24,15 @@ export default authenticatedHandler([
             throw new Error("Email already in use.");
         }
 
-        const user = await prisma.user.findFirst({ where: { id } });
+        const user = await User.findById(id);
         if (user) {
             const fbUser = await auth.getUser(user.authId);
             let updated: string[] = [];
             Object.keys(req.body).map((key) => {
                 if (req.body[key] !== undefined) {
-                    if (req.body[key].trim() !== user[key as keyof User]) {
+                    if (
+                        req.body[key].trim() !== user[key as keyof IUserSchema]
+                    ) {
                         updated.push(key);
                     }
                 }
@@ -49,7 +47,8 @@ export default authenticatedHandler([
                 }
             }
 
-            if (req.body.mobileNumber.trim() === "") delete newData["phoneNumber"];
+            if (req.body.mobileNumber.trim() === "")
+                delete newData["phoneNumber"];
 
             await auth.updateUser(fbUser.uid, newData);
             if (updated.includes("accountType")) {
@@ -61,14 +60,7 @@ export default authenticatedHandler([
             // MongoDB Updates
             newData = { ...req.body };
             delete newData["id"];
-            await prisma.user.update({
-                where: {
-                    id,
-                },
-                data: {
-                    ...newData,
-                },
-            });
+            await User.findByIdAndUpdate(id, { ...newData });
         }
         res.status(200);
     } catch (err) {

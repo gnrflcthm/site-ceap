@@ -12,13 +12,9 @@ import {
     SimpleGrid,
     Flex,
     Button,
-    CircularProgress,
-    Text,
 } from "@chakra-ui/react";
 import Layout from "@components/Layout";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { MemberSchool, User } from "@prisma/client";
-import { prisma } from "../prisma/db";
 import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
@@ -26,6 +22,7 @@ import AuthGetServerSideProps, {
 import axios, { AxiosError } from "axios";
 import UpdatePasswordModal from "@components/Profile/UpdatePasswordModal";
 import TopPanel from "@components/TopPanel";
+import { connectDB, IUserSchema, User } from "@db/index";
 
 export const ProfileModeContext = createContext<[boolean, Function]>([
     false,
@@ -92,7 +89,7 @@ const Profile: PageWithLayout<
                             <UserInfo
                                 label={"Name"}
                                 value={`${userInfo?.firstName} ${
-                                    userInfo?.middleName[0]
+                                    userInfo?.middleName
                                         ? userInfo?.middleName[0] + "."
                                         : ""
                                 } ${userInfo?.lastName}`}
@@ -109,11 +106,13 @@ const Profile: PageWithLayout<
                             />
                             <UserInfo
                                 label={"Contact No."}
-                                value={`${userInfo?.mobileNumber}`}
+                                value={`${userInfo?.mobileNumber || "N/A"}`}
                             />
                             <UserInfo
                                 label={"Member School"}
-                                value={`${userInfo?.memberSchool?.name}`}
+                                value={`${
+                                    userInfo?.memberSchool?.name || "N/A"
+                                }`}
                             />
                             <UserInfo
                                 label={"Password"}
@@ -132,58 +131,88 @@ const Profile: PageWithLayout<
                 />
             </VStack>
             {updating && (
-                    <Flex justify={"flex-end"} align={"center"} p={"4"} bg={"primary"}>
-                        <Button
-                            w={"fit-content"}
-                            onClick={() => {
-                                setDisplayName(userInfo?.displayName || "");
-                                setUpdating(false);
-                            }}
-                            mr={"2"}
-                            bg={'red.500'}
-                            _hover={{
-                                bg: "red.300"
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            w={"fit-content"}
-                            bg={"green.500"}
-                            _hover={{
-                                bg: "green.300"
-                            }}
-                            onClick={() => save()}
-                        >
-                            Save Changes
-                        </Button>
-                    </Flex>
-                )}
+                <Flex
+                    justify={"flex-end"}
+                    align={"center"}
+                    p={"4"}
+                    bg={"primary"}
+                >
+                    <Button
+                        w={"fit-content"}
+                        onClick={() => {
+                            setDisplayName(userInfo?.displayName || "");
+                            setUpdating(false);
+                        }}
+                        mr={"2"}
+                        bg={"red.500"}
+                        _hover={{
+                            bg: "red.300",
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        w={"fit-content"}
+                        bg={"green.500"}
+                        _hover={{
+                            bg: "green.300",
+                        }}
+                        onClick={() => save()}
+                    >
+                        Save Changes
+                    </Button>
+                </Flex>
+            )}
         </>
     );
 };
 
 Profile.PageLayout = Layout;
 
+export interface IUserInfo {
+    id: string;
+    displayName?: string;
+    email: string;
+    mobileNumber?: string;
+    memberSchool?: {
+        name: string;
+    };
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+}
+
 export const getServerSideProps: GetServerSideProps<{
-    userInfo?:
-        | (User & { memberSchool: MemberSchool | undefined | null })
-        | undefined
-        | null;
+    userInfo?: IUserSchema & {
+        id: string;
+        memberSchool: { id: string; name: string };
+    };
 }> = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        const userInfo = await prisma.user.findFirst({
-            where: {
-                authId: uid,
-            },
-            include: {
-                memberSchool: true,
-            },
-        });
+        await connectDB();
+
+        const userInfo = await User.findOne(
+            { authId: uid },
+            {},
+            {
+                fields: [
+                    "id",
+                    "displayName",
+                    "email",
+                    "mobileNumber",
+                    "memberSchool.name",
+                    "firstName",
+                    "lastName",
+                    "middleName",
+                ],
+            }
+        )
+            .populate("memberSchool", ["id", "name"])
+            .exec();
 
         return {
             props: {
-                userInfo,
+                userInfo: userInfo?.toJSON(),
             },
         };
     }

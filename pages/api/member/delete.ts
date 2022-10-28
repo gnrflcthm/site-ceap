@@ -1,11 +1,10 @@
-import axios from "axios";
-import { AccountType } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 
 import "../../../firebase/admin";
 import { getAuth } from "firebase-admin/auth";
 
-import { prisma } from "prisma/db";
+import { connectDB, User } from "@db/index";
+import { AccountType } from "@util/Enums";
 
 export default authenticatedHandler([
     AccountType.CEAP_SUPER_ADMIN,
@@ -14,31 +13,25 @@ export default authenticatedHandler([
     const { id } = req.body;
     const auth = getAuth();
 
+    await connectDB();
+
     try {
-        const findUser = await prisma.user.findFirst({
-            where: {
-                id,
-            },
-        });
+        const findUser = await User.findById(id);
 
         if (findUser?.accountType === AccountType.MS_ADMIN) {
-            const adminCount = await prisma.user.count({
-                where: {
-                    memberSchoolId: findUser.memberSchoolId,
-                    accountType: AccountType.MS_ADMIN,
-                },
+            const adminCount = await User.count({
+                memberSchool: findUser.memberSchool,
+                accountType: AccountType.MS_ADMIN,
             });
 
             if (adminCount === 1) {
-                res.statusMessage = "Cannot delete the only admin."
+                res.statusMessage = "Cannot delete the only admin.";
                 res.status(400);
-                throw new Error("Cannot delete the only admin.")
+                throw new Error("Cannot delete the only admin.");
             }
         }
 
-        const deletedUser = await prisma.user.delete({
-            where: { id },
-        });
+        const deletedUser = await User.findByIdAndDelete(id);
 
         if (deletedUser) {
             await auth.deleteUser(deletedUser.authId);

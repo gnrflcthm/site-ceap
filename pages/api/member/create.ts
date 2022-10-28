@@ -1,11 +1,17 @@
-import { AccountType } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import "../../../firebase/admin";
 import { getAuth } from "firebase-admin/auth";
 import { randomBytes } from "crypto";
 
-import { prisma } from "prisma/db";
 import { sendAcceptEmail } from "@util/email";
+
+import {
+    connectDB,
+    MSAdminRegistration,
+    User,
+    UserRegistration,
+} from "@db/index";
+import { AccountType } from "@util/Enums";
 
 export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
     async (req, res) => {
@@ -18,26 +24,18 @@ export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
             isSuperAdmin,
         } = req.body;
 
-        console.table(req.body);
-
         const auth = getAuth();
         let createdId = "";
 
+        await connectDB();
+
         try {
-            const userExists = await prisma.user.findFirst({
-                where: {
-                    email,
-                },
+            const userExists = await User.findOne({ email });
+            const registrationExists = await UserRegistration.findOne({
+                email,
             });
-            const registrationExists = await prisma.userRegistration.findFirst({
-                where: {
-                    email,
-                },
-            });
-            const msRegistrationExists = await prisma.mSAdminRegistration.findFirst({
-                where: {
-                    email,
-                },
+            const msRegistrationExists = await MSAdminRegistration.findOne({
+                email,
             });
             if (userExists || registrationExists || msRegistrationExists) {
                 res.statusMessage = "Email already in use.";
@@ -62,20 +60,17 @@ export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
                 role,
             });
 
-            const newUser = await prisma.user.create({
-                data: {
-                    accountType: role,
-                    authId: uid,
-                    displayName,
-                    email,
-                    firstName,
-                    lastName,
-                    middleName,
-                    mobileNumber,
-                },
+            const newUser = await User.create({
+                accountType: role,
+                authId: uid,
+                displayName,
+                email,
+                firstName,
+                lastName,
+                middleName,
+                mobileNumber,
             });
 
-            // TODO: Send Email notification to new user about login credentials.
             await sendAcceptEmail(newUser, tempPassword, true);
 
             res.status(200);

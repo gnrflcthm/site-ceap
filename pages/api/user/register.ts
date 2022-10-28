@@ -1,13 +1,13 @@
 import handler from "@util/api/handler";
 
-import { prisma } from "../../../prisma/db";
+import { connectDB, User, UserRegistration, MSAdminRegistration, MemberSchool } from "@db/index";
 
 interface RegistrationData {
     firstName: string;
     lastName: string;
     middleName: string;
     birthday: string;
-    organizationId: string;
+    memberSchoolId: string;
     email: string;
     mobile: string;
     schoolId?: string;
@@ -23,70 +23,49 @@ export default handler().post(async (req, res) => {
         birthday,
         email,
         mobile,
-        organizationId,
+        memberSchoolId,
         schoolId,
     } = req.body as RegistrationData;
 
     console.table(req.body);
 
     try {
+        await connectDB();
+
         // Validating if a user or user registration exists.
-        let existingRegistration = await prisma.userRegistration.findFirst({
-            where: {
-                OR: [
-                    {
-                        email: email.trim(),
-                    },
-                    {
-                        memberSchoolId: organizationId,
-                        schoolId: schoolId?.trim(),
-                        NOT: [
-                            {
-                                schoolId: ""
-                            },
-                            {
-                                schoolId: null
-                            }
-                        ],
-                    },
-                ],
-            },
-        });
-
-        let existingUser = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    {
-                        email: email.trim(),
-                    },
-                    {
-                        memberSchoolId: organizationId,
-                        schoolId: schoolId?.trim(),
-                        NOT: [
-                            {
-                                schoolId: ""
-                            },
-                            {
-                                schoolId: null
-                            }
-                        ],
-                    },
-                ],
-            },
-        });
-
-        let existingAdminRegistration =
-            await prisma.mSAdminRegistration.findFirst({
-                where: {
-                    email,
+        let existingRegistration = await UserRegistration.findOne({
+            $or: [
+                {
+                    email: email.trim(),
                 },
-            });
+                {
+                    "memberSchool.id": memberSchoolId,
+                    schoolId: schoolId?.trim(),
+                    $not: {
+                        schoolId: ["", null, undefined],
+                    },
+                },
+            ],
+        });
 
-        console.log(
-            existingRegistration,
-            existingUser,
-            existingAdminRegistration
-        );
+        let existingUser = await User.findOne({
+            $or: [
+                {
+                    email: email.trim(),
+                },
+                {
+                    "memberSchool.id": memberSchoolId,
+                    schoolId: schoolId?.trim(),
+                    $not: {
+                        schoolId: ["", null, undefined],
+                    },
+                },
+            ],
+        });
+
+        let existingAdminRegistration = await MSAdminRegistration.findOne({
+            email: email.trim(),
+        });
 
         if (existingUser || existingRegistration || existingAdminRegistration) {
             res.statusMessage =
@@ -96,18 +75,19 @@ export default handler().post(async (req, res) => {
             return;
         }
 
+        const memberSchool = await MemberSchool.findById(memberSchoolId);
+
         // Creates New User Registration Record
-        await prisma.userRegistration.create({
-            data: {
-                firstName,
-                lastName,
-                middleName,
-                schoolId,
-                birthday: new Date(birthday),
-                email: email,
-                mobileNumber: mobile,
-                memberSchoolId: organizationId,
-            },
+        await UserRegistration.create({
+            firstName,
+            lastName,
+            middleName,
+            schoolId,
+            birthday: new Date(birthday),
+            email: email,
+            mobileNumber: mobile,
+            memberSchool,
+            registeredAt: new Date(),
         });
     } catch (e) {
         console.log("Unable to submit user registration", e);

@@ -13,11 +13,9 @@ import { Box, VStack, Flex } from "@chakra-ui/react";
 
 import logo from "@assets/CORE_L.png";
 
-import { Prisma } from "@prisma/client";
-import { prisma } from "prisma/db";
-
 import { RegistrationForm, SuccessPage } from "@components/Register";
 import { FaArrowLeft } from "react-icons/fa";
+import { connectDB, IMemberSchoolSchema, MemberSchool } from "@db/index";
 
 export type RegistrationState = "fillup" | "success";
 
@@ -112,21 +110,17 @@ const UserRegistrationPage: NextPage<
 };
 
 export const getServerSideProps: GetServerSideProps<{
-    memberSchools:
-        | (Prisma.PickArray<
-              Prisma.MemberSchoolGroupByOutputType,
-              ("region" | "id" | "name" | "address")[]
-          > & {})[];
+    memberSchools: IMemberSchoolSchema[];
 }> = async () => {
-    const memberSchools = await prisma.memberSchool.groupBy({
-        by: ["region", "name", "id", "address"],
-        where: {
-            isRegistered: true,
-        },
+    await connectDB();
+
+    const memberSchools = await MemberSchool.find({
+        isRegistered: true,
     });
+
     return {
         props: {
-            memberSchools,
+            memberSchools: memberSchools.map((school) => school.toJSON()),
         },
     };
 };

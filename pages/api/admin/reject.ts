@@ -1,8 +1,8 @@
-import { AccountType } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import { sendRejectEmail } from "@util/email";
+import { AccountType } from "@util/Enums";
 
-import { prisma } from "prisma/db";
+import { connectDB, MSAdminRegistration } from "@db/index";
 
 export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
@@ -11,14 +11,12 @@ export default authenticatedHandler([
     const { id } = req.body;
 
     try {
-        const rejectedUser = await prisma.mSAdminRegistration.delete({
-            where: {
-                id,
-            },
-        });
+        await connectDB();
 
-        await sendRejectEmail(rejectedUser);
-        
+        const rejectedUser = await MSAdminRegistration.findByIdAndDelete(id);
+
+        if (rejectedUser) await sendRejectEmail(rejectedUser);
+
         res.statusMessage = "Successfully Removed User.";
         res.status(200);
     } catch (err) {

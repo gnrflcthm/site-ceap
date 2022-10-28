@@ -1,7 +1,12 @@
-import { AccountType } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 
-import { prisma } from "../../../prisma/db";
+import {
+    connectDB,
+    MSAdminRegistration,
+    User,
+    UserRegistration,
+} from "@db/index";
+import { AccountType } from "@util/Enums";
 
 export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
@@ -10,11 +15,9 @@ export default authenticatedHandler([
 ]).post(async (req, res) => {
     const { uid } = req;
     try {
-        const admin = await prisma.user.findFirst({
-            where: {
-                authId: uid,
-            },
-        });
+        await connectDB();
+
+        const admin = await User.findOne({ authId: uid });
 
         let registrations;
 
@@ -22,17 +25,14 @@ export default authenticatedHandler([
             switch (admin.accountType) {
                 case AccountType.CEAP_ADMIN:
                 case AccountType.CEAP_SUPER_ADMIN:
-                    registrations = await prisma.mSAdminRegistration.findMany({
-                        include: {
-                            memberSchool: true,
-                        },
-                    });
+                    registrations = await MSAdminRegistration.find().populate(
+                        "memberSchool",
+                        ["id", "name"]
+                    );
                     break;
                 case AccountType.MS_ADMIN:
-                    registrations = await prisma.userRegistration.findMany({
-                        where: {
-                            memberSchoolId: admin?.memberSchoolId,
-                        },
+                    registrations = await UserRegistration.find({
+                        memberSchool: admin?.memberSchool,
                     });
                     break;
                 default:

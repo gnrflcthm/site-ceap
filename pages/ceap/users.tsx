@@ -6,8 +6,6 @@ import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
 
-import { AccountType, MemberSchool, User } from "@prisma/client";
-
 import {
     CircularProgress,
     Flex,
@@ -24,8 +22,6 @@ import {
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
-
-import { prisma } from "prisma/db";
 
 import { PageWithLayout } from "../_app";
 
@@ -44,6 +40,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
 import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@components/ConfirmationModal";
+import { connectDB, IUserSchema, User } from "@db/index";
+import { AccountType } from "@util/Enums";
 
 const CEAPUsers: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -71,7 +69,13 @@ const CEAPUsers: PageWithLayout<
 
     const { user, loading } = useContext(AuthContext);
     const { data, isLoading, refetch } = useData("", accounts);
-    const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
+    const [currentUser, setCurrentUser] = useState<
+        | (IUserSchema & {
+              id: string;
+              memberSchool?: { id: string; name: string };
+          })
+        | undefined
+    >(undefined);
 
     const deleteUser = () => {
         axios
@@ -85,7 +89,11 @@ const CEAPUsers: PageWithLayout<
                 hideDeleteConfirmation();
             })
             .catch((err: AxiosError) => {
-                toast({ title: err.response?.statusText || "Error In Deleting User.", status: "error" });
+                toast({
+                    title:
+                        err.response?.statusText || "Error In Deleting User.",
+                    status: "error",
+                });
                 hideDeleteConfirmation();
             });
     };
@@ -327,31 +335,43 @@ const CEAPUsers: PageWithLayout<
 };
 
 export const getServerSideProps: GetServerSideProps<{
-    accounts?: (User & { memberSchool?: MemberSchool })[];
+    accounts?: (IUserSchema & {
+        id: string;
+        memberSchool?: { id: string; name: string };
+    })[];
 }> = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        let accounts = undefined;
-        try {
-            accounts = await prisma.user.findMany({
-                where: {
-                    accountType: {
-                        in: [
-                            AccountType.CEAP_ADMIN,
-                            AccountType.CEAP_SUPER_ADMIN,
-                        ],
-                    },
-                    authId: {
-                        not: uid,
-                    },
+        await connectDB();
+
+        const accounts = await User.find(
+            {
+                accountType: [
+                    AccountType.CEAP_ADMIN,
+                    AccountType.CEAP_SUPER_ADMIN,
+                ],
+                authId: {
+                    $ne: uid,
                 },
-            });
-        } catch (err) {
-            console.log(err);
-        }
+            },
+            {},
+            {
+                fields: [
+                    "id",
+                    "firstName",
+                    "lastName",
+                    "middleName",
+                    "email",
+                    "mobileNumber",
+                    "accountType",
+                ],
+            }
+        )
+            .populate("memberSchool", ["id", "name"])
+            .exec();
 
         return {
             props: {
-                accounts,
+                accounts: accounts.map((account) => account.toJSON()),
             },
         };
     }

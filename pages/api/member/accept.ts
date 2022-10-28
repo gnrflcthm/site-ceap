@@ -2,10 +2,11 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 
 import { CreateRequest, getAuth } from "firebase-admin/auth";
 
-import { prisma } from "../../../prisma/db";
-import { AccountType } from "@prisma/client";
 import { sendAcceptEmail } from "@util/email";
 import { randomBytes } from "crypto";
+
+import { connectDB, User, UserRegistration } from "@db/index";
+import { AccountType } from "@util/Enums";
 
 export default authenticatedHandler([AccountType.MS_ADMIN]).post(
     async (req, res) => {
@@ -20,11 +21,9 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(
             return;
         }
 
-        const user = await prisma.userRegistration.findFirst({
-            where: {
-                id,
-            },
-        });
+        await connectDB();
+
+        const user = await UserRegistration.findById(id);
 
         if (!user) {
             res.statusMessage = "User Does Not Exist";
@@ -42,7 +41,7 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(
                 displayName: `${user?.firstName} ${user?.lastName}`,
                 email: user?.email,
                 password: tempPassword,
-            }
+            };
 
             if (user.mobileNumber) {
                 fbData["phoneNumber"] = user.mobileNumber;
@@ -58,32 +57,26 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(
                 firstName,
                 lastName,
                 email,
-                memberSchoolId,
+                memberSchool,
                 schoolId,
                 mobileNumber,
                 middleName,
             } = user;
 
-            const newUser = await prisma.user.create({
-                data: {
-                    email: email,
-                    firstName,
-                    lastName,
-                    middleName,
-                    schoolId,
-                    memberSchoolId,
-                    mobileNumber,
-                    authId: uid,
-                    accountType: AccountType.MS_USER,
-                    displayName: displayName || "",
-                },
+            const newUser = await User.create({
+                email: email,
+                firstName,
+                lastName,
+                middleName,
+                schoolId,
+                memberSchool,
+                mobileNumber,
+                authId: uid,
+                accountType: AccountType.MS_USER,
+                displayName: displayName || "",
             });
 
-            await prisma.userRegistration.delete({
-                where: {
-                    id,
-                },
-            });
+            await UserRegistration.findByIdAndDelete(id);
 
             await sendAcceptEmail(newUser, tempPassword);
 

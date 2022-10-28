@@ -6,8 +6,6 @@ import {
 import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
-import { Prisma } from "@prisma/client";
-import { prisma } from "prisma/db";
 import AdminRegistrationForm from "@components/Register/AdminRegistrationForm";
 import { Box, Center, Flex } from "@chakra-ui/react";
 
@@ -16,6 +14,7 @@ import { useState } from "react";
 import { SuccessPage } from "@components/Register";
 
 import { FaArrowLeft } from "react-icons/fa";
+import { connectDB, IMemberSchoolSchema, MemberSchool } from "@db/index";
 
 const AdminRegistrationPage: NextPage<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -89,24 +88,17 @@ const AdminRegistrationPage: NextPage<
 };
 
 export const getServerSideProps: GetServerSideProps<{
-    memberSchools:
-        | (Prisma.PickArray<
-              Prisma.MemberSchoolGroupByOutputType,
-              ("region" | "id" | "name" | "address")[]
-          > & {})[];
+    memberSchools: IMemberSchoolSchema[]
 }> = async () => {
-    const memberSchools = await prisma.memberSchool.groupBy({
-        by: ["region", "name", "id", "address"],
-        where: {
-            isRegistered: false,
-        },
-        orderBy: {
-            region: "asc",
-        },
-    });
+    await connectDB();
+
+    const memberSchools = await MemberSchool.find({
+        isRegistered: false,
+    }).exec();
+
     return {
         props: {
-            memberSchools,
+            memberSchools: memberSchools.map((school) => school.toJSON()),
         },
     };
 };

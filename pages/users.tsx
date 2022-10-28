@@ -5,8 +5,6 @@ import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
 
-import { AccountType, MemberSchool, User } from "@prisma/client";
-
 import {
     CircularProgress,
     Flex,
@@ -24,8 +22,6 @@ import {
     useToast,
 } from "@chakra-ui/react";
 
-import { prisma } from "prisma/db";
-
 import { PageWithLayout } from "./_app";
 
 import { AuthContext } from "@context/AuthContext";
@@ -38,11 +34,14 @@ import TabButton from "@components/Accounts/TabButton";
 
 import { useData } from "@util/hooks/useData";
 import SearchBar from "@components/Accounts/SearchBar";
-import { FaSearch, FaPlus } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
 import axios from "axios";
 import ConfirmationModal from "@components/ConfirmationModal";
+
+import { AccountType } from "@util/Enums";
+import { IUserSchema, connectDB, User } from "@db/index";
 
 // TODO: Add accepted roles for every GetServersideProps page if applicable
 
@@ -66,7 +65,13 @@ const ManageAccounts: PageWithLayout<
         onOpen: showDeleteConfirmation,
     } = useDisclosure();
 
-    const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
+    const [currentUser, setCurrentUser] = useState<
+        | (IUserSchema & {
+              id: string;
+              memberSchool?: { id: string; name: string };
+          })
+        | undefined
+    >(undefined);
 
     const deleteUser = () => {
         axios
@@ -246,45 +251,39 @@ const ManageAccounts: PageWithLayout<
 };
 
 export const getServerSideProps: GetServerSideProps<{
-    accounts?: (User & { memberSchool?: MemberSchool })[];
+    accounts?: (IUserSchema & {
+        id: string;
+        memberSchool: { id: string; name: string };
+    })[];
 }> = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        let accounts = undefined;
-        try {
-            const admin = await prisma.user.findFirst({
-                where: {
-                    authId: uid,
-                },
-            });
+        await connectDB();
 
-            if (!admin) {
-                return {
-                    redirect: {
-                        destination: "/",
-                        statusCode: 301,
-                        permanent: false,
-                    },
-                };
-            }
+        const admin = await User.findOne({ authId: uid });
 
-            accounts = await prisma.user.findMany({
-                where: {
-                    accountType: AccountType.MS_ADMIN,
-                    memberSchoolId: admin.memberSchoolId,
-                    AND: {
-                        authId: {
-                            not: uid,
-                        },
-                    },
+        if (!admin) {
+            return {
+                redirect: {
+                    destination: "/",
+                    statusCode: 301,
+                    permanent: false,
                 },
-            });
-        } catch (err) {
-            console.log(err);
+            };
         }
+
+        const accounts = await User.find({
+            accountType: AccountType.MS_ADMIN,
+            memberSchool: admin.memberSchool,
+            authId: {
+                $ne: uid,
+            },
+        })
+            .populate("memberSchool", ["id", "name"])
+            .exec();
 
         return {
             props: {
-                accounts,
+                accounts: accounts.map((account) => account.toJSON()),
             },
         };
     }

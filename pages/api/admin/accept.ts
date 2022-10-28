@@ -1,10 +1,12 @@
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { prisma } from "../../../prisma/db";
 import "../../../firebase/admin";
 import { CreateRequest, getAuth } from "firebase-admin/auth";
 import { randomBytes } from "crypto";
-import { AccountType } from "@prisma/client";
 import { sendAcceptEmail } from "@util/email";
+
+import { connectDB, MSAdminRegistration, User, MemberSchool } from "@db/index";
+
+import { AccountType } from "@util/Enums";
 
 export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
@@ -14,11 +16,12 @@ export default authenticatedHandler([
     const auth = getAuth();
 
     try {
-        let registration = await prisma.mSAdminRegistration.findFirst({
-            where: {
-                id,
-            },
-        });
+        await connectDB();
+
+        const registration = await MSAdminRegistration.findById(id).populate(
+            "memberSchool",
+            ["id"]
+        );
 
         if (registration) {
             let {
@@ -26,7 +29,7 @@ export default authenticatedHandler([
                 firstName,
                 lastName,
                 middleName,
-                memberSchoolId,
+                memberSchool,
                 mobileNumber,
             } = registration;
 
@@ -42,43 +45,31 @@ export default authenticatedHandler([
                 fbData["phoneNumber"] = mobileNumber;
             }
 
-            let authResult = await auth.createUser(fbData);
+            let { uid, displayName } = await auth.createUser(fbData);
 
-            auth.setCustomUserClaims(authResult.uid, {
+            auth.setCustomUserClaims(uid, {
                 role: AccountType.MS_ADMIN,
             });
 
-            const newAdmin = await prisma.user.create({
-                data: {
-                    authId: authResult.uid,
-                    firstName,
-                    lastName,
-                    middleName,
-                    email,
-                    mobileNumber,
-                    accountType: AccountType.MS_ADMIN,
-                    displayName: authResult.displayName,
-                    memberSchoolId,
-                },
-                include: {
-                    memberSchool: true,
-                },
+            const newAdmin = await User.create({
+                accountType: AccountType.MS_ADMIN,
+                authId: uid,
+                displayName,
+                email,
+                firstName,
+                lastName,
+                memberSchool,
+                middleName,
+                mobileNumber,
             });
 
-            await prisma.memberSchool.update({
-                where: {
-                    id: newAdmin.memberSchool?.id,
-                },
-                data: {
+            await MemberSchool.findByIdAndUpdate(memberSchool?.id, {
+                $set: {
                     isRegistered: true,
                 },
             });
 
-            await prisma.mSAdminRegistration.delete({
-                where: {
-                    id
-                },
-            });
+            await MSAdminRegistration.findByIdAndDelete(id);
 
             await sendAcceptEmail(newAdmin, tempPassword);
 
@@ -90,7 +81,8 @@ export default authenticatedHandler([
         }
     } catch (err) {
         console.log(err);
-        res.statusMessage = "An Error has occured in creating user.";
+        res.statusMessage =
+            res.statusMessage || "An Error has occured in creating user.";
         res.status(500);
     }
     res.end();

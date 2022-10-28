@@ -1,36 +1,31 @@
-import { AccountType } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { prisma } from "../../../prisma/db";
 
-export default authenticatedHandler().post(async (req, res) => {
-    const uid = req.uid;
-    try {
-        const admin = await prisma.user.findFirst({
-            where: {
+import { connectDB, User } from "@db/index";
+import { AccountType } from "@util/Enums";
+
+export default authenticatedHandler([AccountType.MS_ADMIN]).post(
+    async (req, res) => {
+        const uid = req.uid;
+        try {
+            await connectDB();
+
+            const admin = await User.findOne({
                 authId: uid,
-            },
-        });
+            }).populate("memberSchool", ["id"]);
 
-        if (req.role !== AccountType.MS_ADMIN) {
-            res.statusMessage =
-                "You do not have sufficient permissions to access this route.";
-            res.status(401);
-            res.end();
-            return;
-        }
-
-        if (admin) {
-            const accounts = await prisma.user.findMany({
-                where: {
-                    memberSchoolId: admin.memberSchoolId,
+            if (admin) {
+                const accounts = await User.find({
+                    memberSchool: admin.memberSchool,
                     accountType: AccountType.MS_USER,
-                },
-            });
-            res.status(200).json(accounts);
+                });
+
+                res.status(200).json(accounts);
+            }
+        } catch (error) {
+            res.statusMessage =
+                "An error has occured while retrieving the data.";
+            res.status(418);
         }
-    } catch (error) {
-        res.statusMessage = "An error has occured while retrieving the data.";
-        res.status(418);
+        res.end();
     }
-    res.end();
-});
+);

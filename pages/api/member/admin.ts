@@ -1,40 +1,36 @@
-import { AccountType } from "@prisma/client";
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { prisma } from "../../../prisma/db";
+import { connectDB, User } from "@db/index";
+import { AccountType } from "@util/Enums";
 
-export default authenticatedHandler().post(async (req, res) => {
+export default authenticatedHandler([
+    AccountType.MS_ADMIN,
+    AccountType.CEAP_SUPER_ADMIN,
+]).post(async (req, res) => {
     try {
-        const admin = await prisma.user.findFirst({
-            where: {
-                authId: req.uid,
-            },
+        await connectDB();
+
+        const admin = await User.findOne({
+            authId: req.uid,
         });
 
         if (admin) {
             let admins = [];
             switch (admin.accountType) {
                 case AccountType.MS_ADMIN:
-                    admins = await prisma.user.findMany({
-                        where: {
-                            accountType: AccountType.MS_ADMIN,
-                            memberSchoolId: admin.memberSchoolId,
-                            AND: {
-                                id: {
-                                    not: admin.id
-                                }
-                            },
-                        },
+                    admins = await User.find({
+                        memberSchool: admin.memberSchool,
+                        accountType: AccountType.MS_ADMIN,
+                        authId: {
+                            $ne: req.uid
+                        }
                     });
                     break;
                 case AccountType.CEAP_SUPER_ADMIN:
-                    admins = await prisma.user.findMany({
-                        where: {
-                            accountType: AccountType.MS_ADMIN,
-                        },
-                        include: {
-                            memberSchool: true,
-                        },
-                    });
+                    admins = await User.find({
+                        accountType: AccountType.MS_ADMIN,
+                    })
+                        .populate("memberSchool", ["id", "name"])
+                        .exec();
                     break;
                 default:
                     res.statusMessage =
