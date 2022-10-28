@@ -9,15 +9,19 @@ import {
     CircularProgress,
 } from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
-import { AccountType, User } from "@prisma/client";
 import { getAccountType } from "@util/functions";
 import { FC, FormEvent, useState } from "react";
 
 import { motion } from "framer-motion";
 import axios, { AxiosError } from "axios";
+import { IUserSchema } from "@db/models";
+import { AccountType } from "@util/Enums";
 
 const EditUserModal: FC<{
-    user: User;
+    user: IUserSchema & {
+        id: string;
+        memberSchool?: { id: string; name: string };
+    };
     hasSchoolId?: boolean;
     accountTypes: AccountType[];
     onSave: Function;
@@ -26,7 +30,7 @@ const EditUserModal: FC<{
     const toast = useToast();
     const [firstName, setFirstName] = useState<string>(user.firstName);
     const [lastName, setLastName] = useState<string>(user.lastName);
-    const [middleName, setMiddleName] = useState<string>(user.middleName);
+    const [middleName, setMiddleName] = useState<string | undefined>(user?.middleName);
     const [displayName, setDisplayName] = useState<string>(
         user.displayName || ""
     );

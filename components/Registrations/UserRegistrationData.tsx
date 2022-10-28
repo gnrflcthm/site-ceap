@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { UserRegistration } from "@prisma/client";
+import { IUserRegistrationSchema } from "@db/index";
 
 import {
     Heading,
@@ -23,7 +23,11 @@ import { FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const UserRegistrationData: FC<{
-    data: UserRegistration;
+    data: IUserRegistrationSchema & {
+        id: string;
+        registeredAt: string;
+        birthday?: string;
+    };
     refresh: Function;
 }> = ({ data, refresh }) => {
     const {
@@ -121,7 +125,11 @@ const UserRegistrationData: FC<{
             <Td px={"4"} py={"2"}>
                 {processing ? (
                     <Center>
-                        <CircularProgress isIndeterminate color={"secondary"} size={8} />
+                        <CircularProgress
+                            isIndeterminate
+                            color={"secondary"}
+                            size={8}
+                        />
                     </Center>
                 ) : (
                     <Menu>

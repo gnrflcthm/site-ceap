@@ -2,16 +2,9 @@ import { FC, useMemo, useContext, useState, useEffect } from "react";
 
 import { Center, VStack, Text, CircularProgress, Flex } from "@chakra-ui/react";
 
-import {
-    FaBook,
-    FaUser,
-    FaSignOutAlt,
-    FaHistory,
-    FaUserCog,
-} from "react-icons/fa";
+import { FaBook, FaUser, FaSignOutAlt } from "react-icons/fa";
 
 import { BsCloudUpload } from "react-icons/bs";
-import { HiUsers } from "react-icons/hi";
 
 import CurrentUser from "./CurrentUser";
 import CoreNavItem from "./CoreNavItem";
@@ -22,7 +15,8 @@ import { AuthContext } from "@context/AuthContext";
 import { CollapseContext } from "pages/_app";
 import { getAccountType } from "@util/functions";
 import Routes from "./Routes";
-import { AccountType } from "@prisma/client";
+
+import { AccountType } from "@util/Enums";
 
 const CoreNav: FC<{
     collapsed?: boolean;
@@ -76,6 +70,13 @@ const CoreNav: FC<{
                                 href={"/"}
                                 icon={FaBook}
                             />
+                            {user.role === AccountType.MS_USER && (
+                                <CoreNavItem
+                                    name={"Request Upload"}
+                                    href={"/uploads"}
+                                    icon={BsCloudUpload}
+                                />
+                            )}
                             <Routes role={user.role as AccountType} />
                             <CoreNavItem
                                 name={"Profile"}
@@ -96,7 +97,7 @@ const CoreNav: FC<{
                 </>
             ) : (
                 <>
-                    {!collapsed && loggingOut &&  (
+                    {!collapsed && loggingOut && (
                         <Center flexDir={"column"} h={"full"}>
                             <Text mb={"4"}>Signing Out</Text>
                             <CircularProgress

@@ -1,4 +1,3 @@
-import { AccountType, MemberSchool, User } from "@prisma/client";
 import { motion } from "framer-motion";
 import { FC, useContext } from "react";
 import { FaEllipsisV, FaPencilAlt, FaTrash } from "react-icons/fa";
@@ -16,9 +15,14 @@ import {
 } from "@chakra-ui/react";
 import { AuthContext } from "@context/AuthContext";
 import { getAccountType } from "@util/functions";
+import { IUserSchema } from "@db/models";
+import { AccountType } from "@util/Enums";
 
 const UserData: FC<{
-    user: User & { memberSchool?: MemberSchool };
+    user: IUserSchema & {
+        id: string;
+        memberSchool?: { id: string; name: string };
+    };
     showEdit?: Function;
     onDelete?: Function;
 }> = ({ user, showEdit = () => {}, onDelete = () => {} }) => {

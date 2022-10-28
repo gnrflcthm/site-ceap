@@ -22,7 +22,7 @@ const RegistrationForm: FC<{
     const [firstName, setFirstName] = useState<string>("");
     const [middleName, setMiddleName] = useState<string>("");
     const [birthday, setBirthday] = useState<Date | "">("");
-    const [organization, setOrganization] = useState<string>("");
+    const [memberSchoolId, setMemberSchoolId] = useState<string>("");
     const [mobile, setMobile] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [schoolId, setSchoolId] = useState<string>("");
@@ -34,24 +34,13 @@ const RegistrationForm: FC<{
         e.preventDefault();
         setLoading(true);
 
-        console.table({
-            firstName,
-            lastName,
-            middleName,
-            birthday,
-            organizationId: organization,
-            email,
-            mobile,
-            schoolId,
-        });
-
         axios
             .post("/api/user/register", {
                 firstName,
                 lastName,
                 middleName,
                 birthday,
-                organizationId: organization,
+                memberSchoolId,
                 email,
                 mobile,
                 schoolId,
@@ -103,7 +92,7 @@ const RegistrationForm: FC<{
                 />
                 <CoreSelect
                     placeholder={"School or Organization"}
-                    setValue={setOrganization}
+                    setValue={setMemberSchoolId}
                     // @ts-ignore
                     options={memberSchools}
                     required

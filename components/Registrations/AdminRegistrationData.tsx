@@ -1,5 +1,9 @@
 import { FC, useState } from "react";
-import { MemberSchool, MSAdminRegistration } from "@prisma/client";
+import {
+    MemberSchool,
+    MSAdminRegistration,
+    IMSAdminRegistrationSchema,
+} from "@db/index";
 
 import {
     Heading,
@@ -23,7 +27,11 @@ import { FaEllipsisV } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const AdminRegistrationData: FC<{
-    data: MSAdminRegistration & { memberSchool: MemberSchool };
+    data: IMSAdminRegistrationSchema & {
+        registeredAt: string;
+        id: string;
+        memberSchool: { id: string; name: string };
+    };
     refresh: Function;
 }> = ({ data, refresh }) => {
     const {
@@ -59,6 +67,10 @@ const AdminRegistrationData: FC<{
             })
             .catch((err: AxiosError) => {
                 console.log(err);
+                toast({
+                    title: err.response?.statusText,
+                    status: "error",
+                });
                 setProcessing(false);
             });
     };
@@ -116,7 +128,7 @@ const AdminRegistrationData: FC<{
                 <Text fontSize={textFontSize}>{mobileNumber ?? ""}</Text>
             </Td>
             <Td px={"4"} py={"2"} fontWeight={"bold"}>
-                <Text fontSize={textFontSize}>{memberSchool.name ?? ""}</Text>
+                <Text fontSize={textFontSize}>{memberSchool?.name ?? ""}</Text>
             </Td>
             <Td px={"4"} py={"2"}>
                 {processing ? (

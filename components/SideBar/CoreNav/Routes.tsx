@@ -1,4 +1,4 @@
-import { AccountType } from "@prisma/client";
+import { AccountType } from "@util/Enums";
 import { FC } from "react";
 import { BsCloudUpload } from "react-icons/bs";
 import { FaHistory, FaUserCog } from "react-icons/fa";
@@ -12,7 +12,7 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
                 <>
                     <CoreNavItem
                         name={"Uploads"}
-                        href={"/uploads"}
+                        href={"/upload_requests"}
                         icon={BsCloudUpload}
                     />
                     <CoreNavItem
@@ -37,7 +37,7 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
                 <>
                     <CoreNavItem
                         name={"Uploads"}
-                        href={"/uploads"}
+                        href={"/upload_requests"}
                         icon={BsCloudUpload}
                     />
                     <CoreNavItem
@@ -56,8 +56,8 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
             return (
                 <>
                     <CoreNavItem
-                        name={"Upload"}
-                        href={"/uploads"}
+                        name={"Uploads"}
+                        href={"/upload_requests"}
                         icon={BsCloudUpload}
                     />
                     <CoreNavItem

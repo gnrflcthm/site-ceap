@@ -16,7 +16,7 @@ import axios from "axios";
 import { AuthContext } from "@context/AuthContext";
 
 import type { UploadContentData } from "pages/upload_requests";
-import { AccountType } from "@prisma/client";
+import { AccountType } from "@util/Enums";
 
 const ResourceDataAdminOptions = dynamic(
     () => import("./ResourceDataAdminOptions")
