@@ -1,4 +1,4 @@
-import { AccountType } from "@prisma/client";
+import { AccountType } from "@util/Enums";
 
 export default function(accountType: string | AccountType | undefined): string {
     switch (accountType) {

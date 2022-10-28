@@ -1,8 +1,8 @@
-import { User } from "@prisma/client";
+import { IUserSchema } from "@db/index";
 import transport from "./transport";
 
 
-export async function sendAcceptEmail(receiver: User, initialPassword: string = "random_password", sendCredentials: boolean = false) {
+export async function sendAcceptEmail(receiver: IUserSchema, initialPassword: string = "random_password", sendCredentials: boolean = false) {
     const {
         firstName, lastName, email
     } = receiver;

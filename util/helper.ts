@@ -1,7 +1,7 @@
 import { extname } from "path";
-import { FileType, FileClassification } from "@prisma/client";
+import { FileType, FileClassification } from "@util/Enums";
 
-function getFileType(filename: string): FileType {
+function verifyFileType(filename: string): FileType {
     let extension = extname(filename);
 
     let fileType: FileType = FileType.DOCUMENT;
@@ -12,31 +12,37 @@ function getFileType(filename: string): FileType {
         fileType = FileType.IMAGE;
     } else if (extension === ".mp4") {
         fileType = FileType.VIDEO;
-    } else {
+    } else if (
+        [".doc", ".docx", ".rtf", ".xls", ".xlsx", ".ppt", ".pptx"].includes(
+            extension
+        )
+    ) {
         fileType = FileType.DOCUMENT;
+    } else {
+        throw new Error("Invalid File Type Detected.")
     }
 
     return fileType;
 }
 
 const Classifications = {
-    "CHRISTIAN_FORMATION": "Christian Formation",
-    "BASIC_EDUCATION": "Basic Education",
-    "HIGHER_EDUCATION": "Higher Education",
-    "TECHINICAL_VOCATION_EDUCATION": "Techinical Vocation Education",
-    "ALS_SPED": "ALS & SPED",
-    "PROGRAMS": "Programs",
-    "NATIONAL_CONVENTION": "National Convention",
-    "ADVOCACY": "Advocacy",
-    "RESEARCH": "Research",
-    "GENERAL_CEAP": "General CEAP",
-    "COCOPEA_PEAC": "COCOPEA & PEAC",
-    "INTERNATIONAL_LINKAGES": "International Linkages",
-    "OTHERS": "Others", 
-}
+    CHRISTIAN_FORMATION: "Christian Formation",
+    BASIC_EDUCATION: "Basic Education",
+    HIGHER_EDUCATION: "Higher Education",
+    TECHINICAL_VOCATION_EDUCATION: "Techinical Vocation Education",
+    ALS_SPED: "ALS & SPED",
+    PROGRAMS: "Programs",
+    NATIONAL_CONVENTION: "National Convention",
+    ADVOCACY: "Advocacy",
+    RESEARCH: "Research",
+    GENERAL_CEAP: "General CEAP",
+    COCOPEA_PEAC: "COCOPEA & PEAC",
+    INTERNATIONAL_LINKAGES: "International Linkages",
+    OTHERS: "Others",
+};
 
 function getFileClassification(classification: FileClassification): string {
     return Classifications[classification as keyof typeof Classifications];
 }
 
-export { getFileType, getFileClassification };
+export { verifyFileType, getFileClassification };

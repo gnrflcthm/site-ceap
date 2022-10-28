@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getAuth } from "firebase-admin/auth";
 import "../../firebase/admin";
 
-import { AccountType } from "@prisma/client";
+import { AccountType } from "@util/Enums";
 
 import { serialize } from "cookie";
 import parseMultipartForm from "../middleware/fileparser";

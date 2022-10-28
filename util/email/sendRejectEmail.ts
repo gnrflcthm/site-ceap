@@ -1,7 +1,12 @@
-import { MSAdminRegistration, UserRegistration } from "@prisma/client";
 import transport from "./transport";
+import {
+    IUserRegistrationSchema,
+    IMSAdminRegistrationSchema,
+} from "@db/models";
 
-export async function sendRejectEmail(user: UserRegistration | MSAdminRegistration) {
+export async function sendRejectEmail(
+    user: IUserRegistrationSchema | IMSAdminRegistrationSchema
+) {
     const { email, firstName, lastName } = user;
     await transport.sendMail({
         subject: "Account Creation Denied",

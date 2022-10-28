@@ -2,7 +2,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { getAuth } from "firebase-admin/auth";
 import "../../firebase/admin";
 import axios from "axios";
-import { AccountType } from "@prisma/client";
+import { AccountType } from "@db/models";
 
 export interface GetServerSidePropsContextWithUser
     extends GetServerSidePropsContext {

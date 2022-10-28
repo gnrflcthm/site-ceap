@@ -11,7 +11,7 @@ const form = formidable({
     uploadDir: path.join(process.cwd(), "/temp"),
     filename: (_, __, part, ___) => {
         let ext = path.extname(part.originalFilename || "");
-        return `${nanoId(12)}${ext ? "." + ext : ""}`;
+        return `${nanoId(12)}${ext || ""}`;
     },
 });
 
