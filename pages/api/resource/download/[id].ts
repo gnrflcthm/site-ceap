@@ -17,10 +17,7 @@ export default handler().get(async (req, res) => {
 
         await connectDB();
 
-        const resource = await Resource.findOne({
-            id: resourceId,
-            accessibility: FileAccessibility.PUBLIC,
-        });
+        const resource = await Resource.findById(resourceId);
 
         if (!resource) {
             res.statusMessage = "Not Found!";
@@ -32,14 +29,28 @@ export default handler().get(async (req, res) => {
         let downloadLink: string;
 
         try {
+            if (
+                [FileAccessibility.PRIVATE, FileAccessibility.HIDDEN].includes(
+                    resource.accessibility
+                )
+            ) {
+                res.statusMessage =
+                    "You do not have enough permission to access this file.";
+                res.statusCode = 401;
+                throw new Error(
+                    "You do not have enough permission to access this file."
+                );
+            }
+
             downloadLink = await generateDownloadLink(
                 resource.blobPath,
                 resource.filename
             );
             res.status(200).json({ downloadLink });
         } catch (error) {
-            res.statusMessage = "Error in Generating Download Link";
-            res.status(500);
+            res.statusMessage =
+                res.statusMessage || "Error in Generating Download Link";
+            res.status(res.statusCode || 500);
         }
         res.end();
     }
