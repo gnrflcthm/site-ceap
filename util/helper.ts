@@ -25,7 +25,7 @@ function verifyFileType(filename: string): FileType {
     return fileType;
 }
 
-const Classifications = {
+export const Classifications = {
     CHRISTIAN_FORMATION: "Christian Formation",
     BASIC_EDUCATION: "Basic Education",
     HIGHER_EDUCATION: "Higher Education",
@@ -39,6 +39,23 @@ const Classifications = {
     COCOPEA_PEAC: "COCOPEA & PEAC",
     INTERNATIONAL_LINKAGES: "International Linkages",
     OTHERS: "Others",
+};
+
+export const SelectClassifications = {
+    "Christian Formation": FileClassification.CHRISTIAN_FORMATION,
+    "Basic Education": FileClassification.BASIC_EDUCATION,
+    "Higher Education": FileClassification.HIGHER_EDUCATION,
+    "Techinical Vocation Education":
+        FileClassification.TECHINICAL_VOCATION_EDUCATION,
+    "ALS & SPED": FileClassification.ALS_SPED,
+    Programs: FileClassification.PROGRAMS,
+    "National Convention": FileClassification.NATIONAL_CONVENTION,
+    Advocacy: FileClassification.ADVOCACY,
+    Research: FileClassification.RESEARCH,
+    "General CEAP": FileClassification.GENERAL_CEAP,
+    "COCOPEA & PEAC": FileClassification.COCOPEA_PEAC,
+    "International Linkages": FileClassification.INTERNATIONAL_LINKAGES,
+    Others: FileClassification.OTHERS,
 };
 
 function getFileClassification(classification: FileClassification): string {

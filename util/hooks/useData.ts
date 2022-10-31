@@ -19,7 +19,7 @@ export const useData = <T>(url: string, initialData?: T) => {
         setIsLoading(true);
         setData(undefined);
         axios
-            .post<T>(u || url, {})
+            .get<T>(u || url)
             .then(({ data }) => {
                 setData(data);
                 setIsLoading(false);
@@ -30,5 +30,7 @@ export const useData = <T>(url: string, initialData?: T) => {
             });
     };
 
-    return { data, isLoading, error, refetch: fetch };
+    const clear = () => setData(undefined);
+
+    return { data, isLoading, error, refetch: fetch, clear };
 };
