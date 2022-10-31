@@ -7,7 +7,6 @@ import {
     Center,
     Flex,
     Heading,
-    IconButton,
     Input,
     Progress,
     Text,
@@ -19,7 +18,7 @@ import { motion } from "framer-motion";
 
 import { GrClose } from "react-icons/gr";
 
-const RequestUploadModal: FC<{ close: Function }> = ({ close }) => {
+const RequestUploadModal: FC<{ refetch: Function, close: Function }> = ({ refetch, close }) => {
     const [files, setFiles] = useState<File[] | undefined>(undefined);
     const [dragging, setDragging] = useState<boolean>(false);
     const [uploading, setUploading] = useState<boolean>(false);
@@ -57,6 +56,7 @@ const RequestUploadModal: FC<{ close: Function }> = ({ close }) => {
                     status: "success",
                     title: "Upload Complete",
                 });
+                refetch();
                 close();
             })
             .catch((err: AxiosError) => {
@@ -137,7 +137,7 @@ const RequestUploadModal: FC<{ close: Function }> = ({ close }) => {
                                     Array.from(e.currentTarget.files || [])
                                 )
                             }
-                            disabled={uploading}
+                            pointerEvents={uploading ? "none" : "auto"}
                         />
 
                         {files ? (

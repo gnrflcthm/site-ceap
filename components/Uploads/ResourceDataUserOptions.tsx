@@ -8,21 +8,12 @@ import {
     MenuItem,
     Text,
 } from "@chakra-ui/react";
-import {
-    FaEllipsisV,
-    FaCheckCircle,
-    FaTimesCircle,
-    FaDownload,
-} from "react-icons/fa";
+import { FaEllipsisV, FaBan, FaDownload } from "react-icons/fa";
 
-const ResourceDataCEAPOptions: FC<{
-    resourceId: string;
+const ResourceDataUserOptions: FC<{
     onDownload: Function;
-    onAccept: Function;
-    onReject: Function;
-}> = ({ onDownload, onAccept, onReject }) => {
-    // TODO: Fixed Menu Item Icons
-
+    onCancel: Function;
+}> = ({ onDownload, onCancel }) => {
     return (
         <Menu>
             <MenuButton w={"full"}>
@@ -35,16 +26,10 @@ const ResourceDataCEAPOptions: FC<{
                         Download
                     </Text>
                 </MenuItem>
-                <MenuItem onClick={() => onAccept()} color={"green.500"}>
-                    <Box as={FaCheckCircle} mr={"2"} />
+                <MenuItem onClick={() => onCancel()} color={"red.500"}>
+                    <Box as={FaBan} mr={"2"} />
                     <Text fontSize={"md"} lineHeight={"0"} color={"inherit"}>
-                        Accept
-                    </Text>
-                </MenuItem>
-                <MenuItem onClick={() => onReject()} color={"red.500"}>
-                    <Box as={FaTimesCircle} mr={"2"} />
-                    <Text fontSize={"md"} lineHeight={"0"} color={"inherit"}>
-                        Reject
+                        Cancel Upload Request
                     </Text>
                 </MenuItem>
             </MenuList>
@@ -52,4 +37,4 @@ const ResourceDataCEAPOptions: FC<{
     );
 };
 
-export default ResourceDataCEAPOptions;
+export default ResourceDataUserOptions;

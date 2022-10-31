@@ -1,4 +1,4 @@
-import { FC, useContext, useState } from "react";
+import { FC, useContext, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 
 import {
@@ -15,7 +15,7 @@ import axios from "axios";
 
 import { AuthContext } from "@context/AuthContext";
 
-import type { UploadContentData } from "pages/upload_requests";
+import { IResourceSchema } from "@db/models";
 import { AccountType } from "@util/Enums";
 
 const ResourceDataAdminOptions = dynamic(
@@ -26,17 +26,28 @@ const ResourceDataCEAPOptions = dynamic(
     () => import("./ResourceDataCEAPOptions")
 );
 
-const ResourceData: FC<{ resource: UploadContentData }> = ({ resource }) => {
+const ResourceDataUserOptions = dynamic(
+    () => import("./ResourceDataUserOptions")
+);
+
+const ResourceData: FC<{
+    resource: IResourceSchema & {
+        id: string;
+        dateAdded: string;
+        uploadedBy?: { id: string; displayName?: string };
+    };
+    onAccept?: (id: string) => void;
+    showStatus?: boolean;
+    refetch: Function;
+}> = ({ resource, refetch, showStatus = false, onAccept = (id) => {} }) => {
     const [processing, setProcessing] = useState<boolean>(false);
     const toast = useToast();
-
-    const { user } = useContext(AuthContext);
 
     const download = async () => {
         try {
             setProcessing(true);
             const { data } = await axios.get<{ downloadLink: string }>(
-                `/api/resource/download/a/${resource.id}`
+                `/api/resource/a/download/${resource.id}`
             );
 
             const anchor = document.createElement("a");
@@ -54,6 +65,42 @@ const ResourceData: FC<{ resource: UploadContentData }> = ({ resource }) => {
             setProcessing(false);
         }
     };
+
+    const reject = async () => {
+        setProcessing(true);
+        try {
+            await axios.delete(`/api/resource/a/cancel/${resource.id}`);
+            toast({
+                status: "success",
+                title: "Successfully Removed Resource.",
+            });
+            refetch();
+        } catch (error) {
+            console.log(error);
+            toast({
+                status: "error",
+                title: "Error In Removing Resource",
+            });
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const { user } = useContext(AuthContext);
+
+    const uploaderOrStatus = useMemo<string | undefined | null>(() => {
+        if (!user) {
+            return undefined;
+        }
+
+        if (showStatus) return resource.status;
+
+        if (user.role === AccountType.MS_USER) {
+            return resource.status;
+        } else {
+            return resource.uploadedBy?.displayName;
+        }
+    }, [user]);
 
     const textFontSize = { base: "sm", md: "md" };
     return (
@@ -83,9 +130,7 @@ const ResourceData: FC<{ resource: UploadContentData }> = ({ resource }) => {
                 <Text fontSize={textFontSize}>{resource.fileType}</Text>
             </Td>
             <Td px={"4"} py={"2"}>
-                <Text fontSize={textFontSize}>
-                    {resource.uploadedBy?.displayName}
-                </Text>
+                <Text fontSize={textFontSize}>{uploaderOrStatus}</Text>
             </Td>
             <Td>
                 {(() => {
@@ -102,31 +147,38 @@ const ResourceData: FC<{ resource: UploadContentData }> = ({ resource }) => {
                     }
 
                     if (!processing && user) {
-                        if (
-                            ["CEAP_ADMIN", "CEAP_SUPER_ADMIN"].includes(
-                                user.role
-                            )
-                        ) {
-                            return (
-                                <ResourceDataCEAPOptions
-                                    onDownload={() => download()}
-                                    onAccept={() => {}}
-                                    onReject={() => {}}
-                                />
-                            );
-                        }
+                        switch (user.role) {
+                            case AccountType.CEAP_SUPER_ADMIN:
+                            case AccountType.CEAP_ADMIN:
+                                return (
+                                    <ResourceDataCEAPOptions
+                                        resourceId={resource.id}
+                                        onDownload={() => download()}
+                                        onAccept={() => onAccept(resource.id)}
+                                        onReject={() => reject()}
+                                    />
+                                );
 
-                        if (user.role === AccountType.MS_ADMIN) {
-                            return (
-                                <ResourceDataAdminOptions
-                                    onDownload={() => download()}
-                                    onForward={() => {}}
-                                    onReject={() => {}}
-                                />
-                            );
+                            case AccountType.MS_ADMIN:
+                                return (
+                                    <ResourceDataAdminOptions
+                                        setProcessing={setProcessing}
+                                        isCurrent={showStatus}
+                                        resourceId={resource.id}
+                                        onDownload={() => download()}
+                                        onForward={() => refetch()}
+                                        onReject={() => reject()}
+                                        resourceStatus={resource.status}
+                                    />
+                                );
+                            default:
+                                return (
+                                    <ResourceDataUserOptions
+                                        onDownload={() => download()}
+                                        onCancel={() => reject()}
+                                    />
+                                );
                         }
-                    } else {
-                        return <></>;
                     }
                 })()}
             </Td>
