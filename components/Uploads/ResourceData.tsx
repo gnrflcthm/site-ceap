@@ -66,7 +66,7 @@ const ResourceData: FC<{
         }
     };
 
-    const reject = async () => {
+    const reject = async (refetchLink?: string) => {
         setProcessing(true);
         try {
             await axios.delete(`/api/resource/a/cancel/${resource.id}`);
@@ -74,7 +74,11 @@ const ResourceData: FC<{
                 status: "success",
                 title: "Successfully Removed Resource.",
             });
-            refetch();
+            if (refetchLink) {
+                refetch(refetchLink)
+            } else {
+                refetch();
+            }
         } catch (error) {
             console.log(error);
             toast({
@@ -155,7 +159,7 @@ const ResourceData: FC<{
                                         resourceId={resource.id}
                                         onDownload={() => download()}
                                         onAccept={() => onAccept(resource.id)}
-                                        onReject={() => reject()}
+                                        onReject={() => reject("/api/resource/a/requests")}
                                     />
                                 );
 
