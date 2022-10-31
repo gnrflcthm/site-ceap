@@ -38,6 +38,15 @@ export const ButtonStyles: ComponentStyleConfig = {
                 color: "primaryAccent",
             },
         },
+        light: {
+            bg: "transparent",
+            color: "neutralizerLight",
+            borderColor: "neutralizerLight",
+            _hover: {
+                bg: "neutralizerLight",
+                color: "neutralizerDark"
+            },
+        },
         transparent: {
             bg: "transparent",
             color: "neutralizerLight",
