@@ -73,7 +73,7 @@ const AdminRegistrationForm: FC<{
             <CoreInput
                 name="mobileNumber"
                 setValue={setMobileNumber}
-                placeholder={"Mobile Number"}
+                placeholder={"Mobile Number (+639xxxxxxxxx)"}
                 value={mobileNumber}
                 disabled={loading}
                 pattern={"^\\+63\\d{10}$"}
