@@ -1,6 +1,6 @@
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import { generateDownloadLink } from "@util/functions/blob";
-import { connectDB, Resource } from "@db/index";
+import { connectDB, Resource, User } from "@db/index";
 
 import { FileAccessibility } from "@util/Enums";
 
@@ -14,6 +14,8 @@ export default authenticatedHandler().get(async (req, res) => {
         return;
     } else {
         let resourceId = id as string;
+
+        const user = await User.findOne({ authId: req.uid });
 
         let accessibility: FileAccessibility[] = [FileAccessibility.PUBLIC];
 
@@ -44,13 +46,15 @@ export default authenticatedHandler().get(async (req, res) => {
         let downloadLink: string;
 
         try {
-            if (!accessibility.includes(resource.accessibility)) {
-                res.statusMessage =
-                    "You don't have enough permission access to this file.";
-                res.statusCode = 401;
-                throw new Error(
-                    "You don't have enough permission access to this file."
-                );
+            if (resource.uploadedBy !== user?._id) {
+                if (!accessibility.includes(resource.accessibility)) {
+                    res.statusMessage =
+                        "You don't have enough permission access to this file.";
+                    res.statusCode = 401;
+                    throw new Error(
+                        "You don't have enough permission access to this file."
+                    );
+                }
             }
 
             downloadLink = await generateDownloadLink(
