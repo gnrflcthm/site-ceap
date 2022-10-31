@@ -155,6 +155,7 @@ export const getServerSideProps: GetServerSideProps<{
             uploadedBy: user.id,
         })
             .populate("uploadedBy", ["id", "displayName"])
+            .populate("folder", ["id", "name", "fullPath"])
             .exec();
         return {
             props: {

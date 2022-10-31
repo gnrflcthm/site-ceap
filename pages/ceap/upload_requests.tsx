@@ -171,6 +171,7 @@ export const getServerSideProps: GetServerSideProps<{
             status: RequestStatus.FOR_CEAP_REVIEW,
         })
             .populate({ path: "uploadedBy", select: "id displayName" })
+            .populate("folder", ["id", "name", "fullPath"])
             .exec();
 
         return {

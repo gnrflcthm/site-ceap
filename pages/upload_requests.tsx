@@ -198,6 +198,7 @@ export const getServerSideProps: GetServerSideProps<{
                     select: "id",
                 },
             })
+            .populate("folder", ["id", "name", "fullPath"])
             .exec();
 
         uploadRequests = uploadRequests.filter((ur) =>
