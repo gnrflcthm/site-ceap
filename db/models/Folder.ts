@@ -1,10 +1,13 @@
 import { Schema, model, models, Types, Model } from "mongoose";
 
+import { IResourceSchema, Resource } from "./Resource";
+
 export interface IFolderSchema {
     name: string;
     root: Types.ObjectId;
     folders?: [Types.ObjectId];
     resources?: [Types.ObjectId];
+    fullPath?: string;
 }
 
 const folderSchema = new Schema(
@@ -19,6 +22,7 @@ const folderSchema = new Schema(
         },
         folders: [{ type: Types.ObjectId, ref: "Folder" }],
         resources: [{ type: Types.ObjectId, ref: "Resource" }],
+        fullPath: String,
     },
     {
         collection: "Folder",
