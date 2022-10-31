@@ -14,7 +14,7 @@ const CoreInput: FC<{
     setValue: Function;
     required?: boolean;
     pattern?: string;
-    readonly?: boolean;
+    readOnly?: boolean;
     autoComplete?: string;
     onClick?: Function;
     onFocus?: Function;
@@ -32,7 +32,7 @@ const CoreInput: FC<{
     placeholderColor,
     required,
     pattern,
-    readonly,
+    readOnly,
     disabled = false,
     autoComplete,
     onClick = () => {},
@@ -100,7 +100,7 @@ const CoreInput: FC<{
             ) : (
                 <Input
                     type={type}
-                    {...{ name, value, required, disabled, pattern }}
+                    {...{ name, value, required, disabled, pattern, readOnly }}
                     borderColor={value ? "secondary" : "neutralizerDark"}
                     focusBorderColor={"secondary"}
                     onFocus={() => {
