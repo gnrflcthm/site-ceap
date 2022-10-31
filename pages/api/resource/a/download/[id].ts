@@ -2,7 +2,7 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 import { generateDownloadLink } from "@util/functions/blob";
 import { connectDB, Resource, User } from "@db/index";
 
-import { FileAccessibility } from "@util/Enums";
+import { AccountType, FileAccessibility } from "@util/Enums";
 
 export default authenticatedHandler().get(async (req, res) => {
     const { id } = req.query;
@@ -17,26 +17,11 @@ export default authenticatedHandler().get(async (req, res) => {
 
         const user = await User.findOne({ authId: req.uid });
 
-        let accessibility: FileAccessibility[] = [FileAccessibility.PUBLIC];
-
-        if (["CEAP_ADMIN", "CEAP_SUPER_ADMIN"].includes(req.role)) {
-            accessibility = [
-                FileAccessibility.HIDDEN,
-                FileAccessibility.PRIVATE,
-                FileAccessibility.PUBLIC,
-            ];
-        } else {
-            accessibility = [
-                FileAccessibility.PRIVATE,
-                FileAccessibility.PUBLIC,
-            ];
-        }
-
         await connectDB();
 
         const resource = await Resource.findById(resourceId).populate(
             "uploadedBy",
-            ["id"]
+            ["id", "memberSchool"]
         );
 
         if (!resource) {
@@ -49,14 +34,34 @@ export default authenticatedHandler().get(async (req, res) => {
         let downloadLink: string;
 
         try {
-            if (resource.uploadedBy?.id !== user?.id) {
-                if (!accessibility.includes(resource.accessibility)) {
-                    res.statusMessage =
-                        "You don't have enough permission access to this file.";
-                    res.statusCode = 401;
-                    throw new Error(
-                        "You don't have enough permission access to this file."
-                    );
+            if (
+                resource.uploadedBy?.id !== user?.id &&
+                ![
+                    AccountType.CEAP_ADMIN,
+                    AccountType.CEAP_SUPER_ADMIN,
+                ].includes(user?.accountType || AccountType.MS_USER)
+            ) {
+                switch (user?.accountType) {
+                    case AccountType.MS_ADMIN:
+                        if (
+                            user.memberSchool?.toHexString() !==
+                            resource.uploadedBy.memberSchool?.toHexString()
+                        ) {
+                            res.statusMessage =
+                                "You do not have enough permission to access this file.";
+                            res.statusCode = 401;
+                            throw new Error(
+                                "You do not have enough permission to access this file."
+                            );
+                        }
+                        break;
+                    case AccountType.MS_USER:
+                        res.statusMessage =
+                            "You do not have enough permission to access this file.";
+                        res.statusCode = 401;
+                        throw new Error(
+                            "You do not have enough permission to access this file."
+                        );
                 }
             }
 
@@ -66,6 +71,7 @@ export default authenticatedHandler().get(async (req, res) => {
             );
             res.status(200).json({ downloadLink });
         } catch (error) {
+            console.log(error);
             res.statusMessage =
                 res.statusMessage || "Error in Generating Download Link";
             res.status(res.statusCode || 500);
