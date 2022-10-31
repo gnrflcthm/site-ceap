@@ -38,8 +38,8 @@ const CoreNavItemContent: FC<{
         <Flex
             py={"4"}
             px={{ base: "8", lg: collapsed ? "4" : "6" }}
-            color={color || "neutralizerDark"}
-            bg={bg ? bg : isActive ? "secondary" : "transparent"}
+            color={color || isActive ? "neutralizerLight" : "neutralizerDark"}
+            bg={bg ? bg : isActive ? "primary" : "transparent"}
             boxShadow={isActive ? "md" : "none"}
             rounded={{ base: "none", lg: "xl" }}
             position={"relative"}

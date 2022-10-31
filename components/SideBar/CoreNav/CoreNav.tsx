@@ -70,13 +70,6 @@ const CoreNav: FC<{
                                 href={"/"}
                                 icon={FaBook}
                             />
-                            {user.role === AccountType.MS_USER && (
-                                <CoreNavItem
-                                    name={"Request Upload"}
-                                    href={"/uploads"}
-                                    icon={BsCloudUpload}
-                                />
-                            )}
                             <Routes role={user.role as AccountType} />
                             <CoreNavItem
                                 name={"Profile"}

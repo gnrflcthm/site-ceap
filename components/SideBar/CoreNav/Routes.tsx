@@ -11,8 +11,8 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
             return (
                 <>
                     <CoreNavItem
-                        name={"Uploads"}
-                        href={"/upload_requests"}
+                        name={"Upload Requests"}
+                        href={"/ceap/upload_requests"}
                         icon={BsCloudUpload}
                     />
                     <CoreNavItem
@@ -36,8 +36,8 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
             return (
                 <>
                     <CoreNavItem
-                        name={"Uploads"}
-                        href={"/upload_requests"}
+                        name={"Upload Requests"}
+                        href={"/ceap/upload_requests"}
                         icon={BsCloudUpload}
                     />
                     <CoreNavItem
@@ -56,7 +56,7 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
             return (
                 <>
                     <CoreNavItem
-                        name={"Uploads"}
+                        name={"Upload Requests"}
                         href={"/upload_requests"}
                         icon={BsCloudUpload}
                     />
@@ -74,6 +74,16 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
                         name={"Manage Accounts"}
                         href={"/users"}
                         icon={FaUserCog}
+                    />
+                </>
+            );
+        case AccountType.MS_USER:
+            return (
+                <>
+                    <CoreNavItem
+                        name={"Uploads"}
+                        href={"/uploads"}
+                        icon={BsCloudUpload}
                     />
                 </>
             );
