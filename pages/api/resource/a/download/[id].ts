@@ -34,7 +34,10 @@ export default authenticatedHandler().get(async (req, res) => {
 
         await connectDB();
 
-        const resource = await Resource.findById(resourceId);
+        const resource = await Resource.findById(resourceId).populate(
+            "uploadedBy",
+            ["id"]
+        );
 
         if (!resource) {
             res.statusMessage = "Not Found!";
@@ -46,7 +49,7 @@ export default authenticatedHandler().get(async (req, res) => {
         let downloadLink: string;
 
         try {
-            if (resource.uploadedBy !== user?._id) {
+            if (resource.uploadedBy?.id !== user?.id) {
                 if (!accessibility.includes(resource.accessibility)) {
                     res.statusMessage =
                         "You don't have enough permission access to this file.";
