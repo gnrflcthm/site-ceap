@@ -3,7 +3,7 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 import { connectDB, User } from "@db/index";
 import { AccountType } from "@util/Enums";
 
-export default authenticatedHandler([AccountType.MS_ADMIN]).post(
+export default authenticatedHandler([AccountType.MS_ADMIN]).get(
     async (req, res) => {
         const uid = req.uid;
         try {

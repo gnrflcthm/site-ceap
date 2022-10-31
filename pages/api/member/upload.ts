@@ -6,8 +6,8 @@ import { contentType } from "mime-types";
 import { verifyFileType } from "@util/helper";
 import { rm } from "fs/promises";
 
-import { connectDB, Resource } from "@db/index";
-import { FileAccessibility, RequestStatus } from "@util/Enums";
+import { connectDB, Resource, User } from "@db/index";
+import { AccountType, FileAccessibility, RequestStatus } from "@util/Enums";
 
 export default authenticatedHandler().post(async (req, res) => {
     const files = req.files;
@@ -22,8 +22,27 @@ export default authenticatedHandler().post(async (req, res) => {
                     res.statusMessage = "Invalid File Type Detected";
                     res.status(400);
                     res.end();
+
+                    const deleteQueue: Promise<void>[] = [];
+                    fileUpload.forEach((file) => {
+                        deleteQueue.push(rm(file.filepath));
+                    });
+                    await Promise.all(deleteQueue);
+
                     return;
                 }
+            }
+        } else {
+            try {
+                verifyFileType(fileUpload.newFilename);
+            } catch (err) {
+                res.statusMessage = "Invalid File Type Detected";
+                res.status(400);
+                res.end();
+
+                await rm(fileUpload.filepath);
+                
+                return;
             }
         }
         res.statusMessage = "Successfully Uploaded Files";
@@ -31,6 +50,9 @@ export default authenticatedHandler().post(async (req, res) => {
         res.end();
 
         await connectDB();
+        const user = await User.findOne({ authId: req.uid });
+
+        const status = user?.accountType === AccountType.MS_ADMIN ? RequestStatus.FOR_CEAP_REVIEW : RequestStatus.FOR_ADMIN_REVIEW;
 
         try {
             if (Array.isArray(fileUpload)) {
@@ -45,8 +67,9 @@ export default authenticatedHandler().post(async (req, res) => {
                         fileType: verifyFileType(filename),
                         contentType: contentType(filename) || "",
                         accessibility: FileAccessibility.HIDDEN,
-                        status: RequestStatus.FOR_ADMIN_REVIEW,
+                        status,
                         blobPath,
+                        uploadedBy: user,
                     })
                 );
                 await Resource.insertMany(uploadData);
@@ -69,8 +92,9 @@ export default authenticatedHandler().post(async (req, res) => {
                     fileType: verifyFileType(filename),
                     contentType: contentType(filename) || "",
                     accessibility: FileAccessibility.HIDDEN,
-                    status: RequestStatus.FOR_ADMIN_REVIEW,
+                    status,
                     blobPath,
+                    uploadedBy: user,
                 });
 
                 await rm(fileUpload.filepath);

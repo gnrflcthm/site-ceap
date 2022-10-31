@@ -12,7 +12,7 @@ export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
     AccountType.CEAP_SUPER_ADMIN,
     AccountType.MS_ADMIN,
-]).post(async (req, res) => {
+]).get(async (req, res) => {
     const { uid } = req;
     try {
         await connectDB();

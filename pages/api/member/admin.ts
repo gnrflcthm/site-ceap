@@ -5,7 +5,7 @@ import { AccountType } from "@util/Enums";
 export default authenticatedHandler([
     AccountType.MS_ADMIN,
     AccountType.CEAP_SUPER_ADMIN,
-]).post(async (req, res) => {
+]).get(async (req, res) => {
     try {
         await connectDB();
 
