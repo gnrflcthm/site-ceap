@@ -75,7 +75,7 @@ const ResourceData: FC<{
                 title: "Successfully Removed Resource.",
             });
             if (refetchLink) {
-                refetch(refetchLink)
+                refetch(refetchLink);
             } else {
                 refetch();
             }
@@ -156,10 +156,13 @@ const ResourceData: FC<{
                             case AccountType.CEAP_ADMIN:
                                 return (
                                     <ResourceDataCEAPOptions
+                                        isCurrent={showStatus}
                                         resourceId={resource.id}
                                         onDownload={() => download()}
                                         onAccept={() => onAccept(resource.id)}
-                                        onReject={() => reject("/api/resource/a/requests")}
+                                        onReject={() =>
+                                            reject("/api/resource/a/requests")
+                                        }
                                     />
                                 );
 

@@ -23,6 +23,7 @@ import {
     FaTrash,
     FaPencilAlt,
     FaBan,
+    FaCheck,
 } from "react-icons/fa";
 import { BsGridFill, BsListUl, BsArrowBarUp } from "react-icons/bs";
 import Overlay from "@components/Modal/Overlay";
@@ -158,18 +159,33 @@ const FolderSelectModal: FC<{
                                 }
                             })()}
                         {["newFolder", "rename"].includes(mode) && (
-                            <Button
-                                w={"fit-content"}
-                                onClick={() => {
-                                    setMode("normal");
-                                    setSelectedFolder(undefined);
-                                }}
-                                bg={"red.500"}
-                                color={"neutralizerLight"}
-                            >
-                                <Box mr={"4"} as={FaBan} />
-                                Cancel
-                            </Button>
+                            <HStack>
+                                <Button
+                                    w={"fit-content"}
+                                    onClick={() => {
+                                        setMode("normal");
+                                        setSelectedFolder(undefined);
+                                    }}
+                                    bg={"red.500"}
+                                    color={"neutralizerLight"}
+                                >
+                                    <Box mr={"4"} as={FaBan} />
+                                    Cancel
+                                </Button>
+                                {mode === "newFolder" && (
+                                    <Button
+                                        mr={"2"}
+                                        w={"fit-content"}
+                                        bg={"green.500"}
+                                        color={"neutralizerLight"}
+                                        type={"submit"}
+                                        form={"newFolderItem"}
+                                    >
+                                        <Box mr={"4"} as={FaCheck} />
+                                        Create Folder
+                                    </Button>
+                                )}
+                            </HStack>
                         )}
                     </Flex>
                     <Flex>
@@ -280,9 +296,7 @@ const FolderSelectModal: FC<{
                     p={"4"}
                     roundedBottom={"md"}
                 >
-                    <Text color={"black"}>
-                        {baseFolder?.fullPath}
-                    </Text>
+                    <Text color={"black"}>{baseFolder?.fullPath}</Text>
                     <Button
                         w={"fit-content"}
                         onClick={() => onSelect(selectedFolder || baseFolder)}

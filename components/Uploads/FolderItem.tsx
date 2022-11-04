@@ -89,6 +89,7 @@ const FolderItem: FC<{
                             createFolder(newFolderName);
                         }
                     }}
+                    id={"newFolderItem"}
                 >
                     <Input
                         value={newFolderName}

@@ -16,11 +16,12 @@ import {
 } from "react-icons/fa";
 
 const ResourceDataCEAPOptions: FC<{
+    isCurrent: boolean;
     resourceId: string;
     onDownload: Function;
     onAccept: Function;
     onReject: Function;
-}> = ({ onDownload, onAccept, onReject }) => {
+}> = ({ isCurrent, onDownload, onAccept, onReject }) => {
     // TODO: Fixed Menu Item Icons
 
     return (
@@ -35,18 +36,44 @@ const ResourceDataCEAPOptions: FC<{
                         Download
                     </Text>
                 </MenuItem>
-                <MenuItem onClick={() => onAccept()} color={"green.500"}>
-                    <Box as={FaCheckCircle} mr={"2"} />
-                    <Text fontSize={"md"} lineHeight={"0"} color={"inherit"}>
-                        Accept
-                    </Text>
-                </MenuItem>
-                <MenuItem onClick={() => onReject()} color={"red.500"}>
-                    <Box as={FaTimesCircle} mr={"2"} />
-                    <Text fontSize={"md"} lineHeight={"0"} color={"inherit"}>
-                        Reject
-                    </Text>
-                </MenuItem>
+                {isCurrent ? (
+                    <MenuItem onClick={() => onReject()} color={"red.500"}>
+                        <Box as={FaTimesCircle} mr={"2"} />
+                        <Text
+                            fontSize={"md"}
+                            lineHeight={"0"}
+                            color={"inherit"}
+                        >
+                            Delete Resource
+                        </Text>
+                    </MenuItem>
+                ) : (
+                    <>
+                        <MenuItem
+                            onClick={() => onAccept()}
+                            color={"green.500"}
+                        >
+                            <Box as={FaCheckCircle} mr={"2"} />
+                            <Text
+                                fontSize={"md"}
+                                lineHeight={"0"}
+                                color={"inherit"}
+                            >
+                                Accept
+                            </Text>
+                        </MenuItem>
+                        <MenuItem onClick={() => onReject()} color={"red.500"}>
+                            <Box as={FaTimesCircle} mr={"2"} />
+                            <Text
+                                fontSize={"md"}
+                                lineHeight={"0"}
+                                color={"inherit"}
+                            >
+                                Reject
+                            </Text>
+                        </MenuItem>
+                    </>
+                )}
             </MenuList>
         </Menu>
     );

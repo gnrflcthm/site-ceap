@@ -1,11 +1,6 @@
 import {
-    Box,
     Button,
-    Center,
-    Divider,
-    Flex,
     Text,
-    Heading,
     HStack,
     useDisclosure,
     VStack,
@@ -26,20 +21,19 @@ import { getFileClassification } from "@util/helper";
 import { SelectClassifications } from "@util/helper";
 import { useData } from "@util/hooks/useData";
 import axios from "axios";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { ResourceType } from "pages/ceap/upload_requests";
 import { FC, FormEvent, useEffect, useRef, useState } from "react";
-import { FaTimes } from "react-icons/fa";
 
 import FolderSelectModal from "./FolderSelectModal";
 
-const accessibilityValues = [
+export const accessibilityValues = [
     { name: "Hidden", value: FileAccessibility.HIDDEN },
     { name: "Public", value: FileAccessibility.PUBLIC },
     { name: "Private", value: FileAccessibility.PRIVATE },
 ];
 
-const classifications = Object.keys(SelectClassifications).map((key) => ({
+export const classifications = Object.keys(SelectClassifications).map((key) => ({
     name: key,
     value: SelectClassifications[key as keyof typeof SelectClassifications],
 }));
@@ -47,10 +41,9 @@ const classifications = Object.keys(SelectClassifications).map((key) => ({
 export type FolderType = IFolderSchema & { id: string; root?: FolderType };
 
 const AcceptResourceModal: FC<{
-    mode: "edit" | "upload";
     resource?: ResourceType;
     close: Function;
-}> = ({ mode, resource, close }) => {
+}> = ({ resource, close }) => {
     const [filename, setFilename] = useState<string>(resource?.filename || "");
     const [accessibility, setAccessibility] = useState<FileAccessibility>(
         FileAccessibility.PUBLIC
