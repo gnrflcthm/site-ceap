@@ -37,6 +37,7 @@ import { useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import AcceptResourceModal from "@components/Uploads/AcceptResourceModal";
+import UploadModal from "@components/Uploads/UploadModal";
 
 const UploadRequests: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -48,6 +49,12 @@ const UploadRequests: PageWithLayout<
         isOpen: showResourceModal,
         onClose: closeResourceModal,
         onOpen: openResourceModal,
+    } = useDisclosure();
+
+    const {
+        isOpen: showUploadModal,
+        onClose: closeUploadModal,
+        onOpen: openUploadModal,
     } = useDisclosure();
 
     const [currentResource, setCurrentResource] = useState<
@@ -89,7 +96,7 @@ const UploadRequests: PageWithLayout<
                 <Flex justify={"flex-end"} align={"center"} m={"2"} w={"full"}>
                     <Button
                         variant={"secondary"}
-                        onClick={() => openResourceModal()}
+                        onClick={() => openUploadModal()}
                         w={"fit-content"}
                         rounded={"md"}
                     >
@@ -112,6 +119,7 @@ const UploadRequests: PageWithLayout<
                     <Tbody>
                         {data?.map((resource) => (
                             <ResourceData
+                                showStatus={current === "uploads"}
                                 key={resource.id}
                                 resource={resource}
                                 refetch={refetch}
@@ -140,15 +148,17 @@ const UploadRequests: PageWithLayout<
                 </Table>
             </TableContainer>
             <AnimatePresence>
-                {showResourceModal && (
+                {showResourceModal && !showUploadModal && (
                     <AcceptResourceModal
-                        mode={"upload"}
                         resource={currentResource}
                         close={() => {
                             closeResourceModal();
                             setCurrentResource(undefined);
                         }}
                     />
+                )}
+                {showUploadModal && !showResourceModal && (
+                    <UploadModal onDismiss={() => closeUploadModal()} />
                 )}
             </AnimatePresence>
         </>
