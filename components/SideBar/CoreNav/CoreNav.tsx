@@ -43,7 +43,6 @@ const CoreNav: FC<{
         router.push("/");
         logout();
     };
-
     return (
         <Flex
             flexDir={"column"}
@@ -69,6 +68,7 @@ const CoreNav: FC<{
                                 name={"Resources"}
                                 href={"/"}
                                 icon={FaBook}
+                                matches={/resources(\/.*)*/}
                             />
                             <Routes role={user.role as AccountType} />
                             <CoreNavItem

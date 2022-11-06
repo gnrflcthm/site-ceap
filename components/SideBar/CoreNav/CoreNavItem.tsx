@@ -12,6 +12,7 @@ interface CoreNavItemBaseProps {
     icon?: As;
     bg?: string;
     color?: string;
+    matches?: RegExp;
 }
 
 interface CoreNavItemLink extends CoreNavItemBaseProps {
@@ -92,10 +93,16 @@ const CoreNavItem: FC<CoreNavItemProps> = ({
     icon,
     bg,
     color,
+    matches,
 }) => {
     const [collapsed] = useContext(CollapseContext);
     const { pathname } = useRouter();
-    const isActive: boolean = useMemo(() => pathname === href, [pathname]);
+    const isActive: boolean = useMemo(() => {
+        if (matches) {
+            return matches.test(pathname || "^.^") || pathname === href;
+        }
+        return pathname === href;
+    }, [pathname]);
     const isMobile = useContext(MobileContext);
 
     return (
