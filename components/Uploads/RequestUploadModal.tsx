@@ -4,16 +4,9 @@ import axios, { AxiosError } from "axios";
 import {
     Box,
     Button,
-    Center,
-    Flex,
-    Heading,
-    HStack,
-    Input,
     Progress,
-    Stack,
     Text,
     useToast,
-    VStack,
 } from "@chakra-ui/react";
 
 import UploadBoxInput from "./UploadBoxInput";
@@ -26,7 +19,6 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
     close,
 }) => {
     const [files, setFiles] = useState<File[]>([]);
-    const [dragging, setDragging] = useState<boolean>(false);
     const [uploading, setUploading] = useState<boolean>(false);
     const [error, setError] = useState<string | undefined>(undefined);
     const toast = useToast();
@@ -76,7 +68,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                     title={"Request For Upload"}
                     onDismiss={() => close()}
                 />
-                <Box onSubmit={upload} p={"4"}>
+                <Box as={"form"} onSubmit={upload} p={"4"}>
                     <UploadBoxInput
                         files={files}
                         setFiles={setFiles}
