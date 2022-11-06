@@ -41,7 +41,7 @@ export default authenticatedHandler().post(async (req, res) => {
                 res.end();
 
                 await rm(fileUpload.filepath);
-                
+
                 return;
             }
         }
@@ -52,7 +52,10 @@ export default authenticatedHandler().post(async (req, res) => {
         await connectDB();
         const user = await User.findOne({ authId: req.uid });
 
-        const status = user?.accountType === AccountType.MS_ADMIN ? RequestStatus.FOR_CEAP_REVIEW : RequestStatus.FOR_ADMIN_REVIEW;
+        const status =
+            user?.accountType === AccountType.MS_ADMIN
+                ? RequestStatus.FOR_CEAP_REVIEW
+                : RequestStatus.FOR_ADMIN_REVIEW;
 
         try {
             if (Array.isArray(fileUpload)) {
@@ -61,7 +64,7 @@ export default authenticatedHandler().post(async (req, res) => {
                     "uploads"
                 );
                 const uploadData = uploadResponses.map(
-                    ({ blobPath, filename }) => ({
+                    ({ blobPath, filename, size }) => ({
                         dateAdded: new Date(),
                         filename: filename,
                         fileType: verifyFileType(filename),
@@ -70,6 +73,7 @@ export default authenticatedHandler().post(async (req, res) => {
                         status,
                         blobPath,
                         uploadedBy: user,
+                        size,
                     })
                 );
                 await Resource.insertMany(uploadData);
@@ -81,7 +85,7 @@ export default authenticatedHandler().post(async (req, res) => {
 
                 await Promise.all(deleteQueue);
             } else {
-                const { blobPath, filename } = await uploadToTemp(
+                const { blobPath, filename, size } = await uploadToTemp(
                     fileUpload.filepath,
                     fileUpload.newFilename,
                     fileUpload.originalFilename || fileUpload.newFilename
@@ -95,6 +99,7 @@ export default authenticatedHandler().post(async (req, res) => {
                     status,
                     blobPath,
                     uploadedBy: user,
+                    size,
                 });
 
                 await rm(fileUpload.filepath);

@@ -2,7 +2,7 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 import { generateDownloadLink } from "@util/functions/blob";
 import { connectDB, Resource, User } from "@db/index";
 
-import { AccountType, FileAccessibility } from "@util/Enums";
+import { AccountType, FileAccessibility, RequestStatus } from "@util/Enums";
 
 export default authenticatedHandler().get(async (req, res) => {
     const { id } = req.query;
@@ -34,34 +34,30 @@ export default authenticatedHandler().get(async (req, res) => {
         let downloadLink: string;
 
         try {
-            if (
-                resource.uploadedBy?.id !== user?.id &&
-                ![
-                    AccountType.CEAP_ADMIN,
-                    AccountType.CEAP_SUPER_ADMIN,
-                ].includes(user?.accountType || AccountType.MS_USER)
-            ) {
-                switch (user?.accountType) {
-                    case AccountType.MS_ADMIN:
-                        if (
-                            user.memberSchool?.toHexString() !==
-                            resource.uploadedBy.memberSchool?.toHexString()
-                        ) {
+            if (resource.accessibility == FileAccessibility.HIDDEN) {
+                if (user) {
+                    switch (user.accountType) {
+                        case AccountType.MS_ADMIN:
+                            if (
+                                user.memberSchool !==
+                                resource.uploadedBy.memberSchool
+                            ) {
+                                res.statusMessage =
+                                    "You don't have enough permission to access the resource.";
+                                res.statusCode = 401;
+                                throw new Error(
+                                    "You don't have enough permission to access the resource."
+                                );
+                            }
+                            break;
+                        case AccountType.MS_USER:
                             res.statusMessage =
-                                "You do not have enough permission to access this file.";
+                                "You don't have enough permission to access the resource.";
                             res.statusCode = 401;
                             throw new Error(
-                                "You do not have enough permission to access this file."
+                                "You don't have enough permission to access the resource."
                             );
-                        }
-                        break;
-                    case AccountType.MS_USER:
-                        res.statusMessage =
-                            "You do not have enough permission to access this file.";
-                        res.statusCode = 401;
-                        throw new Error(
-                            "You do not have enough permission to access this file."
-                        );
+                    }
                 }
             }
 

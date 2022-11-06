@@ -66,7 +66,7 @@ export default authenticatedHandler([
                 );
 
                 const uploadData = uploadResponses.map(
-                    ({ blobPath, filename }) => ({
+                    ({ blobPath, filename, size }) => ({
                         dateAdded: new Date(),
                         filename: filename,
                         fileType: verifyFileType(filename),
@@ -77,6 +77,7 @@ export default authenticatedHandler([
                         uploadedBy: user,
                         classification,
                         folder,
+                        size,
                     })
                 );
                 await Resource.insertMany(uploadData);
@@ -88,7 +89,7 @@ export default authenticatedHandler([
 
                 await Promise.all(deleteQueue);
             } else {
-                const { blobPath, filename } = await uploadToTemp(
+                const { blobPath, filename, size } = await uploadToTemp(
                     fileUpload.filepath,
                     fileUpload.newFilename,
                     fileUpload.originalFilename || fileUpload.newFilename
@@ -104,6 +105,7 @@ export default authenticatedHandler([
                     uploadedBy: user,
                     classification,
                     folder,
+                    size,
                 });
 
                 await rm(fileUpload.filepath);
