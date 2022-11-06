@@ -1,0 +1,22 @@
+html {
+    overflow-y: overlay;
+}
+
+*::-webkit-scrollbar {
+    position: absolute;
+    height: 0.5rem;
+    width: 0.5rem;
+    /* background-color: #00000099; */
+}
+
+*::-webkit-scrollbar-track {
+    height: 0.5rem;
+    width: 0.5rem;
+}
+
+*::-webkit-scrollbar-thumb {
+    /* border: 5px solid rgba(0,0,0,0); */
+    background-clip: padding-box;
+    border-radius: 2rem;
+    background-color: white;
+}
