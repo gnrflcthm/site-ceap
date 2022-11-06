@@ -7,17 +7,19 @@ import { AccountType } from "@util/Enums";
 
 import { serialize } from "cookie";
 import parseMultipartForm from "../middleware/fileparser";
-import { Files } from 'formidable';
+import { Files } from "formidable";
 
 import nextConnect, { NextConnect } from "next-connect";
 interface AuthenticatedRequest extends NextApiRequest {
     role: AccountType;
     uid: string;
-    files?: Files
+    isLoggedIn: boolean;
+    files?: Files;
 }
 
 export default function (
-    authorizedRoles?: AccountType[]
+    authorizedRoles?: AccountType[],
+    loginCheck: boolean = false
 ): NextConnect<AuthenticatedRequest, NextApiResponse> {
     return nextConnect<AuthenticatedRequest, NextApiResponse>({
         onError: (err, req, res) => {
@@ -35,6 +37,11 @@ export default function (
             const auth = getAuth();
 
             if (!session) {
+                if (loginCheck) {
+                    req.isLoggedIn = false;
+                    next();
+                    return;
+                }
                 res.statusMessage = "You Are Not Logged In.";
                 res.status(401);
                 res.end();
@@ -50,13 +57,19 @@ export default function (
                     req.role = customClaims.role;
                 }
 
-                if (authorizedRoles && !authorizedRoles.includes(req.role)) {
-                    res.statusMessage =
-                        "You do not have sufficient permission to perform this action.";
-                    res.status(403);
-                    res.end();
-                    return;
+                if (!loginCheck) {
+                    if (
+                        authorizedRoles &&
+                        !authorizedRoles.includes(req.role)
+                    ) {
+                        res.statusMessage =
+                            "You do not have sufficient permission to perform this action.";
+                        res.status(403);
+                        res.end();
+                        return;
+                    }
                 }
+                req.isLoggedIn = true;
                 next();
             } catch (err) {
                 res.setHeader(

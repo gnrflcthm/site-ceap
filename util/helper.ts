@@ -29,7 +29,7 @@ export const Classifications = {
     CHRISTIAN_FORMATION: "Christian Formation",
     BASIC_EDUCATION: "Basic Education",
     HIGHER_EDUCATION: "Higher Education",
-    TECHINICAL_VOCATION_EDUCATION: "Techinical Vocation Education",
+    TECHNICAL_VOCATION_EDUCATION: "Technical Vocation Education",
     ALS_SPED: "ALS & SPED",
     PROGRAMS: "Programs",
     NATIONAL_CONVENTION: "National Convention",
@@ -45,8 +45,8 @@ export const SelectClassifications = {
     "Christian Formation": FileClassification.CHRISTIAN_FORMATION,
     "Basic Education": FileClassification.BASIC_EDUCATION,
     "Higher Education": FileClassification.HIGHER_EDUCATION,
-    "Techinical Vocation Education":
-        FileClassification.TECHINICAL_VOCATION_EDUCATION,
+    "Technical Vocation Education":
+        FileClassification.TECHNICAL_VOCATION_EDUCATION,
     "ALS & SPED": FileClassification.ALS_SPED,
     Programs: FileClassification.PROGRAMS,
     "National Convention": FileClassification.NATIONAL_CONVENTION,

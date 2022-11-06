@@ -18,6 +18,7 @@ interface UploadResponse {
     blobPath: string;
     filename: string;
     response: BlobUploadCommonResponse;
+    size: number | undefined;
 }
 
 export function uploadResource(
@@ -61,10 +62,12 @@ export function uploadResource(
             );
 
             const uploadRes = await blob.uploadStream(f);
+            const properties = await blob.getProperties();
             resolve({
                 blobPath: dest,
                 filename: originalFilename,
                 response: uploadRes,
+                size: properties.contentLength,
             });
         } catch (error) {
             reject(error);
@@ -114,7 +117,10 @@ export function uploadMultiple(
     });
 }
 
-export function generateDownloadLink(blobPath: string, filename?: string): Promise<string> {
+export function generateDownloadLink(
+    blobPath: string,
+    filename?: string
+): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
         const container = client.getContainerClient(
             process.env.BLOB_CONTAINER || "core"
@@ -136,7 +142,9 @@ export function generateDownloadLink(blobPath: string, filename?: string): Promi
         const downloadLink = await blob.generateSasUrl({
             permissions,
             expiresOn: new Date(Date.now() + 1000 * 25),
-            contentDisposition: filename ? `attachment; filename=${filename}` : "attachment"
+            contentDisposition: filename
+                ? `attachment; filename=${filename}`
+                : "attachment",
         });
 
         resolve(downloadLink);

@@ -16,6 +16,7 @@ export const useData = <T>(url: string, initialData?: T) => {
     }, []);
 
     const fetch = (u?: string) => {
+        if (isLoading) return;
         setIsLoading(true);
         setData(undefined);
         axios

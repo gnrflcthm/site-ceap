@@ -11,13 +11,15 @@ export interface GetServerSidePropsContextWithUser
 
 export default function AuthGetServerSideProps(
     handler: GetServerSideProps,
-    authorizedRoles?: AccountType[]
+    authorizedRoles?: AccountType[],
+    loginCheck: boolean = false
 ): GetServerSideProps {
     return async (context: GetServerSidePropsContextWithUser) => {
         const { req } = context;
         const { session } = req.cookies;
 
         if (!session) {
+            if (loginCheck) return handler(context);
             return {
                 props: {},
                 redirect: {
@@ -36,8 +38,27 @@ export default function AuthGetServerSideProps(
             if (authorizedRoles) {
                 const { customClaims } = await auth.getUser(tokenResult.uid);
 
-                if (customClaims) {
-                    if (!customClaims.role) {
+                if (!loginCheck) {
+                    if (customClaims) {
+                        if (!customClaims.role) {
+                            return {
+                                props: {},
+                                redirect: {
+                                    destination: "/",
+                                    statusCode: 307,
+                                },
+                            };
+                        }
+                        if (!authorizedRoles.includes(customClaims.role)) {
+                            return {
+                                props: {},
+                                redirect: {
+                                    destination: "/",
+                                    statusCode: 307,
+                                },
+                            };
+                        }
+                    } else {
                         return {
                             props: {},
                             redirect: {
@@ -46,38 +67,22 @@ export default function AuthGetServerSideProps(
                             },
                         };
                     }
-                    if (!authorizedRoles.includes(customClaims.role)) {
-                        return {
-                            props: {},
-                            redirect: {
-                                destination: "/",
-                                statusCode: 307,
-                            },
-                        };
-                    }
-                } else {
-                    return {
-                        props: {},
-                        redirect: {
-                            destination: "/",
-                            statusCode: 307,
-                        },
-                    };
                 }
             }
         } catch (err) {
-            console.debug(err);
             await axios.head("/api/user/logout");
-            return {
-                props: {},
-                redirect: {
-                    destination: "/",
-                    statusCode: 307,
-                },
-            };
+            if (!loginCheck) {
+                return {
+                    props: {},
+                    redirect: {
+                        destination: "/",
+                        statusCode: 307,
+                    },
+                };
+            }
         }
 
-        context.uid = tokenResult.uid;
+        context.uid = tokenResult?.uid;
 
         return handler(context);
     };
