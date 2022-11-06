@@ -2,36 +2,48 @@ import { FC } from "react";
 
 import Link from "next/link";
 
-import { Box, Heading, Text } from "@chakra-ui/react";
-
-import { motion } from "framer-motion";
+import { Center, Text, useToken } from "@chakra-ui/react";
+import { Classifications } from "@util/helper";
 
 const Category: FC<{
-    resourceCount?: number;
-    name?: string;
-    href: string;
-}> = ({ resourceCount, name, href }) => {
+    classification: string;
+}> = ({ classification }) => {
+    const [secondary] = useToken("colors", ["secondary"]);
+
     return (
-        <Link href={href} passHref>
-            <Box
-                as={motion.a}
+        <Link
+            href={`/resources/classification/${encodeURIComponent(
+                classification.toLowerCase()
+            )}`}
+            passHref
+        >
+            <Center
+                as={"a"}
+                key={classification}
+                rounded={"md"}
+                p={"8"}
                 bg={"secondary"}
-                rounded={"sm"}
-                p={"4"}
-                textAlign={"center"}
-                whileHover={{
-                    scale: 1.05,
-                }}
+                shadow={"md"}
+                transform={"auto"}
+                transition={"all 0.2s ease"}
                 _hover={{
-                    shadow: "md",
+                    bg: `linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)) ${secondary}`,
+                    scale: 1.1,
                 }}
-                shadow={"sm"}
             >
-                <Heading fontWeight={"semibold"} fontSize={"2xl"}>
-                    {name}
-                </Heading>
-                {resourceCount && <Text>{resourceCount} Files</Text>}
-            </Box>
+                <Text
+                    textAlign={"center"}
+                    color={"neutralizerDark"}
+                    fontWeight={"bold"}
+                    fontSize={"xl"}
+                >
+                    {
+                        Classifications[
+                            classification as keyof typeof Classifications
+                        ]
+                    }
+                </Text>
+            </Center>
         </Link>
     );
 };

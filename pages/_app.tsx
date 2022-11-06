@@ -18,6 +18,7 @@ import "@fontsource/montserrat/500.css";
 import "@fontsource/montserrat/600.css";
 import "@fontsource/montserrat/700.css";
 import "../style/georgia.css";
+import "../style/scroll.css";
 
 type ComponentWithLayout = AppProps & {
     Component: AppProps["Component"] & {
@@ -44,7 +45,11 @@ export default function App({ Component, pageProps }: ComponentWithLayout) {
     return (
         <ChakraProvider resetCSS={true} theme={appTheme}>
             <Head>
-                <link rel={"icon"} href={"/logo.png"} type={"image/icon type"} />
+                <link
+                    rel={"icon"}
+                    href={"/logo.png"}
+                    type={"image/icon type"}
+                />
             </Head>
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>

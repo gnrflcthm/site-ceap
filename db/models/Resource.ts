@@ -17,6 +17,7 @@ export interface IResourceSchema {
     folder?: Types.ObjectId;
     classification: FileClassification;
     fileType: FileType;
+    size?: number;
     uploadedBy?: Types.ObjectId;
 }
 
@@ -55,6 +56,7 @@ const resourceSchema = new Schema<IResourceSchema>(
             type: String,
             enum: RequestStatus,
         },
+        size: Number,
         uploadedBy: {
             type: Types.ObjectId,
             ref: "User",

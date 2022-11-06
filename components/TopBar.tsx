@@ -28,9 +28,9 @@ const TopBar: FC = () => {
             px={"4"}
             position={"sticky"}
             top={"0"}
-            h={{base: "14", lg: "16"}}
-            minH={{base: "14", lg: "16"}}
-            maxH={{base: "14", lg: "16"}}
+            h={{base: "7vh", lg: "7vh"}}
+            minH={{base: "7vh", lg: "7vh"}}
+            maxH={{base: "7vh", lg: "7vh"}}
         >
             <Box
                 as={"button"}

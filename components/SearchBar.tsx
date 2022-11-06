@@ -3,15 +3,25 @@ import { FC, useState } from "react";
 import { Box, Flex, Input } from "@chakra-ui/react";
 
 import { FaSearch } from "react-icons/fa";
+import { LayoutProps } from "framer-motion";
 
-const SearchBar: FC<{ query: string; setQuery: Function }> = ({
-    query,
-    setQuery,
-}) => {
+const SearchBar: FC<{
+    query: string;
+    setQuery: Function;
+    onSearch: Function;
+    width?: string | { [key: string]: any };
+    inputColor?: string;
+    placeholderColor?: string;
+}> = ({ query, setQuery, onSearch, width, inputColor = "neutralizerLight", placeholderColor = "#888888" }) => {
     const [focused, setFocused] = useState<boolean>(false);
 
     return (
-        <Flex position={"relative"} w={"50%"}>
+        <Flex
+            as={"form"}
+            position={"relative"}
+            w={width || "full"}
+            onSubmit={(e) => onSearch(e)}
+        >
             <Input
                 rounded={"none"}
                 w={"full"}
@@ -20,17 +30,19 @@ const SearchBar: FC<{ query: string; setQuery: Function }> = ({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={"Search title of resource"}
-                border={"none"}
-                borderBottom={"1px solid"}
-                borderBottomColor={"neutralizerLight"}
-                focusBorderColor={"transparent"}
+                // border={"none"}
+                // borderBottom={"1px solid"}
+                // borderBottomColor={"neutralizerLight"}
+                focusBorderColor={"secondary"}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
+                color={inputColor}
                 _placeholder={{
-                    color: "whiteAlpha.500",
+                    color: placeholderColor,
                 }}
-                color={"neutralizerLight"}
+                // color={"neutralizerLight"}
                 autoComplete={"off"}
+                name={"q"}
             />
             <Box
                 as={FaSearch}
@@ -41,7 +53,7 @@ const SearchBar: FC<{ query: string; setQuery: Function }> = ({
                 right={"4"}
                 color={"neutralizerLight"}
             />
-            <Box
+            {/* <Box
                 position={"absolute"}
                 bottom={"0"}
                 left={"50%"}
@@ -51,7 +63,7 @@ const SearchBar: FC<{ query: string; setQuery: Function }> = ({
                 h={"px"}
                 bg={"secondary"}
                 transition={"all 0.2s ease"}
-            />
+            /> */}
         </Flex>
     );
 };
