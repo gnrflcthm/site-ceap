@@ -20,9 +20,10 @@ import {
     CircularProgress,
     Grid,
     useBreakpoint,
+    useDisclosure,
 } from "@chakra-ui/react";
 import SearchBar from "@components/SearchBar";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Pill from "@components/Resources/Pill";
 import { useRouter } from "next/router";
 import { Folder, IFolderSchema, IResourceSchema } from "@db/models";
@@ -31,11 +32,17 @@ import { useData } from "@util/hooks/useData";
 import { connectDB } from "@db/index";
 import ResourceItem from "@components/Resources/ResourceItem";
 import FolderItem from "@components/Resources/FolderItem";
+import { AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
 
 type ResourceOrFolder = (
     | (IResourceSchema & { uploadedBy: string })
     | (IFolderSchema & { root: string })
 ) & { id: string };
+
+const EditResourceModal = dynamic(
+    () => import("@components/Resources/EditResourceModal")
+);
 
 const FolderPage: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
@@ -43,7 +50,7 @@ const FolderPage: PageWithLayout<
     const [mode, setMode] = useState<"folders" | "resources">("folders");
 
     const { data, isLoading, refetch, clear } = useData<ResourceOrFolder[]>(
-        `/api/resource/folders/${current?.id}${q ? "?q=" + q : ""}`
+        `/api/resource/folders/${current?.id}/folders`
     );
 
     const pageTitle =
@@ -56,6 +63,17 @@ const FolderPage: PageWithLayout<
         ["primary", "secondary", "neutralizerLight", "neutralizerDark"]
     );
 
+    const [selected, setSelected] = useState<
+        | (IResourceSchema & {
+              id: string;
+              folder: string;
+              uploadedBy: string;
+          })
+        | undefined
+    >(undefined);
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
     const router = useRouter();
 
     const changeClassification = (c: FileClassification | undefined) => {
@@ -65,6 +83,24 @@ const FolderPage: PageWithLayout<
                     c.toLowerCase()
                 )}`
             );
+        }
+    };
+
+    const manageResource = (
+        resource: IResourceSchema & {
+            id: string;
+            folder: string;
+            uploadedBy: string;
+        }
+    ) => {
+        setSelected(resource);
+        onOpen();
+    };
+
+    const search = (e: FormEvent) => {
+        e.preventDefault();
+        if (query) {
+            router.push(`/resources/search?q=${query}`);
         }
     };
 
@@ -98,7 +134,7 @@ const FolderPage: PageWithLayout<
                     <SearchBar
                         query={query}
                         setQuery={setQuery}
-                        onSearch={() => {}}
+                        onSearch={search}
                     />
                     <Flex
                         w={"full"}
@@ -143,7 +179,6 @@ const FolderPage: PageWithLayout<
                                         c as keyof typeof Classifications
                                     ];
                                 if (c === classification) return;
-
                                 return (
                                     <Pill
                                         key={c}
@@ -160,35 +195,36 @@ const FolderPage: PageWithLayout<
                         </HStack>
                     </Flex>
                 </Center>
-                <HStack p={"4"} justify={"flex-start"} h={"8vh"}>
-                    <TabButton
-                        onClick={() => {
-                            if (!isLoading) {
-                                setMode("folders");
-                                clear();
-                                refetch();
-                            }
-                        }}
-                        isActive={mode === "folders"}
-                    >
-                        Folders
-                    </TabButton>
-
-                    <TabButton
-                        onClick={() => {
-                            if (!isLoading) {
-                                setMode("resources");
-                                clear();
-                                refetch(
-                                    `/api/resource/folders/${current?.id}/resources${q ? "?q=" + q : ""}`
-                                );
-                            }
-                        }}
-                        isActive={mode === "resources"}
-                    >
-                        Resources
-                    </TabButton>
-                </HStack>
+                <Flex p={"4"} justify={"flex-start"} h={"8vh"}>
+                    <HStack>
+                        <TabButton
+                            onClick={() => {
+                                if (!isLoading) {
+                                    setMode("folders");
+                                    clear();
+                                    refetch();
+                                }
+                            }}
+                            isActive={mode === "folders"}
+                        >
+                            Folders
+                        </TabButton>
+                        <TabButton
+                            onClick={() => {
+                                if (!isLoading) {
+                                    setMode("resources");
+                                    clear();
+                                    refetch(
+                                        `/api/resource/folders/${current?.id}/resources`
+                                    );
+                                }
+                            }}
+                            isActive={mode === "resources"}
+                        >
+                            Resources
+                        </TabButton>
+                    </HStack>
+                </Flex>
                 <Flex
                     justify={"flex-start"}
                     align={"stretch"}
@@ -234,6 +270,20 @@ const FolderPage: PageWithLayout<
                                                 {data.map((d) => (
                                                     <ResourceItem
                                                         resource={d}
+                                                        reload={() => {
+                                                            if (!isLoading) {
+                                                                setMode(
+                                                                    "resources"
+                                                                );
+                                                                clear();
+                                                                refetch(
+                                                                    `/api/resource/folders/${current?.id}/resources`
+                                                                );
+                                                            }
+                                                        }}
+                                                        onManage={
+                                                            manageResource
+                                                        }
                                                     />
                                                 ))}
                                             </>
@@ -288,6 +338,16 @@ const FolderPage: PageWithLayout<
                     </Grid>
                 </Flex>
             </Box>
+            <AnimatePresence>
+                {isOpen && selected && (
+                    <EditResourceModal
+                        resource={selected}
+                        onDismiss={() => {
+                            onClose();
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 };

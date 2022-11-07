@@ -5,155 +5,107 @@ import { PageWithLayout } from "../_app";
 
 import {
     Box,
-    Flex,
     Text,
-    Image,
-    VStack,
-    HStack,
     Center,
+    useToken,
+    Grid,
+    useDisclosure,
 } from "@chakra-ui/react";
-
-import landingBg from "@assets/aboutimghd.jpg";
-import coreNavLogo from "@assets/CORE_Nav.png";
 
 import SearchBar from "@components/SearchBar";
 import Head from "next/head";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { connectDB, Resource, User } from "@db/index";
+import { connectDB, IResourceSchema, Resource, User } from "@db/index";
 import {
+    AccountType,
     FileAccessibility,
     FileClassification,
     FileType,
-    RequestStatus,
+    ResourceStatus,
 } from "@util/Enums";
 import { useRouter } from "next/router";
 import ResourceItem from "@components/Resources/ResourceItem";
-import Pill from "@components/Resources/Pill";
-import { getFileClassification } from "@util/helper";
 import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
+import { AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const EditResourceModal = dynamic(
+    () => import("@components/Resources/EditResourceModal")
+);
 
 const SearchResource: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ data }) => {
     const [query, setQuery] = useState<string>(data?.query || "");
-
-    const [categoryFilter, setCategoryFilter] = useState<
-        FileClassification | "All"
-    >("All");
-
-    const filteredResources = useMemo<ClientResourceType[] | undefined>(() => {
-        if (data?.resources) {
-            if (categoryFilter === "All") {
-                return data.resources;
-            } else {
-                return data.resources.filter(
-                    (resource) => resource.classification === categoryFilter
-                );
-            }
-        }
-        return undefined;
-    }, [data?.resources, categoryFilter]);
-
+    const [primary] = useToken("colors", ["primary"]);
     const router = useRouter();
+
+    const [selected, setSelected] = useState<
+        | (IResourceSchema & {
+              id: string;
+              folder: string;
+              uploadedBy: string;
+          })
+        | undefined
+    >(undefined);
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     const search = (e: FormEvent) => {
         e.preventDefault();
         router.push(`/resources/search/?q=${query}`);
     };
 
-    const classifications = useMemo<(FileClassification | "All")[]>(() => {
-        let classifications: (FileClassification | "All")[] = ["All"];
-        if (data?.resources) {
-            data.resources
-                .map((resource) => resource.classification)
-                .forEach((classification, index, arr) => {
-                    if (arr.indexOf(classification) === index)
-                        classifications.push(classification);
-                });
+    const manageResource = (
+        resource: IResourceSchema & {
+            id: string;
+            folder: string;
+            uploadedBy: string;
         }
-        return classifications;
-    }, [data?.resources]);
-
-    useEffect(() => {
-        if (data?.resources) {
-            setCategoryFilter("All");
-        } else {
-        }
-    }, [data]);
+    ) => {
+        setSelected(resource);
+        onOpen();
+    };
 
     return (
         <>
             <Head>
                 <title>CORE</title>
             </Head>
-            <Flex
-                position={"relative"}
-                flexDir={"column"}
-                w={"full"}
-                h={"93vh"}
-                maxH={"93vh"}
-                flex={"1"}
-                overflow={"auto"}
-                overflowX={"hidden"}
-                bg={`linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${landingBg.src})`}
-                bgPos={"center"}
-                bgSize={"cover"}
-                backdropBlur={"sm"}
-                py={"20"}
-            >
-                <Flex
-                    w={"full"}
-                    justify={"center"}
-                    align={"center"}
+            <Box>
+                <Center
+                    p={"4"}
+                    flexDir={"column"}
                     position={"relative"}
+                    w={"full"}
+                    bg={`${primary}EE`}
                 >
-                    <VStack
-                        justify={"center"}
-                        align={"center"}
-                        spacing={"4"}
-                        position={"relative"}
-                        mb={"10"}
-                        px={"10"}
+                    <SearchBar {...{ query, setQuery, onSearch: search }} />
+                </Center>
+                {data?.resources ? (
+                    <Grid
                         w={"full"}
+                        h={"fit-content"}
+                        gridTemplateColumns={{
+                            base: "repeat(2, 1fr)",
+                            md: "repeat(3, 1fr)",
+                            xl: "repeat(4, 1fr)",
+                        }}
+                        justifyItems={"center"}
+                        alignItems={"start"}
+                        gap={"4"}
+                        mt={"4"}
                     >
-                        <Image src={coreNavLogo.src} w={"96"} />
-                        <Box w={{ base: "full", lg: "50%" }}>
-                            <SearchBar
-                                {...{ query, setQuery, onSearch: search }}
+                        {data.resources.map((resource) => (
+                            <ResourceItem
+                                resource={resource}
+                                reload={() => router.reload()}
+                                onManage={manageResource}
                             />
-                        </Box>
-                        {data?.resources && data?.resources?.length > 0 && (
-                            <HStack w={"50%"}>
-                                {classifications.map((classification) => (
-                                    <Pill
-                                        key={classification}
-                                        name={
-                                            classification === "All"
-                                                ? "All"
-                                                : getFileClassification(
-                                                      classification
-                                                  )
-                                        }
-                                        onClick={() =>
-                                            setCategoryFilter(classification)
-                                        }
-                                        isActive={
-                                            categoryFilter === classification
-                                        }
-                                    />
-                                ))}
-                            </HStack>
-                        )}
-                    </VStack>
-                </Flex>
-                {filteredResources && filteredResources?.length > 0 ? (
-                    <VStack>
-                        {filteredResources.map((resource) => (
-                            <ResourceItem resource={resource} />
                         ))}
-                    </VStack>
+                    </Grid>
                 ) : (
                     <Center minH={"20vh"}>
                         <Text
@@ -165,7 +117,17 @@ const SearchResource: PageWithLayout<
                         </Text>
                     </Center>
                 )}
-            </Flex>
+            </Box>
+            <AnimatePresence>
+                {isOpen && selected && (
+                    <EditResourceModal
+                        resource={selected}
+                        onDismiss={() => {
+                            onClose();
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 };
@@ -177,20 +139,21 @@ export interface ClientResourceType {
     fileType: FileType;
     size: number;
     uploadedBy: string | undefined;
+    folder: string;
 }
 
 export const getServerSideProps: GetServerSideProps<{
-    data?: { resources?: ClientResourceType[]; query?: string };
+    data?: {
+        resources?: (IResourceSchema & {
+            id: string;
+            folder: string;
+            uploadedBy: string;
+        })[];
+        query?: string;
+    };
 }> = AuthGetServerSideProps(
     async ({ query, uid }: GetServerSidePropsContextWithUser) => {
         let q: string | undefined;
-        let p: number | undefined = undefined;
-
-        if (query.p && typeof query.p === "string") {
-            if (!isNaN(parseInt(query.p))) {
-                p = parseInt(query.p);
-            }
-        }
 
         if (query.q) {
             if (Array.isArray(query.q)) {
@@ -205,18 +168,29 @@ export const getServerSideProps: GetServerSideProps<{
         const user = await User.findOne({ authId: uid });
 
         const accessibility: FileAccessibility[] = [FileAccessibility.PUBLIC];
+        const status: ResourceStatus[] = [ResourceStatus.APPROVED];
+
         if (user) {
-            accessibility.push(FileAccessibility.PRIVATE);
+            switch (user.accountType) {
+                case AccountType.CEAP_SUPER_ADMIN:
+                case AccountType.CEAP_ADMIN:
+                    accessibility.push(FileAccessibility.HIDDEN);
+                    status.push(ResourceStatus.ARCHIVED);
+                default:
+                    accessibility.push(FileAccessibility.PRIVATE);
+            }
         }
 
         if (q) {
             const resources = await Resource.find({
                 filename: { $regex: `.*${q}.*`, $options: "i" },
-                status: RequestStatus.APPROVED,
+                status,
                 accessibility,
+                classification: query.c || Object.keys(FileClassification),
             })
-                .select("id filename classification fileType size uploadedBy")
-                .skip(p ? 15 * p : 0)
+                .select(
+                    "id filename classification fileType accessibility size status uploadedBy folder"
+                )
                 .limit(15);
 
             return {
@@ -225,6 +199,7 @@ export const getServerSideProps: GetServerSideProps<{
                         resources: resources.map((resource) => ({
                             ...resource.toJSON(),
                             uploadedBy: resource.uploadedBy?.toHexString(),
+                            folder: resource.folder?.toHexString(),
                         })),
                         query: q,
                     },
