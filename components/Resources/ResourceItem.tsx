@@ -4,24 +4,42 @@ import {
     As,
     Box,
     Center,
-    Flex,
-    Heading,
-    IconButton,
     HStack,
     Text,
     VStack,
     Tooltip,
+    Menu,
+    MenuButton,
+    MenuList,
 } from "@chakra-ui/react";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload, FaEllipsisV } from "react-icons/fa";
 
 import axios, { AxiosError } from "axios";
 import { AuthContext } from "@context/AuthContext";
 import { ClientResourceType } from "pages/resources/search";
 
 import { FaFileAlt, FaFileImage, FaFileVideo, FaFilePdf } from "react-icons/fa";
-import { FileType } from "@util/Enums";
+import { AccountType, FileType } from "@util/Enums";
+import dynamic from "next/dynamic";
+import { IResourceSchema } from "@db/models";
 
-const ResourceItem: FC<{ resource: ClientResourceType }> = ({ resource }) => {
+const UserMenuList = dynamic(
+    () => import("@components/Resources/UserMenuList")
+);
+
+const CEAPMenuList = dynamic(
+    () => import("@components/Resources/CEAPMenuList")
+);
+
+const ResourceItem: FC<{
+    resource: IResourceSchema & {
+        id: string;
+        uploadedBy: string;
+        folder: string;
+    };
+    reload: Function;
+    onManage: Function;
+}> = ({ resource, reload, onManage }) => {
     const { user } = useContext(AuthContext);
 
     const download = () => {
@@ -57,10 +75,12 @@ const ResourceItem: FC<{ resource: ClientResourceType }> = ({ resource }) => {
     })();
 
     let size = "";
-    if (resource.size < 1000000) {
-        size = `${(resource.size * Math.pow(10, -3)).toFixed(1)} KB`;
-    } else {
-        size = `${(resource.size * Math.pow(10, -6)).toFixed(1)} MB`;
+    if (resource.size) {
+        if (resource.size < 1000000) {
+            size = `${(resource.size * Math.pow(10, -3)).toFixed(1)} KB`;
+        } else {
+            size = `${(resource.size * Math.pow(10, -6)).toFixed(1)} MB`;
+        }
     }
 
     return (
@@ -73,33 +93,93 @@ const ResourceItem: FC<{ resource: ClientResourceType }> = ({ resource }) => {
                 borderColor={"neutralizerDark"}
                 flexDir={"column"}
                 cursor={"pointer"}
+                w={"12rem"}
                 _hover={{
-                    color: "secondary",
                     borderColor: "secondary",
                 }}
-                onClick={() => download()}
-                w={"12rem"}
             >
-                <Center mb={"4"}>
-                    <Box as={icon} w={"full"} height={"16"} color={"inherit"} />
-                </Center>
-                <Text
-                    fontSize={"xl"}
-                    color={"inherit"}
-                    textAlign={"center"}
-                    whiteSpace={"nowrap"}
-                    textOverflow={"ellipsis"}
+                <Menu>
+                    <MenuButton
+                        pos={"absolute"}
+                        top={"0"}
+                        right={"0"}
+                        h={"10"}
+                        w={"8"}
+                        _hover={{
+                            bg: "#00000044",
+                        }}
+                    >
+                        <Box
+                            as={FaEllipsisV}
+                            m={"auto"}
+                            cursor={"pointer"}
+                            fontSize={"xl"}
+                        />
+                    </MenuButton>
+                    {(() => {
+                        if (user) {
+                            switch (user.role as AccountType) {
+                                case AccountType.CEAP_ADMIN:
+                                case AccountType.CEAP_SUPER_ADMIN:
+                                    return (
+                                        <CEAPMenuList
+                                            onDownload={() => download()}
+                                            onManage={onManage}
+                                            resource={
+                                                resource as IResourceSchema & {
+                                                    id: string;
+                                                    uploadedBy: string;
+                                                    folder: string;
+                                                }
+                                            }
+                                            reload={() => reload()}
+                                        />
+                                    );
+                            }
+                        } else {
+                            return (
+                                <UserMenuList onDownload={() => download()} />
+                            );
+                        }
+                    })()}
+                </Menu>
+                <Box
                     w={"full"}
-                    overflow={"hidden"}
+                    _hover={{
+                        color: "secondary",
+                        borderColor: "secondary",
+                    }}
+                    // onClick={() => download()}
                 >
-                    {resource.filename}
-                </Text>
-                <HStack w={"full"} justify={"flex-end"}>
-                    <Text color={"blackAlpha.700"} textTransform={"uppercase"}>
-                        {size}
+                    <Center mb={"4"}>
+                        <Box
+                            as={icon}
+                            w={"full"}
+                            height={"16"}
+                            color={"inherit"}
+                        />
+                    </Center>
+                    <Text
+                        fontSize={"xl"}
+                        color={"inherit"}
+                        textAlign={"center"}
+                        whiteSpace={"nowrap"}
+                        textOverflow={"ellipsis"}
+                        w={"full"}
+                        overflow={"hidden"}
+                    >
+                        {resource.filename}
                     </Text>
-                    <Box as={FaDownload} color={"inherit"} />
-                </HStack>
+                    <HStack w={"full"} justify={"flex-end"}>
+                        <Text
+                            color={"blackAlpha.700"}
+                            textTransform={"uppercase"}
+                        >
+                            {size}
+                        </Text>
+                        <Box as={FaDownload} color={"inherit"} />
+                    </HStack>
+                </Box>
             </VStack>
         </Tooltip>
     );
