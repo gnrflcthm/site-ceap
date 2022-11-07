@@ -8,7 +8,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
-import { AccountType, RequestStatus } from "@util/Enums";
+import { AccountType, ResourceStatus } from "@util/Enums";
 import {
     connectDB,
     IResourceSchema,
@@ -188,7 +188,7 @@ export const getServerSideProps: GetServerSideProps<{
         }
 
         let uploadRequests = await Resource.find({
-            status: RequestStatus.FOR_ADMIN_REVIEW,
+            status: ResourceStatus.FOR_ADMIN_REVIEW,
         })
             .populate({
                 path: "uploadedBy",

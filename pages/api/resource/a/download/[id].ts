@@ -2,7 +2,7 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 import { generateDownloadLink } from "@util/functions/blob";
 import { connectDB, Resource, User } from "@db/index";
 
-import { AccountType, FileAccessibility, RequestStatus } from "@util/Enums";
+import { AccountType, FileAccessibility, ResourceStatus } from "@util/Enums";
 
 export default authenticatedHandler().get(async (req, res) => {
     const { id } = req.query;

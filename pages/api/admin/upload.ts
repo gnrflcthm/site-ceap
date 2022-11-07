@@ -7,7 +7,7 @@ import { verifyFileType } from "@util/helper";
 import { rm } from "fs/promises";
 
 import { connectDB, Folder, Resource, User } from "@db/index";
-import { AccountType, FileAccessibility, RequestStatus } from "@util/Enums";
+import { AccountType, FileAccessibility, ResourceStatus } from "@util/Enums";
 
 export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
@@ -72,7 +72,7 @@ export default authenticatedHandler([
                         fileType: verifyFileType(filename),
                         contentType: contentType(filename) || "",
                         accessibility,
-                        status: RequestStatus.APPROVED,
+                        status: ResourceStatus.APPROVED,
                         blobPath,
                         uploadedBy: user,
                         classification,
@@ -100,7 +100,7 @@ export default authenticatedHandler([
                     fileType: verifyFileType(filename),
                     contentType: contentType(filename) || "",
                     accessibility,
-                    status: RequestStatus.APPROVED,
+                    status: ResourceStatus.APPROVED,
                     blobPath,
                     uploadedBy: user,
                     classification,

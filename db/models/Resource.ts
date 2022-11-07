@@ -4,7 +4,7 @@ import {
     FileAccessibility,
     FileClassification,
     FileType,
-    RequestStatus,
+    ResourceStatus,
 } from "../../util/Enums";
 
 export interface IResourceSchema {
@@ -13,7 +13,7 @@ export interface IResourceSchema {
     dateAdded: Date;
     contentType: string;
     accessibility: FileAccessibility;
-    status: RequestStatus;
+    status: ResourceStatus;
     folder?: Types.ObjectId;
     classification: FileClassification;
     fileType: FileType;
@@ -54,7 +54,7 @@ const resourceSchema = new Schema<IResourceSchema>(
         },
         status: {
             type: String,
-            enum: RequestStatus,
+            enum: ResourceStatus,
         },
         size: Number,
         uploadedBy: {

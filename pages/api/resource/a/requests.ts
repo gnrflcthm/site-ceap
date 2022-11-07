@@ -1,7 +1,7 @@
 import authenticatedHandler from "@util/api/authenticatedHandler";
 
 import { connectDB, Folder, Resource, User } from "@db/index";
-import { AccountType, RequestStatus } from "@util/Enums";
+import { AccountType, ResourceStatus } from "@util/Enums";
 
 export default authenticatedHandler([
     AccountType.MS_ADMIN,
@@ -45,7 +45,7 @@ export default authenticatedHandler([
             case AccountType.CEAP_SUPER_ADMIN:
             case AccountType.CEAP_ADMIN:
                 uploads = await Resource.find({
-                    status: RequestStatus.FOR_CEAP_REVIEW,
+                    status: ResourceStatus.FOR_CEAP_REVIEW,
                 })
                     .populate({
                         path: "uploadedBy",
@@ -66,7 +66,7 @@ export default authenticatedHandler([
                 return;
             case AccountType.MS_ADMIN:
                 uploads = await Resource.find({
-                    status: RequestStatus.FOR_ADMIN_REVIEW,
+                    status: ResourceStatus.FOR_ADMIN_REVIEW,
                 })
                     .populate({
                         path: "uploadedBy",

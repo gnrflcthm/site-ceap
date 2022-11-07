@@ -15,7 +15,7 @@ import { IFolderSchema } from "@db/models";
 import {
     FileAccessibility,
     FileClassification,
-    RequestStatus,
+    ResourceStatus,
 } from "@util/Enums";
 import { getFileClassification } from "@util/helper";
 import { SelectClassifications } from "@util/helper";
@@ -87,7 +87,7 @@ const AcceptResourceModal: FC<{
                 accessibility,
                 classification,
                 folder: location?.id,
-                status: RequestStatus.APPROVED,
+                status: ResourceStatus.APPROVED,
             });
             toast({
                 status: "success",

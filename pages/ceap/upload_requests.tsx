@@ -31,7 +31,7 @@ import ResourceData from "@components/Uploads/ResourceData";
 
 import { Resource, connectDB, IResourceSchema } from "@db/index";
 
-import { AccountType, RequestStatus, FileType } from "@util/Enums";
+import { AccountType, ResourceStatus, FileType } from "@util/Enums";
 import TabButton from "@components/Accounts/TabButton";
 import { useState } from "react";
 import { FaCloudUploadAlt } from "react-icons/fa";
@@ -178,7 +178,7 @@ export const getServerSideProps: GetServerSideProps<{
         await connectDB();
 
         const uploads = await Resource.find({
-            status: RequestStatus.FOR_CEAP_REVIEW,
+            status: ResourceStatus.FOR_CEAP_REVIEW,
         })
             .populate({ path: "uploadedBy", select: "id displayName" })
             .populate("folder", ["id", "name", "fullPath"])

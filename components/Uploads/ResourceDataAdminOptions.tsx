@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { FaEllipsisV, FaDownload, FaCheckCircle, FaBan } from "react-icons/fa";
 import axios from "axios";
-import { RequestStatus } from "@util/Enums";
+import { ResourceStatus } from "@util/Enums";
 
 const ResourceDataAdminOptions: FC<{
     resourceId: string;
@@ -20,7 +20,7 @@ const ResourceDataAdminOptions: FC<{
     onReject: Function;
     isCurrent?: boolean;
     setProcessing: Function;
-    resourceStatus: RequestStatus;
+    resourceStatus: ResourceStatus;
 }> = ({
     resourceId,
     onDownload,
@@ -79,7 +79,7 @@ const ResourceDataAdminOptions: FC<{
                         </Text>
                     </MenuItem>
                 )}
-                {resourceStatus !== RequestStatus.APPROVED && (
+                {resourceStatus !== ResourceStatus.APPROVED && (
                     <MenuItem onClick={() => onReject()} color={"red.500"}>
                         <Box as={FaBan} mr={"2"} />
                         <Text

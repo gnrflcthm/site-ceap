@@ -7,7 +7,7 @@ import { verifyFileType } from "@util/helper";
 import { rm } from "fs/promises";
 
 import { connectDB, Resource, User } from "@db/index";
-import { AccountType, FileAccessibility, RequestStatus } from "@util/Enums";
+import { AccountType, FileAccessibility, ResourceStatus } from "@util/Enums";
 
 export default authenticatedHandler().post(async (req, res) => {
     const files = req.files;
@@ -54,8 +54,8 @@ export default authenticatedHandler().post(async (req, res) => {
 
         const status =
             user?.accountType === AccountType.MS_ADMIN
-                ? RequestStatus.FOR_CEAP_REVIEW
-                : RequestStatus.FOR_ADMIN_REVIEW;
+                ? ResourceStatus.FOR_CEAP_REVIEW
+                : ResourceStatus.FOR_ADMIN_REVIEW;
 
         try {
             if (Array.isArray(fileUpload)) {

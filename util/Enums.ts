@@ -4,10 +4,11 @@ export enum FileAccessibility {
     HIDDEN = "HIDDEN",
 }
 
-export enum RequestStatus {
+export enum ResourceStatus {
     FOR_ADMIN_REVIEW = "FOR_ADMIN_REVIEW",
     FOR_CEAP_REVIEW = "FOR_CEAP_REVIEW",
     APPROVED = "APPROVED",
+    ARCHIVED = "ARCHIVED",
 }
 
 export enum FileClassification {
