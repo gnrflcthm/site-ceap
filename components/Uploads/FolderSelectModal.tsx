@@ -5,21 +5,15 @@ import {
     Button,
     Center,
     Flex,
-    Heading,
     Box,
     IconButton,
     HStack,
-    VStack,
     Text,
     Grid,
-    GridItem,
-    Stack,
     CircularProgress,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
 import {
     FaFolderPlus,
-    FaFolder,
     FaTrash,
     FaPencilAlt,
     FaBan,
@@ -56,7 +50,7 @@ const FolderSelectModal: FC<{
         data: folders,
         refetch,
         clear,
-    } = useData<FolderType[]>(`/api/resource/folders/${baseFolder?.id}`);
+    } = useData<FolderType[]>(`/api/resource/folders/${baseFolder?.id}/folders`);
 
     const createFolder = async (folderName: string) => {
         setLoading(true);
