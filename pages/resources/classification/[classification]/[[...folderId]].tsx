@@ -35,10 +35,15 @@ import FolderItem from "@components/Resources/FolderItem";
 import { AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 
-type ResourceOrFolder = (
-    | (IResourceSchema & { uploadedBy: string })
-    | (IFolderSchema & { root: string })
-) & { id: string };
+type ResourceType = IResourceSchema & {
+    id: string;
+    uploadedBy: string;
+    folder: string;
+};
+
+type FolderType = IFolderSchema & { id: string; root: string };
+
+type ResourceOrFolder = ResourceType | FolderType;
 
 const EditResourceModal = dynamic(
     () => import("@components/Resources/EditResourceModal")
@@ -269,7 +274,7 @@ const FolderPage: PageWithLayout<
                                             <>
                                                 {data.map((d) => (
                                                     <ResourceItem
-                                                        resource={d}
+                                                        resource={d as ResourceType}
                                                         reload={() => {
                                                             if (!isLoading) {
                                                                 setMode(
@@ -293,7 +298,7 @@ const FolderPage: PageWithLayout<
                                             <>
                                                 {data.map((f) => (
                                                     <FolderItem
-                                                        folder={f}
+                                                        folder={f as FolderType}
                                                         onClick={() =>
                                                             navigateFolder(f.id)
                                                         }

@@ -40,7 +40,8 @@ export default authenticatedHandler().get(async (req, res) => {
                         case AccountType.MS_ADMIN:
                             if (
                                 user.memberSchool !==
-                                resource.uploadedBy.memberSchool
+                                //@ts-ignore
+                                resource.uploadedBy?.memberSchool
                             ) {
                                 res.statusMessage =
                                     "You don't have enough permission to access the resource.";

@@ -1,5 +1,3 @@
-import Resources, { getServerSideProps as gssp } from "./resources";
+import Resources from "./resources";
 
 export default Resources;
-
-export const getServerSideProps = gssp;

@@ -128,7 +128,16 @@ const UserRegistrations: PageWithLayout<
                                         case AccountType.CEAP_ADMIN:
                                             return (
                                                 <AdminRegistrationData
-                                                    data={reg}
+                                                    data={
+                                                        reg as IMSAdminRegistrationSchema & {
+                                                            id: string;
+                                                            registeredAt: string;
+                                                            memberSchool: {
+                                                                id: string;
+                                                                name: string;
+                                                            };
+                                                        }
+                                                    }
                                                     key={reg.id}
                                                     refresh={refetch}
                                                 />
