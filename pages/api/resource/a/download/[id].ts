@@ -19,10 +19,9 @@ export default authenticatedHandler().get(async (req, res) => {
 
         await connectDB();
 
-        const resource = await Resource.findById(resourceId).populate(
-            "uploadedBy",
-            ["id", "memberSchool"]
-        );
+        const resource = await Resource.findById(resourceId);
+
+        const uploader = await User.findById(resource?.uploadedBy);
 
         if (!resource) {
             res.statusMessage = "Not Found!";
@@ -32,16 +31,15 @@ export default authenticatedHandler().get(async (req, res) => {
         }
 
         let downloadLink: string;
-
         try {
             if (resource.accessibility == FileAccessibility.HIDDEN) {
                 if (user) {
                     switch (user.accountType) {
                         case AccountType.MS_ADMIN:
                             if (
-                                user.memberSchool !==
+                                user.memberSchool?.toHexString() !==
                                 //@ts-ignore
-                                resource.uploadedBy?.memberSchool
+                                uploader?.memberSchool?.toHexString()
                             ) {
                                 res.statusMessage =
                                     "You don't have enough permission to access the resource.";
