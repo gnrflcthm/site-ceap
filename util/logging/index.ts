@@ -1,12 +1,40 @@
-import { IUserSchema } from "@db/index";
+import { connectDB, IUserSchema, Log } from "@db/index";
 
-function logAction(
+export enum Action {
+    // FILES
+    MODIFY_FILE = "MODIFY FILE",    // Location, Accessibility, etc.
+    UPLOAD_REQUEST = "UPLOAD REQUEST",
+    ACCEPT_UPLOAD = "ACCEPT UPLOAD",
+    REJECT_UPLOAD = "REJECT UPLOAD",
+    DELETE_RESOURCE = "DELETE RESOURCE",
+    UPLOAD_RESOURCE = "UPLOAD RESOURCE",
+    
+    // ACCOUNT
+    DELETE_ACCOUNT = "DELETE ACCOUNT",
+    UPDATE_USER = "UPDATE USER", // Roles, Personal Info
+    CREATE_ADMIN = "CREATE ADMIN",
+
+    // REGISTRATION
+    ACCEPT_ADMIN_REGISTRATION = "ACCEPT ADMIN REGISTRATION",
+    ACCEPT_USER_REGISTRATION = "ACCEPT USER REGISTRATION",
+    REJECT_ADMIN_REGISTRATION = "REJECT ADMIN REGISTRATION",
+    REJECT_USER_REGISTRATION = "REJECT USER REGISTRATION",
+}
+
+export function logAction(
     actor: IUserSchema,
-    action: string,
+    action: Action,
     details: string
 ): Promise<void> {
     return new Promise(async (resolve, reject) => {
         try {
+            await connectDB();
+            await Log.create({
+                action,
+                datePerformed: new Date(),
+                details,
+                user: actor,
+            });
         } catch (err) {
             reject(err);
         }
