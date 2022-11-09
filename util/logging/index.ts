@@ -2,12 +2,15 @@ import { connectDB, IUserSchema, Log } from "@db/index";
 
 export enum Action {
     // FILES
-    MODIFY_FILE = "MODIFY FILE",    // Location, Accessibility, etc.
+    MODIFY_RESOURCE = "MODIFY FILE",    // Location, Accessibility, etc.
     UPLOAD_REQUEST = "UPLOAD REQUEST",
     ACCEPT_UPLOAD = "ACCEPT UPLOAD",
     REJECT_UPLOAD = "REJECT UPLOAD",
     DELETE_RESOURCE = "DELETE RESOURCE",
     UPLOAD_RESOURCE = "UPLOAD RESOURCE",
+    CREATED_FOLDER = "CREATED FOLDER",
+    DELETED_FOLDER = "DELETED FOLDER",
+    RENAMED_FOLDER = "RENAMED FOLDER",
     
     // ACCOUNT
     DELETE_ACCOUNT = "DELETE ACCOUNT",
