@@ -5,6 +5,7 @@ export interface ILogSchema {
     action: string;
     details?: string;
     user?: Types.ObjectId;
+    memberSchool?: Types.ObjectId;
 }
 
 const logSchema = new Schema<ILogSchema>(
@@ -21,6 +22,10 @@ const logSchema = new Schema<ILogSchema>(
         user: {
             type: Types.ObjectId,
             ref: "User",
+        },
+        memberSchool: {
+            type: Types.ObjectId,
+            ref: "MemberSchool",
         },
     },
     {
