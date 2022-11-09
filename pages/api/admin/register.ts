@@ -6,6 +6,7 @@ import {
     MemberSchool,
 } from "@db/index";
 import handler from "@util/api/handler";
+import { sendAdminRegisterNotif } from "@util/email";
 
 interface IRegistrationData {
     firstName: string;
@@ -50,7 +51,7 @@ export default handler().post(async (req, res) => {
 
         const memberSchool = await MemberSchool.findById(memberSchoolId);
 
-        await MSAdminRegistration.create({
+        const userReg = await MSAdminRegistration.create({
             email,
             firstName,
             lastName,
@@ -62,6 +63,10 @@ export default handler().post(async (req, res) => {
 
         res.statusMessage = "Registered Successfully";
         res.status(200);
+
+        if (userReg && memberSchool) {
+            await sendAdminRegisterNotif(userReg, memberSchool?.name);
+        }
     } catch (err) {
         console.log(err);
         res.statusMessage = "Error in Registering";

@@ -9,6 +9,9 @@ import { rm } from "fs/promises";
 import { connectDB, Resource, User } from "@db/index";
 import { AccountType, FileAccessibility, ResourceStatus } from "@util/Enums";
 import { Action, logAction } from "@util/logging";
+import {
+    sendUserUploadResponseEmail,
+} from "@util/email";
 
 export default authenticatedHandler().post(async (req, res) => {
     const files = req.files;
@@ -89,7 +92,7 @@ export default authenticatedHandler().post(async (req, res) => {
                     await logAction(
                         user,
                         Action.UPLOAD_REQUEST,
-                        `Sent an upload request to ${fileUpload.length} files.`
+                        `Sent an upload request containing ${fileUpload.length} files.`
                     );
             } else {
                 const { blobPath, filename, size } = await uploadToTemp(
@@ -97,7 +100,7 @@ export default authenticatedHandler().post(async (req, res) => {
                     fileUpload.newFilename,
                     fileUpload.originalFilename || fileUpload.newFilename
                 );
-                await Resource.create({
+                const resource = await Resource.create({
                     dateAdded: new Date(),
                     filename: filename,
                     fileType: verifyFileType(filename),
@@ -110,12 +113,14 @@ export default authenticatedHandler().post(async (req, res) => {
                 });
 
                 await rm(fileUpload.filepath);
-                if (user)
+                if (user) {
                     await logAction(
                         user,
                         Action.UPLOAD_REQUEST,
                         "Sent an upload request."
                     );
+                    await sendUserUploadResponseEmail(user, resource);
+                }
             }
         } catch (err) {
             console.log("Error in uploading files to azure");

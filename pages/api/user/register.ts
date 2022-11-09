@@ -1,6 +1,7 @@
 import handler from "@util/api/handler";
 
 import { connectDB, User, UserRegistration, MSAdminRegistration, MemberSchool } from "@db/index";
+import { sendUserRegisterNotif } from "@util/email";
 
 interface RegistrationData {
     firstName: string;
@@ -78,7 +79,7 @@ export default handler().post(async (req, res) => {
         const memberSchool = await MemberSchool.findById(memberSchoolId);
 
         // Creates New User Registration Record
-        await UserRegistration.create({
+        const userReg = await UserRegistration.create({
             firstName,
             lastName,
             middleName,
@@ -89,6 +90,10 @@ export default handler().post(async (req, res) => {
             memberSchool,
             registeredAt: new Date(),
         });
+
+        if (userReg && memberSchool) {
+            await sendUserRegisterNotif(userReg, memberSchool?.name);
+        }
     } catch (e) {
         console.log("Unable to submit user registration", e);
         res.statusMessage =

@@ -3,7 +3,7 @@ import "../../../firebase/admin";
 import { getAuth } from "firebase-admin/auth";
 import { randomBytes } from "crypto";
 
-import { sendAcceptEmail } from "@util/email";
+import { sendAcceptEmail, sendNewCEAPUserEmail } from "@util/email";
 
 import {
     connectDB,
@@ -72,7 +72,7 @@ export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
                 mobileNumber,
             });
 
-            await sendAcceptEmail(newUser, tempPassword, true);
+            await sendNewCEAPUserEmail(newUser, tempPassword);
             res.status(200);
 
             const a = await User.findOne({ authId: req.uid });

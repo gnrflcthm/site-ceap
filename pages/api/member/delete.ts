@@ -7,6 +7,7 @@ import { connectDB, MemberSchool, User } from "@db/index";
 import { AccountType } from "@util/Enums";
 import { logAction, Action } from "@util/logging";
 import { getAccountType } from "@util/functions";
+import { sendDeletedAccountNotif } from "@util/email";
 
 export default authenticatedHandler([
     AccountType.CEAP_SUPER_ADMIN,
@@ -39,13 +40,21 @@ export default authenticatedHandler([
 
             const a = await User.findOne({ authId: req.uid });
             const ms = await MemberSchool.findById(findUser.memberSchool);
-            if (a && ms) {
+            if (a) {
                 await logAction(
                     a,
                     Action.DELETE_ACCOUNT,
                     `Deleted an account. (${
                         findUser.displayName
                     } - ${getAccountType(findUser.accountType)})`
+                );
+                await sendDeletedAccountNotif(
+                    findUser,
+                    ms?.name || undefined,
+                    [
+                        AccountType.CEAP_ADMIN,
+                        AccountType.CEAP_SUPER_ADMIN,
+                    ].includes(findUser.accountType)
                 );
             }
         }
