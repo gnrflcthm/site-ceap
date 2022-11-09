@@ -8,6 +8,7 @@ import { rm } from "fs/promises";
 
 import { connectDB, Resource, User } from "@db/index";
 import { AccountType, FileAccessibility, ResourceStatus } from "@util/Enums";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler().post(async (req, res) => {
     const files = req.files;
@@ -84,6 +85,12 @@ export default authenticatedHandler().post(async (req, res) => {
                 });
 
                 await Promise.all(deleteQueue);
+                if (user)
+                    await logAction(
+                        user,
+                        Action.UPLOAD_REQUEST,
+                        `Sent an upload request to ${fileUpload.length} files.`
+                    );
             } else {
                 const { blobPath, filename, size } = await uploadToTemp(
                     fileUpload.filepath,
@@ -103,6 +110,12 @@ export default authenticatedHandler().post(async (req, res) => {
                 });
 
                 await rm(fileUpload.filepath);
+                if (user)
+                    await logAction(
+                        user,
+                        Action.UPLOAD_REQUEST,
+                        "Sent an upload request."
+                    );
             }
         } catch (err) {
             console.log("Error in uploading files to azure");

@@ -1,5 +1,6 @@
+import { Action, logAction } from "@util/logging";
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { connectDB, Folder, Resource } from "@db/index";
+import { connectDB, Folder, Resource, User } from "@db/index";
 import { AccountType } from "@util/Enums";
 
 export default authenticatedHandler([
@@ -17,6 +18,7 @@ export default authenticatedHandler([
 
             const root = await Folder.findById(folder?.root);
 
+            const oldPath = folder?.fullPath;
             if (folder && root) {
                 folder.name = name;
                 folder.fullPath = root.fullPath + `/${name}`;
@@ -24,6 +26,15 @@ export default authenticatedHandler([
             }
 
             res.status(200);
+
+            const a = await User.findOne({ authId: req.uid });
+            if (a && folder) {
+                await logAction(
+                    a,
+                    Action.RENAMED_FOLDER,
+                    `Renamed folder ${oldPath} to ${name}`
+                );
+            }
         } catch (err) {
             console.log(err);
             res.statusMessage = "Error in updating folder.";
@@ -48,9 +59,17 @@ export default authenticatedHandler([
                 );
             }
 
-            await Folder.findByIdAndDelete(id);
-
+            const deletedFolder = await Folder.findByIdAndDelete(id);
             res.status(200);
+
+            const a = await User.findOne({ authId: req.uid });
+            if (a && deletedFolder) {
+                await logAction(
+                    a,
+                    Action.DELETED_FOLDER,
+                    `Deleted Folder ${deletedFolder?.fullPath}`
+                );
+            }
         } catch (err) {
             console.log(err);
             res.statusMessage =

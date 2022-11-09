@@ -7,6 +7,7 @@ import { sendAcceptEmail } from "@util/email";
 import { connectDB, MSAdminRegistration, User, MemberSchool } from "@db/index";
 
 import { AccountType } from "@util/Enums";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
@@ -20,7 +21,7 @@ export default authenticatedHandler([
 
         const registration = await MSAdminRegistration.findById(id).populate(
             "memberSchool",
-            ["id"]
+            ["id", "name"]
         );
 
         if (registration) {
@@ -75,6 +76,15 @@ export default authenticatedHandler([
 
             res.statusMessage = "User Created Successfully";
             res.status(200);
+
+            const user = await User.findOne({ authId: req.uid });
+            const ms = await MemberSchool.findById(memberSchool);
+            if (user && ms)
+                await logAction(
+                    user,
+                    Action.ACCEPT_ADMIN_REGISTRATION,
+                    `Accepted Admin Registration from ${ms.name}`
+                );
         } else {
             res.statusMessage = "Cannot Find Registration.";
             res.status(418);

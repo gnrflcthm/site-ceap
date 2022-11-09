@@ -4,6 +4,7 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 
 import { connectDB, IUserSchema, User, UserRegistration } from "@db/index";
 import { AccountType } from "@util/Enums";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler([
     AccountType.CEAP_SUPER_ADMIN,
@@ -61,6 +62,24 @@ export default authenticatedHandler([
             newData = { ...req.body };
             delete newData["id"];
             await User.findByIdAndUpdate(id, { ...newData });
+
+            if (user) {
+                let status = `Updated user info. (${user.displayName})`;
+                let action: Action = Action.UPDATE_USER;
+                if (updated.includes("accountType")) {
+                    if (
+                        [
+                            AccountType.CEAP_SUPER_ADMIN,
+                            AccountType.MS_ADMIN,
+                        ].includes(accountType)
+                    ) {
+                        status = `Promoted user and updated info. (${user.displayName})`;
+                    } else {
+                        status = `Demoted user and updated info. (${user.displayName})`;
+                    }
+                }
+                await logAction(user, action, status);
+            }
         }
         res.status(200);
     } catch (err) {

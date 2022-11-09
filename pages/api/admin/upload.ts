@@ -7,7 +7,8 @@ import { verifyFileType } from "@util/helper";
 import { rm } from "fs/promises";
 
 import { connectDB, Folder, Resource, User } from "@db/index";
-import { AccountType, FileAccessibility, ResourceStatus } from "@util/Enums";
+import { AccountType, ResourceStatus } from "@util/Enums";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
@@ -109,6 +110,12 @@ export default authenticatedHandler([
                 });
 
                 await rm(fileUpload.filepath);
+                if (user)
+                    await logAction(
+                        user,
+                        Action.UPLOAD_RESOURCE,
+                        "Uploaded a file."
+                    );
             }
         } catch (err) {
             console.log("Error in uploading files to azure");

@@ -5,8 +5,9 @@ import { CreateRequest, getAuth } from "firebase-admin/auth";
 import { sendAcceptEmail } from "@util/email";
 import { randomBytes } from "crypto";
 
-import { connectDB, User, UserRegistration } from "@db/index";
+import { connectDB, MemberSchool, User, UserRegistration } from "@db/index";
 import { AccountType } from "@util/Enums";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler([AccountType.MS_ADMIN]).post(
     async (req, res) => {
@@ -82,6 +83,16 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(
 
             res.statusMessage = "User Created Successfully.";
             res.status(200);
+
+            const a = await User.findOne({ authId: req.uid });
+            const ms = await MemberSchool.findById(memberSchool);
+            if (a && ms) {
+                await logAction(
+                    a,
+                    Action.ACCEPT_USER_REGISTRATION,
+                    `Accepted User Registration From ${ms.name}`
+                );
+            }
         } catch (error) {
             console.log(error);
             res.statusMessage = "Error in adding user.";

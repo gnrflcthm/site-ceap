@@ -1,7 +1,8 @@
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { connectDB, Resource } from "@db/index";
+import { connectDB, Resource, User } from "@db/index";
 
 import { deleteResource } from "@util/functions/blob";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler().delete(async (req, res) => {
     const { id } = req.query;
@@ -21,6 +22,15 @@ export default authenticatedHandler().delete(async (req, res) => {
         await resource.delete();
         res.statusMessage = "Successfully removed Resource";
         res.status(200);
+
+        const a = await User.findOne({ authId: req.uid });
+        if (a) {
+            await logAction(
+                a,
+                Action.DELETE_RESOURCE,
+                `Rejected file (${resource.filename}) upload request.`
+            );
+        }
     } catch (error) {
         res.statusMessage = "Error in removing Resource";
         res.status(500);

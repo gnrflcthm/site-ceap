@@ -12,6 +12,7 @@ import {
     UserRegistration,
 } from "@db/index";
 import { AccountType } from "@util/Enums";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
     async (req, res) => {
@@ -72,8 +73,20 @@ export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).post(
             });
 
             await sendAcceptEmail(newUser, tempPassword, true);
-
             res.status(200);
+
+            const a = await User.findOne({ authId: req.uid });
+            if (a) {
+                await logAction(
+                    a,
+                    Action.CREATE_ADMIN,
+                    `Created New CEAP ${
+                        role === AccountType.CEAP_SUPER_ADMIN
+                            ? "Super Admin"
+                            : ""
+                    } Account`
+                );
+            }
         } catch (err) {
             try {
                 let user = await auth.getUser(createdId);

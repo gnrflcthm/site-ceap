@@ -2,7 +2,8 @@ import authenticatedHandler from "@util/api/authenticatedHandler";
 import { sendRejectEmail } from "@util/email";
 import { AccountType } from "@util/Enums";
 
-import { connectDB, MSAdminRegistration } from "@db/index";
+import { connectDB, MSAdminRegistration, User, MemberSchool } from "@db/index";
+import { Action, logAction } from "@util/logging";
 
 export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
@@ -19,6 +20,15 @@ export default authenticatedHandler([
 
         res.statusMessage = "Successfully Removed User.";
         res.status(200);
+
+        const user = await User.findOne({ authId: req.uid });
+        const ms = await MemberSchool.findById(rejectedUser?.memberSchool);
+        if (user && ms)
+            await logAction(
+                user,
+                Action.REJECT_ADMIN_REGISTRATION,
+                `Rejected Admin Registration from ${ms.name}`
+            );
     } catch (err) {
         console.log(err);
         res.statusMessage = "An Error has occured removing the user.";
