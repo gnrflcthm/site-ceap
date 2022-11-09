@@ -2,7 +2,7 @@ import { connectDB, IUserSchema, Log } from "@db/index";
 
 export enum Action {
     // FILES
-    MODIFY_RESOURCE = "MODIFY FILE",    // Location, Accessibility, etc.
+    MODIFY_RESOURCE = "MODIFY FILE", // Location, Accessibility, etc.
     UPLOAD_REQUEST = "UPLOAD REQUEST",
     ACCEPT_UPLOAD = "ACCEPT UPLOAD",
     REJECT_UPLOAD = "REJECT UPLOAD",
@@ -11,7 +11,7 @@ export enum Action {
     CREATED_FOLDER = "CREATED FOLDER",
     DELETED_FOLDER = "DELETED FOLDER",
     RENAMED_FOLDER = "RENAMED FOLDER",
-    
+
     // ACCOUNT
     DELETE_ACCOUNT = "DELETE ACCOUNT",
     UPDATE_USER = "UPDATE USER", // Roles, Personal Info
@@ -37,7 +37,9 @@ export function logAction(
                 datePerformed: new Date(),
                 details,
                 user: actor,
+                memberSchool: actor.memberSchool,
             });
+            resolve();
         } catch (err) {
             reject(err);
         }
