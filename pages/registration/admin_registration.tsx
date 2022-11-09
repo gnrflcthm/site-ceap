@@ -28,7 +28,7 @@ const AdminRegistrationPage: NextPage<
             <Head>
                 <title>CORE Admin Registration</title>
             </Head>
-            <Center minH={"100vh"} minW={"100vw"} bg={"neutralizerDark"}>
+            <Center minH={"100vh"} minW={"100vw"} bg={"neutralizerDark"} overflow={"auto"}>
                 <Flex
                     flexDir={"column"}
                     bg="neutralizerLight"

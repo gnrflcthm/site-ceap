@@ -1,4 +1,4 @@
-import { FC, useState, FormEvent } from "react";
+import { FC, useState, FormEvent, useMemo } from "react";
 import Link from "next/link";
 
 import {
@@ -23,12 +23,20 @@ const RegistrationForm: FC<{
     const [middleName, setMiddleName] = useState<string>("");
     const [birthday, setBirthday] = useState<Date | "">("");
     const [memberSchoolId, setMemberSchoolId] = useState<string>("");
+    const [region, setRegion] = useState<string>("");
     const [mobile, setMobile] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [schoolId, setSchoolId] = useState<string>("");
 
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | undefined>("");
+
+    const regions = useMemo<{ name: string; value: string }[]>(() => {
+        return memberSchools
+            .map((ms) => ms.region)
+            .filter((reg, i, arr) => arr.indexOf(reg) === i)
+            .map((reg) => ({ name: reg, value: reg }));
+    }, [memberSchools]);
 
     const register = (e: FormEvent) => {
         e.preventDefault();
@@ -90,14 +98,25 @@ const RegistrationForm: FC<{
                     type={"date"}
                     required
                 />
-                <CoreSelect
-                    placeholder={"School or Organization"}
-                    setValue={setMemberSchoolId}
-                    // @ts-ignore
-                    options={memberSchools}
+                <CoreInput
+                    placeholder={"Region"}
+                    value={region}
+                    setValue={setRegion}
+                    type={"select"}
+                    values={regions}
                     required
-                    isGrouped
                 />
+                {region && (
+                    <CoreSelect
+                        placeholder={"School or Organization"}
+                        setValue={setMemberSchoolId}
+                        // @ts-ignore
+                        options={memberSchools}
+                        filter={region}
+                        required
+                        isGrouped
+                    />
+                )}
                 <CoreInput
                     placeholder={"School ID"}
                     value={schoolId}
@@ -142,7 +161,7 @@ const RegistrationForm: FC<{
                 </Center>
             </VStack>
             <Text mt={"4"} textAlign={"center"}>
-                Can't find your school at the list?
+                Can't find your region or school at the list?
                 <Link href={"/registration/admin_registration"} passHref>
                     <Text
                         display={"block"}

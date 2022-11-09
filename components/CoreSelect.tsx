@@ -20,6 +20,7 @@ const CoreSelect: FC<{
     isGrouped: boolean;
     name?: string;
     disabled?: boolean;
+    filter?: string;
 }> = ({
     options,
     isGrouped = false,
@@ -28,6 +29,7 @@ const CoreSelect: FC<{
     required,
     name,
     disabled = false,
+    filter,
 }) => {
     const [selected, setSelected] = useState<string>("");
     const [query, setQuery] = useState<string>("");
@@ -66,20 +68,26 @@ const CoreSelect: FC<{
         if (isGrouped) {
             setProcessing(true);
             let data = {};
-            for (let option of options) {
+            if (filter) {
                 // @ts-ignore
-                data[option.region] = data[option.region] || [];
-                // @ts-ignore
-                data[option.region].push(option);
+                data[filter] = options.filter(option => option.region === filter);
+            } else {
+                for (let option of options) {
+                    // @ts-ignore
+                    data[option.region] = data[option.region] || [];
+                    // @ts-ignore
+                    data[option.region].push(option);
+                }
             }
             Object.keys(data).forEach((key) => {
                 // @ts-ignore
                 data[key].sort((a, b) => a.name.localeCompare(b.name));
             });
+            console.log(data);
             setSelectData(data);
         }
         setProcessing(false);
-    }, []);
+    }, [options, filter]);
 
     return (
         <Flex

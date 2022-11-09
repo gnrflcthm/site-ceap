@@ -1,4 +1,4 @@
-import { FC, useState, FormEvent } from "react";
+import { FC, useState, FormEvent, useMemo } from "react";
 
 import { Button, CircularProgress, Heading, VStack } from "@chakra-ui/react";
 import CoreSelect from "@components/CoreSelect";
@@ -17,6 +17,14 @@ const AdminRegistrationForm: FC<{
     const [memberSchool, setMemberSchool] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | undefined>(undefined);
+    const [region, setRegion] = useState<string>("");
+
+    const regions = useMemo<{ name: string; value: string }[]>(() => {
+        return memberSchools
+            .map((ms) => ms.region)
+            .filter((reg, i, arr) => arr.indexOf(reg) === i)
+            .map((reg) => ({ name: reg, value: reg }));
+    }, [memberSchools]);
 
     const register = (e: FormEvent) => {
         e.preventDefault();
@@ -86,16 +94,27 @@ const AdminRegistrationForm: FC<{
                 required
                 disabled={loading}
             />
-            <CoreSelect
-                name={"memberSchool"}
-                // @ts-ignore
-                options={memberSchools}
-                placeholder={"School or Organization"}
-                setValue={setMemberSchool}
-                isGrouped
-                required
-                disabled={loading}
+            <CoreInput
+                type={"select"}
+                value={region}
+                setValue={setRegion}
+                name={"region"}
+                placeholder={"Region"}
+                values={regions}
             />
+            {region && (
+                <CoreSelect
+                    name={"memberSchool"}
+                    // @ts-ignore
+                    options={memberSchools}
+                    placeholder={"School or Organization"}
+                    setValue={setMemberSchool}
+                    isGrouped
+                    required
+                    disabled={loading}
+                    filter={region}
+                />
+            )}
             <Button type={"submit"} variant={"secondary"} disabled={loading}>
                 {loading ? <CircularProgress size={8} /> : "Register"}
             </Button>
