@@ -193,7 +193,7 @@ const EditResourceModal: FC<{
                                         setError("No Classification Selected.");
                                     }
                                 }}
-                                placeholder={"Folder Locatiion"}
+                                placeholder={"Folder Location"}
                                 required
                                 disabled={loading || !location}
                             />
