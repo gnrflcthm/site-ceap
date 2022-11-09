@@ -9,7 +9,13 @@ import Head from "next/head";
 import TopPanel from "@components/TopPanel";
 import { Box, Table, TableContainer, Tbody, Thead, Tr } from "@chakra-ui/react";
 import TableHeader from "@components/TableHeader";
-import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
+import {
+    connectDB,
+    ILogSchema,
+    IUserSchema,
+    Log,
+    User,
+} from "@db/index";
 import LogData from "@components/Logs/LogData";
 
 const Logs: PageWithLayout<
@@ -58,34 +64,35 @@ export const getServerSideProps: GetServerSideProps<{
         await connectDB();
 
         const user = await User.findOne({ authId: ctx.uid });
-
         if (user) {
             switch (user.accountType) {
                 case AccountType.CEAP_SUPER_ADMIN:
                 case AccountType.CEAP_ADMIN:
-                    let logs = await Log.find({}).populate("user", [
+                    const logs = await Log.find({}).populate("user", [
                         "id",
                         "displayName",
                     ]);
-                    console.log(logs);
+
                     return {
                         props: {
                             logs: logs.map((log) => ({
                                 ...log.toJSON(),
                                 datePerformed: log.datePerformed.toString(),
+                                memberSchool: log?.memberSchool?.toHexString() || "",
                             })),
                         },
                     };
 
                 case AccountType.MS_ADMIN:
-                    logs = await Log.find({
+                    const logData = await Log.find({
                         memberSchool: user.memberSchool,
-                    }).populate("user");
+                    }).populate("user", ["id", "displayName"]);
                     return {
                         props: {
-                            logs: logs.map((log) => ({
+                            logs: logData.map((log) => ({
                                 ...log.toJSON(),
                                 datePerformed: log.datePerformed.toString(),
+                                memberSchool: log?.memberSchool?.toHexString() || "",
                             })),
                         },
                     };
