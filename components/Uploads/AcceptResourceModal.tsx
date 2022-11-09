@@ -88,6 +88,7 @@ const AcceptResourceModal: FC<{
                 classification,
                 folder: location?.id,
                 status: ResourceStatus.APPROVED,
+                accept: true,
             });
             toast({
                 status: "success",
