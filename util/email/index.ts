@@ -1,4 +1,27 @@
-import { sendAcceptEmail } from "./sendAcceptEmail";
-import { sendRejectEmail } from "./sendRejectEmail";
+import {
+    sendAcceptEmail,
+    sendUserRejectEmail,
+    sendAdminRegisterNotif,
+    sendAdminRejectEmail,
+    sendUserRegisterNotif,
+    sendNewCEAPUserEmail,
+    sendDeletedAccountNotif
+} from "./register";
+import {
+    sendUploadRequestNotification,
+    sendUserUploadResponseEmail,
+    sendUploadRequestAcceptEmail,
+} from "./uploadRequest";
 
-export { sendAcceptEmail, sendRejectEmail };
+export {
+    sendAcceptEmail,
+    sendUserRejectEmail,
+    sendAdminRegisterNotif,
+    sendAdminRejectEmail,
+    sendUserRegisterNotif,
+    sendUploadRequestNotification,
+    sendUserUploadResponseEmail,
+    sendUploadRequestAcceptEmail,
+    sendNewCEAPUserEmail,
+    sendDeletedAccountNotif
+};
