@@ -112,7 +112,13 @@ const UploadRequests: PageWithLayout<
                             <TableHeader heading={"Date Uploaded"} sortable />
                             <TableHeader heading={"File Name"} />
                             <TableHeader heading={"file type"} />
-                            <TableHeader heading={"uploader"} />
+                            <TableHeader
+                                heading={
+                                    current === "requests"
+                                        ? "uploader"
+                                        : "status"
+                                }
+                            />
                             <TableHeader heading="" />
                         </Tr>
                     </Thead>
