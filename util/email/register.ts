@@ -9,20 +9,15 @@ import transport from "./transport";
 export async function sendAcceptEmail(
     receiver: IUserSchema,
     initialPassword: string = "random_password",
-    sendCredentials: boolean = false,
     memberSchool: string
 ) {
     const { firstName, lastName, email, schoolId, mobileNumber, accountType } =
         receiver;
 
-    const subject = sendCredentials
-        ? "Account Creation"
-        : "Account Registration";
-
     await transport.sendMail({
         from: process.env.SERVICE_EMAIL,
         to: email,
-        subject: subject,
+        subject: "Account Registration",
         html: `
         Dear ${firstName} ${lastName}, 
         <br /><br />

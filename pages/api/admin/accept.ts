@@ -64,7 +64,7 @@ export default authenticatedHandler([
                 mobileNumber,
             });
 
-            await MemberSchool.findByIdAndUpdate(memberSchool?.id, {
+            const ms = await MemberSchool.findByIdAndUpdate(memberSchool?.id, {
                 $set: {
                     isRegistered: true,
                 },
@@ -72,13 +72,12 @@ export default authenticatedHandler([
 
             await MSAdminRegistration.findByIdAndDelete(id);
 
-            await sendAcceptEmail(newAdmin, tempPassword);
+            if (ms) await sendAcceptEmail(newAdmin, tempPassword, ms?.name);
 
             res.statusMessage = "User Created Successfully";
             res.status(200);
 
             const user = await User.findOne({ authId: req.uid });
-            const ms = await MemberSchool.findById(memberSchool);
             if (user && ms)
                 await logAction(
                     user,
