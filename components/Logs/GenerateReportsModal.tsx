@@ -87,7 +87,8 @@ const GenerateReportsModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                 <VStack
                     as={"form"}
                     spacing={"8"}
-                    p={"8"}
+                    px={"8"}
+                    pt={"8"}
                     id={"reportForm"}
                     onSubmit={generateReport}
                     onFocus={() => setError("")}
@@ -109,18 +110,18 @@ const GenerateReportsModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                         name={"endDate"}
                         disabled={loading}
                     />
-                    {error && (
-                        <Text
-                            as={"small"}
-                            color={"red"}
-                            fontSize={"md"}
-                            w={"full"}
-                            textAlign={"center"}
-                        >
-                            {error}
-                        </Text>
-                    )}
                 </VStack>
+                {error && (
+                    <Text
+                        as={"small"}
+                        color={"red"}
+                        fontSize={"md"}
+                        w={"full"}
+                        textAlign={"center"}
+                    >
+                        {error}
+                    </Text>
+                )}
 
                 <Flex p={"4"} bg={"secondary"} justify={"flex-end"}>
                     <Button
