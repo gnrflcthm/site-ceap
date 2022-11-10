@@ -82,7 +82,7 @@ const AcceptResourceModal: FC<{
         }
 
         try {
-            await axios.patch(`/api/resource/a/update/${resource.id}`, {
+            await axios.patch(`/api/resource/a/${resource.id}`, {
                 filename,
                 accessibility,
                 classification,

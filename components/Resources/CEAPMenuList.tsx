@@ -27,7 +27,7 @@ const CEAPMenuList: FC<{
                 ? FileAccessibility.PUBLIC
                 : FileAccessibility.HIDDEN;
         axios
-            .patch(`/api/resource/a/update/${resource.id}`, {
+            .patch(`/api/resource/a/${resource.id}`, {
                 accessibility,
                 status,
             })
