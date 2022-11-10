@@ -1,7 +1,7 @@
 import { AccountType } from "@util/Enums";
 import { FC } from "react";
 import { BsCloudUpload } from "react-icons/bs";
-import { FaHistory, FaUserCog } from "react-icons/fa";
+import { FaHistory, FaUserCog, FaArchive } from "react-icons/fa";
 import { HiUsers } from "react-icons/hi";
 import CoreNavItem from "./CoreNavItem";
 
@@ -10,6 +10,11 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
         case AccountType.CEAP_SUPER_ADMIN:
             return (
                 <>
+                    <CoreNavItem
+                        name={"Archived Resources"}
+                        href={"/ceap/archive"}
+                        icon={FaArchive}
+                    />
                     <CoreNavItem
                         name={"Upload Requests"}
                         href={"/ceap/upload_requests"}
@@ -35,6 +40,11 @@ const Routes: FC<{ role: AccountType }> = ({ role }) => {
         case AccountType.CEAP_ADMIN:
             return (
                 <>
+                    <CoreNavItem
+                        name={"Archived Resources"}
+                        href={"/ceap/archive"}
+                        icon={FaArchive}
+                    />
                     <CoreNavItem
                         name={"Upload Requests"}
                         href={"/ceap/upload_requests"}
