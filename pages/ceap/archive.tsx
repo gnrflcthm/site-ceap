@@ -81,7 +81,11 @@ const Archives: PageWithLayout<
                                 <Td colSpan={4}>
                                     <Center>
                                         {isLoading ? (
-                                            <CircularProgress isIndeterminate size={8} color={'secondary'} />
+                                            <CircularProgress
+                                                isIndeterminate
+                                                size={8}
+                                                color={"secondary"}
+                                            />
                                         ) : (
                                             <Text>No Resources Found.</Text>
                                         )}
@@ -99,7 +103,12 @@ const Archives: PageWithLayout<
 export type ArchiveType = IResourceSchema & {
     id: string;
     dateAdded: string;
-    uploadedBy: { id: string; displayName: string };
+    uploadedBy: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        displayName?: string;
+    };
     folder: string;
 };
 
@@ -147,7 +156,12 @@ export const getServerSideProps: GetServerSideProps<{
         }
 
         const resources = await Resource.find(tempQuery)
-            .populate("uploadedBy", ["id", "displayName"])
+            .populate("uploadedBy", [
+                "id",
+                "firstName",
+                "lastName",
+                "displayName",
+            ])
             .skip(p * 15)
             .limit(15);
 

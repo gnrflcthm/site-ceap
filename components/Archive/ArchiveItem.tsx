@@ -123,8 +123,11 @@ const ArchiveItem: FC<{
                         variant={"link"}
                         onClick={() => openUser()}
                         fontSize={textFontSize}
+                        disabled={!resource.uploadedBy}
                     >
-                        {resource.uploadedBy.displayName}
+                        {resource.uploadedBy
+                            ? `${resource.uploadedBy.displayName}`
+                            : "DELETED USER"}
                     </Button>
                 </Td>
                 <Td px={"4"} py={"2"}>
