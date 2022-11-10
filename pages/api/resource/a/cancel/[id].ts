@@ -3,6 +3,7 @@ import { connectDB, Resource, User } from "@db/index";
 
 import { deleteResource } from "@util/functions/blob";
 import { Action, logAction } from "@util/logging";
+import { sendUploadRequestRejectEmail } from "@util/email/uploadRequest";
 
 export default authenticatedHandler().delete(async (req, res) => {
     const { id } = req.query;
@@ -22,6 +23,9 @@ export default authenticatedHandler().delete(async (req, res) => {
         await resource.delete();
         res.statusMessage = "Successfully removed Resource";
         res.status(200);
+
+        const user = await User.findById(resource.uploadedBy);
+        if (user) await sendUploadRequestRejectEmail(user, resource);
 
         const a = await User.findOne({ authId: req.uid });
         if (a) {
