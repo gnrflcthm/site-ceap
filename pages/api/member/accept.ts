@@ -79,13 +79,12 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(
 
             await UserRegistration.findByIdAndDelete(id);
 
-            await sendAcceptEmail(newUser, tempPassword);
-
             res.statusMessage = "User Created Successfully.";
             res.status(200);
 
             const a = await User.findOne({ authId: req.uid });
             const ms = await MemberSchool.findById(memberSchool);
+            if (ms) await sendAcceptEmail(newUser, tempPassword, ms.name);
             if (a && ms) {
                 await logAction(
                     a,
