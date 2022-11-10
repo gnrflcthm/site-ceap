@@ -20,6 +20,7 @@ const CoreInput: FC<{
     onFocus?: Function;
     onBlur?: Function;
     disabled?: boolean;
+    selectPrompt?: string;
 }> = ({
     name,
     type,
@@ -38,6 +39,7 @@ const CoreInput: FC<{
     onClick = () => {},
     onFocus = () => {},
     onBlur = () => {},
+    selectPrompt = "",
 }) => {
     const [focused, setFocused] = useState<boolean>(false);
 
@@ -71,6 +73,7 @@ const CoreInput: FC<{
                         setFocused(false);
                     }}
                     onChange={(e) => setValue(e.target.value)}
+                    onClick={(e) => console.log(e)}
                     _before={{ content: `""`, position: "absolute" }}
                     color={value ? "neutralizerDark" : "transparent"}
                     _focus={{
@@ -90,6 +93,9 @@ const CoreInput: FC<{
                         borderColor: "neutralizerDark",
                     }}
                 >
+                    <option value={""} disabled selected>
+                        {selectPrompt}
+                    </option>
                     {values &&
                         values.map(({ name, value }) => (
                             <option value={value} key={name}>

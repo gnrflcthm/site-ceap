@@ -17,7 +17,7 @@ const AdminRegistrationForm: FC<{
     const [memberSchool, setMemberSchool] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | undefined>(undefined);
-    const [region, setRegion] = useState<string>("");
+    const [region, setRegion] = useState<string | undefined>(undefined);
 
     const regions = useMemo<{ name: string; value: string }[]>(() => {
         return memberSchools
@@ -100,6 +100,7 @@ const AdminRegistrationForm: FC<{
                 setValue={setRegion}
                 name={"region"}
                 placeholder={"Region"}
+                selectPrompt={"Select A Region"}
                 values={regions}
             />
             {region && (

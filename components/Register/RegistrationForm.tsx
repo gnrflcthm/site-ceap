@@ -104,6 +104,7 @@ const RegistrationForm: FC<{
                     setValue={setRegion}
                     type={"select"}
                     values={regions}
+                    selectPrompt={"Select Region"}
                     required
                 />
                 {region && (
