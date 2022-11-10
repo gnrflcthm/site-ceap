@@ -7,30 +7,52 @@ import AuthGetServerSideProps, {
 import { AccountType } from "@util/Enums";
 import Head from "next/head";
 import TopPanel from "@components/TopPanel";
-import { Box, Table, TableContainer, Tbody, Thead, Tr } from "@chakra-ui/react";
-import TableHeader from "@components/TableHeader";
 import {
-    connectDB,
-    ILogSchema,
-    IUserSchema,
-    Log,
-    User,
-} from "@db/index";
+    Table,
+    TableContainer,
+    Tbody,
+    Thead,
+    Tr,
+    useDisclosure,
+} from "@chakra-ui/react";
+import TableHeader from "@components/TableHeader";
+import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
 import LogData from "@components/Logs/LogData";
+import { FaFileAlt } from "react-icons/fa";
+
+import { generateAuditReport } from "@util/reports";
+import { AnimatePresence } from "framer-motion";
+import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
 
 const Logs: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ logs }) => {
+    const {
+        isOpen: showReports,
+        onOpen: openReports,
+        onClose: closeReports,
+    } = useDisclosure();
+
     return (
         <>
             <Head>
                 <title>Logs</title>
             </Head>
-            <TopPanel title={"Audit Logs"} />
-            <Box w={"full"} bg={"red"}></Box>
-            <TableContainer>
+            <TopPanel
+                title={"Audit Logs"}
+                hasAction
+                actionIcon={FaFileAlt}
+                actionText={"Generate Reports"}
+                onActionClick={() => openReports()}
+            />
+            <TableContainer overflowY={"auto"} h={"85vh"}>
                 <Table>
-                    <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
+                    <Thead
+                        bg={"gray.100"}
+                        position={"sticky"}
+                        top={"1"}
+                        zIndex={"2"}
+                    >
                         <Tr>
                             <TableHeader heading={"Date Performed"} />
                             <TableHeader heading={"User"} />
@@ -46,6 +68,11 @@ const Logs: PageWithLayout<
                     </Tbody>
                 </Table>
             </TableContainer>
+            <AnimatePresence>
+                {showReports && (
+                    <GenerateReportsModal onDismiss={() => closeReports()} />
+                )}
+            </AnimatePresence>
         </>
     );
 };
@@ -62,7 +89,6 @@ export const getServerSideProps: GetServerSideProps<{
 }> = AuthGetServerSideProps(
     async (ctx: GetServerSidePropsContextWithUser) => {
         await connectDB();
-
         const user = await User.findOne({ authId: ctx.uid });
         if (user) {
             switch (user.accountType) {
@@ -78,7 +104,8 @@ export const getServerSideProps: GetServerSideProps<{
                             logs: logs.map((log) => ({
                                 ...log.toJSON(),
                                 datePerformed: log.datePerformed.toString(),
-                                memberSchool: log?.memberSchool?.toHexString() || "",
+                                memberSchool:
+                                    log?.memberSchool?.toHexString() || "",
                             })),
                         },
                     };
@@ -92,7 +119,8 @@ export const getServerSideProps: GetServerSideProps<{
                             logs: logData.map((log) => ({
                                 ...log.toJSON(),
                                 datePerformed: log.datePerformed.toString(),
-                                memberSchool: log?.memberSchool?.toHexString() || "",
+                                memberSchool:
+                                    log?.memberSchool?.toHexString() || "",
                             })),
                         },
                     };

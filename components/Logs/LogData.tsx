@@ -38,8 +38,9 @@ const LogData: FC<{
                         variant={"link"}
                         fontSize={textFontSize}
                         onClick={() => onOpen()}
+                        disabled={!log.user}
                     >
-                        {log.user.displayName}
+                        {log.user ? log.user.displayName : "DELETED USER"}
                     </Button>
                 </Td>
                 <Td px={"4"} py={"2"}>
