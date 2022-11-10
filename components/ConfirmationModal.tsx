@@ -9,6 +9,9 @@ import {
     CircularProgress,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
+import Overlay from "./Modal/Overlay";
+import Modal from "./Modal/Modal";
+import ModalHeader from "./Modal/ModalHeader";
 
 const ConfirmationModal: FC<{
     title: string;
@@ -29,28 +32,23 @@ const ConfirmationModal: FC<{
 }) => {
     const [processing, setProcessing] = useState<boolean>(false);
     return (
-        <Center
-            h={"100vh"}
-            w={"100vw"}
-            bg={"blackAlpha.400"}
-            zIndex={"modal"}
-            position={"absolute"}
-            top={"0"}
-            left={"0"}
-            as={motion.div}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-        >
-            <Flex
-                flexDir={"column"}
-                bg={"neutralizerLight"}
-                rounded={"md"}
-                p={"8"}
-            >
-                <Heading mb={"4"}>{title}</Heading>
-                {prompt && <Text mb={"4"}>{prompt}</Text>}
-                <Flex justify={"flex-end"} align={"center"}>
+        <Overlay>
+            <Modal>
+                <ModalHeader
+                    title={title}
+                    {...{
+                        onDismiss: processing ? undefined : () => onReject(),
+                    }}
+                />
+                {prompt && (
+                    <Text
+                        p={"4"}
+                        dangerouslySetInnerHTML={{ __html: prompt }}
+                        w={"full"}
+                        whiteSpace={"normal"}
+                    ></Text>
+                )}
+                <Flex justify={"flex-end"} align={"center"} p={"4"}>
                     <Button
                         bg={"red.500"}
                         fontWeight={"bold"}
@@ -59,6 +57,7 @@ const ConfirmationModal: FC<{
                         w={"fit-content"}
                         onClick={() => onReject()}
                         mr={"4"}
+                        disabled={processing}
                     >
                         {rejectText}
                     </Button>
@@ -72,6 +71,7 @@ const ConfirmationModal: FC<{
                             if (willProcessOnAccept) setProcessing(true);
                             onAccept();
                         }}
+                        disabled={processing}
                     >
                         {willProcessOnAccept && processing ? (
                             <CircularProgress size={8} isIndeterminate />
@@ -80,8 +80,8 @@ const ConfirmationModal: FC<{
                         )}
                     </Button>
                 </Flex>
-            </Flex>
-        </Center>
+            </Modal>
+        </Overlay>
     );
 };
 
