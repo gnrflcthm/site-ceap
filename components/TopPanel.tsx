@@ -4,7 +4,6 @@ import {
     Heading,
     Button,
     Text,
-    CircularProgress,
     As,
     Box,
     Center,
@@ -24,7 +23,7 @@ const TopPanel: FC<{
     actionText,
     onActionClick = () => {},
     actionIcon,
-    actionIsProcessing = true,
+    actionIsProcessing = false,
 }) => {
     return (
         <Flex
@@ -45,7 +44,7 @@ const TopPanel: FC<{
             {hasAction && (
                 <Button
                     variant={"transparent"}
-                    p={"0"}
+                    px={'4'}
                     color={"neutralizerLight"}
                     onClick={() => onActionClick()}
                     m={"0"}
