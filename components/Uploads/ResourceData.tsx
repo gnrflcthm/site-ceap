@@ -8,6 +8,7 @@ import {
     useToast,
     Center,
     CircularProgress,
+    Button,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
@@ -119,8 +120,8 @@ const ResourceData: FC<{
                 <Text fontSize={textFontSize}>{resource.dateAdded}</Text>
             </Td>
             <Td px={"4"} py={"2"}>
-                <Text
-                    as={"button"}
+                <Button
+                    variant={"link"}
                     cursor={"pointer"}
                     onClick={download}
                     textDecor={"underline"}
@@ -128,7 +129,7 @@ const ResourceData: FC<{
                     fontSize={textFontSize}
                 >
                     {resource.filename}
-                </Text>
+                </Button>
             </Td>
             <Td px={"4"} py={"2"}>
                 <Text fontSize={textFontSize}>{resource.fileType}</Text>
