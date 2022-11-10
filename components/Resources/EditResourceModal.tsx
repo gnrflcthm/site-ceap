@@ -63,7 +63,7 @@ const EditResourceModal: FC<{
         e.preventDefault();
         setLoading(true);
         axios
-            .patch(`/api/resource/a/update/${resource.id}`, {
+            .patch(`/api/resource/a/${resource.id}`, {
                 filename,
                 accessibility,
                 classification,
