@@ -3,7 +3,6 @@ import { FC, useState } from "react";
 import { Box, Flex, Input } from "@chakra-ui/react";
 
 import { FaSearch } from "react-icons/fa";
-import { LayoutProps } from "framer-motion";
 
 const SearchBar: FC<{
     query: string;
@@ -51,19 +50,8 @@ const SearchBar: FC<{
                 transform={"auto"}
                 translateY={"-50%"}
                 right={"4"}
-                color={"neutralizerLight"}
+                color={inputColor || "neutralizerDark"}
             />
-            {/* <Box
-                position={"absolute"}
-                bottom={"0"}
-                left={"50%"}
-                translateX={"-50%"}
-                transform={"auto"}
-                w={focused ? "100%" : "0%"}
-                h={"px"}
-                bg={"secondary"}
-                transition={"all 0.2s ease"}
-            /> */}
         </Flex>
     );
 };
