@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { Tr, Th, Flex, Heading, Text, Center, Box } from "@chakra-ui/react";
+import { Th, Flex, Heading, Text, Center, Box } from "@chakra-ui/react";
 
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 
