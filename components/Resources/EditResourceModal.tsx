@@ -10,6 +10,7 @@ import {
     useDisclosure,
     useToast,
     VStack,
+    Text,
 } from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
 import {
@@ -31,7 +32,8 @@ import FolderSelectModal from "@components/Uploads/FolderSelectModal";
 const EditResourceModal: FC<{
     resource: IResourceSchema & { id: string; folder?: string };
     onDismiss: Function;
-}> = ({ resource, onDismiss = () => {} }) => {
+    refetch?: Function;
+}> = ({ resource, onDismiss = () => {}, refetch = () => {} }) => {
     const [filename, setFilename] = useState<string>(resource.filename);
     const [accessibility, setAccessibility] = useState<FileAccessibility>(
         resource.accessibility
@@ -50,7 +52,7 @@ const EditResourceModal: FC<{
     >("/api/resource/classifications");
 
     const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | undefined>("");
+    const [error, setError] = useState<string>("");
     const {
         isOpen: showFolderSelectModal,
         onClose: hideFolderSelectModal,
@@ -75,11 +77,12 @@ const EditResourceModal: FC<{
                     title: "Successfully Updated Resource",
                     status: "success",
                 });
+                refetch();
                 onDismiss();
             })
             .catch((err: AxiosError) => {
                 console.log(err);
-                setError(err.response?.statusText);
+                setError(err.response?.statusText || "An error has occured.");
             });
     };
 
@@ -207,6 +210,16 @@ const EditResourceModal: FC<{
                                 disabled={loading || !location}
                             />
                         </VStack>
+                        {error && (
+                            <Text
+                                w={"full"}
+                                color={"red"}
+                                textAlign={"center"}
+                                mb={"2"}
+                            >
+                                {error}
+                            </Text>
+                        )}
                         <HStack
                             justify={"flex-end"}
                             p={"2"}

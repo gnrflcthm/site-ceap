@@ -274,7 +274,9 @@ const FolderPage: PageWithLayout<
                                             <>
                                                 {data.map((d) => (
                                                     <ResourceItem
-                                                        resource={d as ResourceType}
+                                                        resource={
+                                                            d as ResourceType
+                                                        }
                                                         reload={() => {
                                                             if (!isLoading) {
                                                                 setMode(
@@ -347,9 +349,12 @@ const FolderPage: PageWithLayout<
                 {isOpen && selected && (
                     <EditResourceModal
                         resource={selected}
-                        onDismiss={() => {
-                            onClose();
-                        }}
+                        onDismiss={() => onClose()}
+                        refetch={() =>
+                            refetch(
+                                `/api/resource/folders/${current?.id}/resources`
+                            )
+                        }
                     />
                 )}
             </AnimatePresence>

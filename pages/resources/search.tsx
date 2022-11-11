@@ -122,9 +122,8 @@ const SearchResource: PageWithLayout<
                 {isOpen && selected && (
                     <EditResourceModal
                         resource={selected}
-                        onDismiss={() => {
-                            onClose();
-                        }}
+                        onDismiss={() => onClose()}
+                        refetch={() => router.reload()}
                     />
                 )}
             </AnimatePresence>
