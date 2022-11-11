@@ -9,6 +9,8 @@ import {
 
 export interface IResourceSchema {
     filename: string;
+    description?: string;
+    thumbnail?: string;
     blobPath: string;
     dateAdded: Date;
     contentType: string;
@@ -19,11 +21,18 @@ export interface IResourceSchema {
     fileType: FileType;
     size?: number;
     uploadedBy?: Types.ObjectId;
+    memberSchool?: Types.ObjectId;
 }
 
 const resourceSchema = new Schema<IResourceSchema>(
     {
         filename: {
+            type: String,
+        },
+        description: {
+            type: String,
+        },
+        thumbnail: {
             type: String,
         },
         folder: {
@@ -60,6 +69,10 @@ const resourceSchema = new Schema<IResourceSchema>(
         uploadedBy: {
             type: Types.ObjectId,
             ref: "User",
+        },
+        memberSchool: {
+            type: Types.ObjectId,
+            ref: "MemberSchool",
         },
     },
     {
