@@ -14,9 +14,7 @@ import { AnimatePresence } from "framer-motion";
 import {
     Center,
     CircularProgress,
-    Flex,
     Button,
-    Text,
     Table,
     TableContainer,
     Tbody,
@@ -163,7 +161,7 @@ export const getServerSideProps: GetServerSideProps<{
                 uploadRequests: uploadRequests.map((ur) => ({
                     ...ur.toJSON(),
                     dateAdded: ur.dateAdded.toDateString(),
-                    memberSchool: ur.memberSchool?.toHexString || "",
+                    memberSchool: ur.memberSchool?.toHexString() || "",
                 })),
             },
         };
