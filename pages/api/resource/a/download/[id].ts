@@ -15,9 +15,8 @@ export default authenticatedHandler().get(async (req, res) => {
     } else {
         let resourceId = id as string;
 
-        const user = await User.findOne({ authId: req.uid });
-
         await connectDB();
+        const user = await User.findOne({ authId: req.uid });
 
         const resource = await Resource.findById(resourceId);
 
@@ -50,12 +49,14 @@ export default authenticatedHandler().get(async (req, res) => {
                             }
                             break;
                         case AccountType.MS_USER:
-                            res.statusMessage =
-                                "You don't have enough permission to access the resource.";
-                            res.statusCode = 401;
-                            throw new Error(
-                                "You don't have enough permission to access the resource."
-                            );
+                            if (!resource.uploadedBy?.equals(user._id)) {
+                                res.statusMessage =
+                                    "You don't have enough permission to access the resource.";
+                                res.statusCode = 401;
+                                throw new Error(
+                                    "You don't have enough permission to access the resource."
+                                );
+                            }
                     }
                 }
             }
