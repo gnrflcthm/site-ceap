@@ -104,6 +104,15 @@ const EditResourceModal: FC<{
         }
     }, [status]);
 
+    useEffect(() => {
+        if (!loadingClassFolders && classification) {
+            const rootFolder = classFolders?.find(
+                ({ name }) => name === getFileClassification(classification)
+            );
+            setLocation(rootFolder);
+        }
+    }, [loadingClassFolders, classification]);
+
     return (
         <>
             <Overlay>
