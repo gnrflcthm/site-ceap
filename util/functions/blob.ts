@@ -14,18 +14,20 @@ const client = BlobServiceClient.fromConnectionString(
     process.env.BLOB_CONNECTION_STRING || ""
 );
 
-interface UploadResponse {
+export interface UploadResponse {
     blobPath: string;
     filename: string;
     response: BlobUploadCommonResponse;
     size: number | undefined;
+    key: string;
 }
 
 export function uploadResource(
     file: string | ReadStream,
     destination: string,
     newFilename: string,
-    originalFilename: string
+    originalFilename: string,
+    key: string = ""
 ): Promise<UploadResponse> {
     return new Promise<UploadResponse>(async (resolve, reject) => {
         let f: string | ReadStream;
@@ -68,6 +70,7 @@ export function uploadResource(
                 filename: originalFilename,
                 response: uploadRes,
                 size: properties.contentLength,
+                key,
             });
         } catch (error) {
             reject(error);
@@ -78,9 +81,10 @@ export function uploadResource(
 export function uploadToTemp(
     file: string | ReadStream,
     filename: string,
-    originalFilename: string
+    originalFilename: string,
+    key: string = ""
 ): Promise<UploadResponse> {
-    return uploadResource(file, "uploads", filename, originalFilename);
+    return uploadResource(file, "uploads", filename, originalFilename, key);
 }
 
 export function uploadMultiple(

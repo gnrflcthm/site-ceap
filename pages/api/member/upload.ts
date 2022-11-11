@@ -1,54 +1,57 @@
+import { uploadResource, UploadResponse } from "./../../../util/functions/blob";
 import authenticatedHandler from "@util/api/authenticatedHandler";
-import { Files } from "formidable";
 import { uploadMultiple, uploadToTemp } from "@util/functions/blob";
 import { contentType } from "mime-types";
 
 import { verifyFileType } from "@util/helper";
 import { rm } from "fs/promises";
 
-import { connectDB, Resource, User } from "@db/index";
+import { connectDB, IResourceSchema, Resource, User } from "@db/index";
 import { AccountType, FileAccessibility, ResourceStatus } from "@util/Enums";
 import { Action, logAction } from "@util/logging";
-import {
-    sendUserUploadResponseEmail,
-} from "@util/email";
+import { sendUserUploadResponseEmail } from "@util/email";
+import { File, Files } from "formidable";
 
 export default authenticatedHandler().post(async (req, res) => {
     const files = req.files;
+    Object.keys(req.body).forEach(
+        (key) => (req.body[key] = JSON.parse(req.body[key]))
+    );
+    // console.log(req.body);
+    // console.log(Array.isArray(req.files));
+    if (req.files) {
+        // const fileUpload = files["fileUpload" as keyof Files];
+        const fileKeys = Object.keys(req.files);
+        try {
+            for (let key of fileKeys) {
+                if (Array.isArray(req.files[key]))
+                    throw new Error("Invalid Fields Detected.");
+                const file = req.files[key] as File;
+                verifyFileType(file.newFilename);
+            }
+        } catch (err) {
+            if (err instanceof Error) console.error(err.message);
 
-    if (files) {
-        const fileUpload = files["fileUpload" as keyof Files];
-        if (Array.isArray(fileUpload)) {
-            for (let file of fileUpload) {
-                try {
-                    verifyFileType(file.newFilename);
-                } catch (err) {
-                    res.statusMessage = "Invalid File Type Detected";
-                    res.status(400);
-                    res.end();
+            res.statusMessage = "Bad Request.";
+            res.status(400).end();
 
-                    const deleteQueue: Promise<void>[] = [];
-                    fileUpload.forEach((file) => {
-                        deleteQueue.push(rm(file.filepath));
-                    });
-                    await Promise.all(deleteQueue);
-
-                    return;
+            const deleteQueue: Promise<void>[] = [];
+            for (let key of fileKeys) {
+                if (Array.isArray(req.files[key])) {
+                    const files = req.files[key] as unknown as File[];
+                    files.forEach((file) =>
+                        deleteQueue.push(rm(file.filepath))
+                    );
+                } else {
+                    const file = req.files[key] as File;
+                    deleteQueue.push(rm(file.filepath));
                 }
             }
-        } else {
-            try {
-                verifyFileType(fileUpload.newFilename);
-            } catch (err) {
-                res.statusMessage = "Invalid File Type Detected";
-                res.status(400);
-                res.end();
 
-                await rm(fileUpload.filepath);
-
-                return;
-            }
+            await Promise.all(deleteQueue);
+            return;
         }
+
         res.statusMessage = "Successfully Uploaded Files";
         res.status(200);
         res.end();
@@ -62,66 +65,66 @@ export default authenticatedHandler().post(async (req, res) => {
                 : ResourceStatus.FOR_ADMIN_REVIEW;
 
         try {
-            if (Array.isArray(fileUpload)) {
-                const uploadResponses = await uploadMultiple(
-                    fileUpload,
-                    "uploads"
+            const uploadQueue: Promise<UploadResponse>[] = [];
+            for (let key of fileKeys) {
+                const file = req.files[key] as File;
+                uploadQueue.push(
+                    uploadToTemp(
+                        file.filepath,
+                        file.newFilename,
+                        file.originalFilename || file.newFilename,
+                        key
+                    )
                 );
-                const uploadData = uploadResponses.map(
-                    ({ blobPath, filename, size }) => ({
+            }
+
+            const uploadRes = await Promise.all(uploadQueue);
+
+            const uploadData = uploadRes.map(
+                ({ blobPath, filename, size, key }) => {
+                    const fileData: IResourceSchema = {
+                        ...req.body[key],
                         dateAdded: new Date(),
-                        filename: filename,
                         fileType: verifyFileType(filename),
                         contentType: contentType(filename) || "",
                         accessibility: FileAccessibility.HIDDEN,
                         status,
                         blobPath,
-                        uploadedBy: user,
                         size,
-                    })
-                );
-                await Resource.insertMany(uploadData);
-                const deleteQueue: Promise<void>[] = [];
+                        uploadedBy: user,
+                        memberSchool: user?.memberSchool
+                    };
+                    return fileData;
+                }
+            );
 
-                fileUpload.forEach((file) => {
+            await Resource.insertMany(uploadData);
+
+            const deleteQueue: Promise<void>[] = [];
+            for (let key of fileKeys) {
+                if (Array.isArray(req.files[key])) {
+                    const files = req.files[key] as unknown as File[];
+                    files.forEach((file) =>
+                        deleteQueue.push(rm(file.filepath))
+                    );
+                } else {
+                    const file = req.files[key] as File;
                     deleteQueue.push(rm(file.filepath));
-                });
-
-                await Promise.all(deleteQueue);
-                if (user)
-                    await logAction(
-                        user,
-                        Action.UPLOAD_REQUEST,
-                        `Sent an upload request containing ${fileUpload.length} files.`
-                    );
-            } else {
-                const { blobPath, filename, size } = await uploadToTemp(
-                    fileUpload.filepath,
-                    fileUpload.newFilename,
-                    fileUpload.originalFilename || fileUpload.newFilename
-                );
-                const resource = await Resource.create({
-                    dateAdded: new Date(),
-                    filename: filename,
-                    fileType: verifyFileType(filename),
-                    contentType: contentType(filename) || "",
-                    accessibility: FileAccessibility.HIDDEN,
-                    status,
-                    blobPath,
-                    uploadedBy: user,
-                    size,
-                });
-
-                await rm(fileUpload.filepath);
-                if (user) {
-                    await logAction(
-                        user,
-                        Action.UPLOAD_REQUEST,
-                        "Sent an upload request."
-                    );
-                    await sendUserUploadResponseEmail(user, resource);
                 }
             }
+
+            await Promise.all(deleteQueue);
+
+            if (user) {
+                await logAction(
+                    user,
+                    Action.UPLOAD_REQUEST,
+                    `Sent an upload request containing ${
+                        Object.keys(req.files).length
+                    } file${Object.keys(req.files).length === 1 ? "" : "s"}.`
+                );
+            }
+
         } catch (err) {
             console.log("Error in uploading files to azure");
             console.log(err);
