@@ -2,7 +2,7 @@ import { FC, useState } from "react";
 import { Center, Input, VStack, Text } from "@chakra-ui/react";
 
 const UploadBoxInput: FC<{
-    files: File[];
+    files: File[] | File | undefined;
     setFiles: Function;
     processing: boolean;
 }> = ({ files, setFiles, processing }) => {
@@ -41,30 +41,48 @@ const UploadBoxInput: FC<{
                 pointerEvents={processing ? "none" : "auto"}
             />
 
-            {files.length > 0 ? (
-                <VStack
-                    align={"flex-start"}
-                    w={"full"}
-                    p={"4"}
-                    position={"relative"}
-                    bg={"inherit"}
-                >
-                    {files.map((file, i) => (
-                        <Text
-                            key={i}
+            {(() => {
+                if (!files) return <Text>"Click or Drop Files To Upload"</Text>;
+
+                if (Array.isArray(files)) {
+                    if (files.length === 0) {
+                        return <Text>"Click or Drop Files To Upload"</Text>;
+                    }
+                    return (
+                        <VStack
+                            align={"flex-start"}
                             w={"full"}
-                            overflow={"hidden"}
-                            textOverflow={"ellipsis"}
-                            whiteSpace={"nowrap"}
-                            fontWeight={"bold"}
+                            p={"4"}
+                            position={"relative"}
+                            bg={"inherit"}
                         >
-                            {file.name}
-                        </Text>
-                    ))}
-                </VStack>
-            ) : (
-                <Text>"Click or Drop Files To Upload"</Text>
-            )}
+                            {files.map((file, i) => (
+                                <Text
+                                    key={i}
+                                    w={"full"}
+                                    overflow={"hidden"}
+                                    textOverflow={"ellipsis"}
+                                    whiteSpace={"nowrap"}
+                                    fontWeight={"bold"}
+                                >
+                                    {file.name}
+                                </Text>
+                            ))}
+                        </VStack>
+                    );
+                }
+                return (
+                    <Text
+                        w={"full"}
+                        overflow={"hidden"}
+                        textOverflow={"ellipsis"}
+                        whiteSpace={"nowrap"}
+                        fontWeight={"bold"}
+                    >
+                        {files.name}
+                    </Text>
+                );
+            })()}
         </Center>
     );
 };
