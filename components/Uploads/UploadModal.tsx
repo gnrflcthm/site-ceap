@@ -4,13 +4,17 @@ import Overlay from "@components/Modal/Overlay";
 import Modal from "@components/Modal/Modal";
 import ModalHeader from "@components/Modal/ModalHeader";
 import CoreInput from "@components/CoreInput";
-import UploadBoxInput from "./UploadBoxInput";
 
 import {
     Button,
     CircularProgress,
     useDisclosure,
     VStack,
+    Text,
+    Flex,
+    Box,
+    Progress,
+    useToast,
 } from "@chakra-ui/react";
 
 import {
@@ -25,9 +29,15 @@ import { useData } from "@util/hooks/useData";
 import { AnimatePresence } from "framer-motion";
 import FolderSelectModal from "./FolderSelectModal";
 import axios, { AxiosError } from "axios";
+import FileUploadItem from "./FileUploadItem";
+import { FileUpload } from "./RequestUploadModal";
+import dynamic from "next/dynamic";
+import { FaFile } from "react-icons/fa";
+
+const AddFileModal = dynamic(() => import("./AddFileModal"));
 
 const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<FileUpload[]>([]);
     const [accessibility, setAccessibility] = useState<FileAccessibility>(
         FileAccessibility.PUBLIC
     );
@@ -45,14 +55,24 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
         undefined
     );
 
+    const [current, setCurrent] = useState<number>(-1);
+
     const [processing, setProcessing] = useState<boolean>(false);
     const [progress, setProgress] = useState<number>(0);
     const [error, setError] = useState<string>("");
+
+    const toast = useToast();
 
     const {
         isOpen: showFolderSelectModal,
         onClose: hideFolderSelectModal,
         onOpen: openFolderSelectModal,
+    } = useDisclosure();
+
+    const {
+        isOpen: showAddFile,
+        onOpen: openAddFile,
+        onClose: closeAddFile,
     } = useDisclosure();
 
     useEffect(() => {
@@ -70,33 +90,70 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
 
         setProcessing(true);
 
-        const data = new FormData();
+        const formData = new FormData();
 
-        for (let i of files) {
-            data.append("fileUpload", i);
+        if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                formData.append(`fileUpload${i}`, files[i].file);
+                formData.append(
+                    `fileUpload${i}`,
+                    JSON.stringify({
+                        filename: files[i].filename,
+                        description: files[i].description || "",
+                        accessibility,
+                        classification,
+                        folder: location?.id || "",
+                    })
+                );
+            }
+
+            axios
+                .post("/api/admin/upload", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    onUploadProgress: ({ loaded, total }: ProgressEvent) => {
+                        setProgress((loaded / total) * 100);
+                    },
+                })
+                .then(() => {
+                    setProcessing(false);
+                    toast({
+                        status: "success",
+                        title: "Sucessfully Uploaded Files",
+                    });
+                    onDismiss();
+                })
+                .catch((err: AxiosError) => {
+                    setProcessing(false);
+                    setError(
+                        err.response?.statusText || "An Error Has Occured"
+                    );
+                    setProcessing(false);
+                });
+        } else {
+            setError("No Files Selected");
         }
+    };
 
-        data.append("accessibility", accessibility);
-        data.append("classification", classification);
-        data.append("location", location?.id || "");
+    const onEdit = (i: number) => {
+        setCurrent(i);
+        openAddFile();
+    };
 
-        axios
-            .post("/api/admin/upload", data, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: ({ loaded, total }: ProgressEvent) => {
-                    setProgress((loaded / total) * 100);
-                },
-            })
-            .then(() => {
-                setProcessing(false);
-            })
-            .catch((err: AxiosError) => {
-                setProcessing(false);
-                setError(err.response?.statusText || "An Error Has Occured");
-                setProcessing(false);
-            });
+    const updateFile = (file: FileUpload) => {
+        setFiles((f) => {
+            const temp = f;
+            temp[current] = file;
+            console.log(temp);
+            return temp;
+        });
+        closeAddFile();
+        setCurrent(-1);
+    };
+
+    const removeFile = (i: number) => {
+        setFiles((temp) => temp.filter((f, idx) => idx !== i));
     };
 
     return (
@@ -112,8 +169,39 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                     align={"stretch"}
                     spacing={"8"}
                     onSubmit={upload}
+                    id={"uploadForm"}
                 >
-                    <UploadBoxInput {...{ files, setFiles, processing }} />
+                    <Flex justify={"end"} w={"full"}>
+                        <Button w={"fit-content"} onClick={() => openAddFile()}>
+                            <Box as={FaFile} mr={"4"} />
+                            Add File
+                        </Button>
+                    </Flex>
+                    <VStack
+                        h={"30vh"}
+                        overflowY={"auto"}
+                        rounded={"md"}
+                        border={"1px solid"}
+                        borderColor={"neutralizerDark"}
+                        justify={files.length > 0 ? "flex-start" : "center"}
+                    >
+                        {files.length > 0 ? (
+                            files.map((file, i) => (
+                                <FileUploadItem
+                                    file={file}
+                                    key={i}
+                                    onEdit={() => {
+                                        onEdit(i);
+                                    }}
+                                    onRemove={() => {
+                                        removeFile(i);
+                                    }}
+                                />
+                            ))
+                        ) : (
+                            <Text>No Files Selected</Text>
+                        )}
+                    </VStack>
                     <CoreInput
                         value={accessibility}
                         setValue={setAccessibility}
@@ -159,22 +247,25 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                             disabled={processing}
                         />
                     )}
-                    <Button
-                        type={"submit"}
-                        disabled={processing}
-                        variant={"secondary"}
-                    >
-                        {processing ? (
-                            <CircularProgress
-                                isIndeterminate
-                                color={"secondary"}
-                                size={6}
-                            />
-                        ) : (
-                            "Upload"
-                        )}
-                    </Button>
                 </VStack>
+                {error && (
+                    <Text w={"full"} color={"red"} textAlign={"center"}>
+                        {error}
+                    </Text>
+                )}
+                <Box p={"2"} w={"full"}>
+                    {processing ? (
+                        <Progress value={progress} color={"primary"} />
+                    ) : (
+                        <Button
+                            type={"submit"}
+                            variant={"secondary"}
+                            form={"uploadForm"}
+                        >
+                            Upload
+                        </Button>
+                    )}
+                </Box>
             </Modal>
             <AnimatePresence>
                 {showFolderSelectModal && (
@@ -186,6 +277,20 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                             setLocation(folder);
                             hideFolderSelectModal();
                         }}
+                    />
+                )}
+                {showAddFile && (
+                    <AddFileModal
+                        onAdd={(fileUpload: FileUpload) => {
+                            setFiles((files) => [...files, fileUpload]);
+                            closeAddFile();
+                        }}
+                        onDismiss={() => closeAddFile()}
+                        update={current !== -1}
+                        currentFile={
+                            current !== -1 ? files[current] : undefined
+                        }
+                        onUpdate={current !== -1 ? updateFile : () => {}}
                     />
                 )}
             </AnimatePresence>

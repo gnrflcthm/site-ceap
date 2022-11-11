@@ -31,7 +31,6 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
     close,
 }) => {
     const [files, setFiles] = useState<FileUpload[]>([]);
-    // const [file, setFile] = useState<File | undefined>(undefined);
     const [uploading, setUploading] = useState<boolean>(false);
     const [error, setError] = useState<string | undefined>(undefined);
     const toast = useToast();
@@ -60,41 +59,31 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                     })
                 );
             }
-        }
-        // if (file) {
-        // console.log(file);
-        // formData.append("fileUpload", file);
-        // formData.append(
-        //     "fileUpload.0",
-        //     JSON.stringify({
-        //         fileName: "test.pdf",
-        //         description: "this is a test file",
-        //         thumbnail: "test.png",
-        //     })
-        // );
-        // }
 
-        axios
-            .post("/api/member/upload", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: ({ loaded, total }: ProgressEvent) => {
-                    setProgress((loaded / total) * 100);
-                },
-            })
-            .then(() => {
-                toast({
-                    status: "success",
-                    title: "Upload Complete",
+            axios
+                .post("/api/member/upload", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    onUploadProgress: ({ loaded, total }: ProgressEvent) => {
+                        setProgress((loaded / total) * 100);
+                    },
+                })
+                .then(() => {
+                    toast({
+                        status: "success",
+                        title: "Upload Complete",
+                    });
+                    refetch();
+                    close();
+                })
+                .catch((err: AxiosError) => {
+                    setError(err.response?.statusText);
+                    setUploading(false);
                 });
-                refetch();
-                close();
-            })
-            .catch((err: AxiosError) => {
-                setError(err.response?.statusText);
-                setUploading(false);
-            });
+        } else {
+            setError("No Files Selected");
+        }
     };
 
     const onEdit = (i: number) => {

@@ -9,8 +9,9 @@ import {
     Center,
     CircularProgress,
     Button,
+    useDisclosure,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 import axios from "axios";
 
@@ -30,6 +31,8 @@ const ResourceDataCEAPOptions = dynamic(
 const ResourceDataUserOptions = dynamic(
     () => import("./ResourceDataUserOptions")
 );
+
+const UserInfoModal = dynamic(() => import("@components/Modal/UserInfoModal"));
 
 const ResourceData: FC<{
     resource: IResourceSchema & {
@@ -107,90 +110,123 @@ const ResourceData: FC<{
         }
     }, [user]);
 
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
     const textFontSize = { base: "sm", md: "md" };
     return (
-        <Tr
-            as={motion.tr}
-            p={0}
-            _hover={{
-                bg: "blackAlpha.50",
-            }}
-        >
-            <Td px={"4"} py={"2"}>
-                <Text fontSize={textFontSize}>{resource.dateAdded}</Text>
-            </Td>
-            <Td px={"4"} py={"2"}>
-                <Button
-                    variant={"link"}
-                    cursor={"pointer"}
-                    onClick={download}
-                    textDecor={"underline"}
-                    color={"primary"}
-                    fontSize={textFontSize}
-                >
-                    {resource.filename}
-                </Button>
-            </Td>
-            <Td px={"4"} py={"2"}>
-                <Text fontSize={textFontSize}>{resource.fileType}</Text>
-            </Td>
-            <Td px={"4"} py={"2"}>
-                <Text fontSize={textFontSize}>{uploaderOrStatus}</Text>
-            </Td>
-            <Td>
-                {(() => {
-                    if (processing) {
-                        return (
-                            <Center>
-                                <CircularProgress
-                                    isIndeterminate
-                                    color={"primary"}
-                                    size={6}
-                                />
-                            </Center>
-                        );
-                    }
-
-                    if (!processing && user) {
-                        switch (user.role) {
-                            case AccountType.CEAP_SUPER_ADMIN:
-                            case AccountType.CEAP_ADMIN:
-                                return (
-                                    <ResourceDataCEAPOptions
-                                        isCurrent={showStatus}
-                                        resourceId={resource.id}
-                                        onDownload={() => download()}
-                                        onAccept={() => onAccept(resource.id)}
-                                        onReject={() =>
-                                            reject("/api/resource/a/requests")
-                                        }
-                                    />
-                                );
-
-                            case AccountType.MS_ADMIN:
-                                return (
-                                    <ResourceDataAdminOptions
-                                        setProcessing={setProcessing}
-                                        isCurrent={showStatus}
-                                        resourceId={resource.id}
-                                        onDownload={() => download()}
-                                        onForward={() => refetch()}
-                                        onReject={() => reject()}
-                                        resourceStatus={resource.status}
-                                    />
-                                );
-                            default:
-                                return (
-                                    <ResourceDataUserOptions
-                                        onDownload={() => download()}
-                                        onCancel={() => reject()}
-                                    />
-                                );
+        <>
+            <Tr
+                as={motion.tr}
+                p={0}
+                _hover={{
+                    bg: "blackAlpha.50",
+                }}
+            >
+                <Td px={"4"} py={"2"}>
+                    <Text fontSize={textFontSize}>{resource.dateAdded}</Text>
+                </Td>
+                <Td px={"4"} py={"2"}>
+                    <Button
+                        variant={"link"}
+                        cursor={"pointer"}
+                        onClick={download}
+                        textDecor={"underline"}
+                        color={"primary"}
+                        fontSize={textFontSize}
+                    >
+                        {resource.filename}
+                    </Button>
+                </Td>
+                <Td px={"4"} py={"2"}>
+                    <Text fontSize={textFontSize}>{resource.fileType}</Text>
+                </Td>
+                <Td px={"4"} py={"2"}>
+                    {(() => {
+                        if (showStatus) {
+                            return (
+                                <Text fontSize={textFontSize}>
+                                    {resource.status}
+                                </Text>
+                            );
+                        } else {
+                            return (
+                                <Button
+                                    variant={"link"}
+                                    onClick={() => onOpen()}
+                                >
+                                    {resource.uploadedBy?.displayName}
+                                </Button>
+                            );
                         }
-                    }
-                })()}
-            </Td>
-        </Tr>
+                    })()}
+                </Td>
+                <Td>
+                    {(() => {
+                        if (processing) {
+                            return (
+                                <Center>
+                                    <CircularProgress
+                                        isIndeterminate
+                                        color={"primary"}
+                                        size={6}
+                                    />
+                                </Center>
+                            );
+                        }
+
+                        if (!processing && user) {
+                            switch (user.role) {
+                                case AccountType.CEAP_SUPER_ADMIN:
+                                case AccountType.CEAP_ADMIN:
+                                    return (
+                                        <ResourceDataCEAPOptions
+                                            isCurrent={showStatus}
+                                            resourceId={resource.id}
+                                            onDownload={() => download()}
+                                            onAccept={() =>
+                                                onAccept(resource.id)
+                                            }
+                                            onReject={() =>
+                                                reject(
+                                                    "/api/resource/a/requests"
+                                                )
+                                            }
+                                        />
+                                    );
+
+                                case AccountType.MS_ADMIN:
+                                    return (
+                                        <ResourceDataAdminOptions
+                                            setProcessing={setProcessing}
+                                            isCurrent={showStatus}
+                                            resourceId={resource.id}
+                                            onDownload={() => download()}
+                                            onForward={() => refetch()}
+                                            onReject={() => reject()}
+                                            resourceStatus={resource.status}
+                                        />
+                                    );
+                                default:
+                                    return (
+                                        <ResourceDataUserOptions
+                                            onDownload={() => download()}
+                                            onCancel={() => reject()}
+                                        />
+                                    );
+                            }
+                        }
+                    })()}
+                </Td>
+            </Tr>
+            <AnimatePresence>
+                {isOpen && (
+                    <UserInfoModal
+                        userId={resource.uploadedBy?.id.toString() || ""}
+                        onDismiss={() => onClose()}
+                    />
+                )}
+            </AnimatePresence>
+        </>
     );
 };
 
