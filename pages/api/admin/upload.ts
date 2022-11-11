@@ -88,7 +88,6 @@ export default authenticatedHandler([
                         blobPath,
                         size,
                         uploadedBy: user,
-                        // memberSchool: user?.memberSchool,
                     };
                     return fileData;
                 }
@@ -114,8 +113,8 @@ export default authenticatedHandler([
             if (user) {
                 await logAction(
                     user,
-                    Action.UPLOAD_REQUEST,
-                    `Sent an upload request containing ${
+                    Action.UPLOAD_RESOURCE,
+                    `Uploaded ${
                         Object.keys(req.files).length
                     } file${Object.keys(req.files).length === 1 ? "" : "s"}.`
                 );
