@@ -1,10 +1,18 @@
 import { jsPDF, CellConfig } from "jspdf";
 import { connectDB, Log, ILogSchema } from "@db/index";
+import { existsSync, mkdirSync } from "fs";
+import { join } from "path";
 
 export async function generateAuditReport(
     from: Date,
     to: Date
 ): Promise<string> {
+    // @ts-ignore
+    const baseDir = global.__basedir;
+    if (!existsSync(join(baseDir, "/temp"))) {
+        mkdirSync(join(baseDir, "/temp"));
+    }
+
     const doc = new jsPDF({ orientation: "l", format: "letter" });
 
     await connectDB();
@@ -46,7 +54,7 @@ export async function generateAuditReport(
 
 function createHeaders(keys: string[]): CellConfig[] {
     var result: CellConfig[] = [];
-    const size = [80, 65, 70, 140]
+    const size = [80, 65, 70, 140];
     for (var i = 0; i < keys.length; i += 1) {
         result.push({
             name: keys[i],

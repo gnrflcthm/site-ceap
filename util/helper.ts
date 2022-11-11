@@ -19,7 +19,7 @@ function verifyFileType(filename: string): FileType {
     ) {
         fileType = FileType.DOCUMENT;
     } else {
-        throw new Error("Invalid File Type Detected.")
+        throw new Error("Invalid File Type Detected.");
     }
 
     return fileType;

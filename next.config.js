@@ -1,3 +1,5 @@
+global.__basedir = __dirname;
+
 module.exports = {
     async redirects() {
         return [

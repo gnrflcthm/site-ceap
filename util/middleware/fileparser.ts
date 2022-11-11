@@ -1,10 +1,11 @@
 import formidable, { Files, Fields } from "formidable";
 import { IncomingMessage, ServerResponse } from "http";
 import { NextHandler } from "next-connect";
-import path from "path";
+import path, { join } from "path";
 
 // @ts-ignore
 import nanoId from "nano-id";
+import { mkdirSync, existsSync } from "fs";
 
 const form = formidable({
     multiples: true,
@@ -20,6 +21,12 @@ export default async function parseMultipartForm(
     _: ServerResponse,
     next: NextHandler
 ) {
+    // @ts-ignore
+    const baseDir = global.__basedir;
+    if (!existsSync(join(baseDir, "/temp"))) {
+        mkdirSync(join(baseDir, "/temp"));
+    }
+
     const contentType = req.headers["content-type"];
     if (contentType && contentType.indexOf("multipart/form-data") !== -1) {
         form.parse(req, (err, fields: Fields, files: Files) => {
