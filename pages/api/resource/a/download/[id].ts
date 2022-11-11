@@ -38,7 +38,7 @@ export default authenticatedHandler().get(async (req, res) => {
                             if (
                                 user.memberSchool?.toHexString() !==
                                 //@ts-ignore
-                                uploader?.memberSchool?.toHexString()
+                                resource.memberSchool?.toHexString()
                             ) {
                                 res.statusMessage =
                                     "You don't have enough permission to access the resource.";
