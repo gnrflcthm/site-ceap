@@ -175,6 +175,7 @@ export type ResourceType = IResourceSchema & {
     id: string;
     dateAdded: string;
     uploadedBy: { id: string; displayName?: string };
+    memberSchool?: string;
 };
 
 export const getServerSideProps: GetServerSideProps<{
@@ -186,7 +187,7 @@ export const getServerSideProps: GetServerSideProps<{
         const uploads = await Resource.find({
             status: ResourceStatus.FOR_CEAP_REVIEW,
         })
-            .populate({ path: "uploadedBy", select: "id displayName" })
+            .populate("uploadedBy", ["id", "displayName"])
             .populate("folder", ["id", "name", "fullPath"])
             .exec();
 
@@ -195,6 +196,7 @@ export const getServerSideProps: GetServerSideProps<{
                 uploads: uploads.map((resources) => ({
                     ...resources.toJSON(),
                     dateAdded: resources.dateAdded.toDateString(),
+                    memberSchool: resources.memberSchool?.toHexString() || ""
                 })),
             },
         };

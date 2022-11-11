@@ -162,6 +162,7 @@ export const getServerSideProps: GetServerSideProps<{
                 uploadRequests: uploadRequests.map((ur) => ({
                     ...ur.toJSON(),
                     dateAdded: ur.dateAdded.toDateString(),
+                    memberSchool: ur.memberSchool?.toHexString || ""
                 })),
             },
         };

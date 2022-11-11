@@ -189,22 +189,11 @@ export const getServerSideProps: GetServerSideProps<{
 
         let uploadRequests = await Resource.find({
             status: ResourceStatus.FOR_ADMIN_REVIEW,
+            memberSchool: user.memberSchool,
         })
-            .populate({
-                path: "uploadedBy",
-                select: "id displayName memberSchool",
-                populate: {
-                    path: "memberSchool",
-                    select: "id",
-                },
-            })
+            .populate("uploadedBy", ["id", "displayName", "memberSchool"])
             .populate("folder", ["id", "name", "fullPath"])
             .exec();
-
-        uploadRequests = uploadRequests.filter((ur) =>
-            // @ts-ignore
-            ur.uploadedBy?.memberSchool.equals(user.memberSchool)
-        );
 
         return {
             props: {
