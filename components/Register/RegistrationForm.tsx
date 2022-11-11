@@ -99,7 +99,7 @@ const RegistrationForm: FC<{
                     required
                 />
                 <CoreInput
-                    placeholder={"Region"}
+                    placeholder={"Region of your school"}
                     value={region}
                     setValue={setRegion}
                     type={"select"}

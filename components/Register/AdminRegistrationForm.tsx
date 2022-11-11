@@ -99,7 +99,7 @@ const AdminRegistrationForm: FC<{
                 value={region}
                 setValue={setRegion}
                 name={"region"}
-                placeholder={"Region"}
+                placeholder={"Region of your school"}
                 selectPrompt={"Select A Region"}
                 values={regions}
             />
