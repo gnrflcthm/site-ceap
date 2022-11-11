@@ -1,7 +1,10 @@
 import { jsPDF, CellConfig } from "jspdf";
 import { connectDB, Log, ILogSchema } from "@db/index";
 
-export async function generateAuditReport(from: Date, to: Date): Promise<string> {
+export async function generateAuditReport(
+    from: Date,
+    to: Date
+): Promise<string> {
     const doc = new jsPDF({ orientation: "l", format: "letter" });
 
     await connectDB();
@@ -31,26 +34,24 @@ export async function generateAuditReport(from: Date, to: Date): Promise<string>
             : `${from.toDateString()} - ${to.toDateString()}`;
 
     doc.text(`Audit Log Reports (${date})`, 5, 10);
-    doc.table(6, 15, temp, createHeaders(Object.keys(temp[0])), {
-        autoSize: true,
-    });
+    doc.table(6, 15, temp, createHeaders(Object.keys(temp[0])), {});
 
     let s = from.toISOString().split("T")[0];
     const fileName = `AuditReports(${s}).pdf`;
 
     doc.save(`temp/${fileName}`);
-    doc.save("test.pdf");
 
     return fileName;
 }
 
 function createHeaders(keys: string[]): CellConfig[] {
     var result: CellConfig[] = [];
+    const size = [80, 65, 70, 140]
     for (var i = 0; i < keys.length; i += 1) {
         result.push({
             name: keys[i],
             prompt: keys[i],
-            width: 65,
+            width: size[i],
             align: "center",
             padding: 0,
         });
