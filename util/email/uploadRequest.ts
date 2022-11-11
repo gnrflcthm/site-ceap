@@ -1,11 +1,14 @@
 import transport from "./transport";
-import { IFolderSchema, IResourceSchema, IUserSchema, User } from "@db/models";
+import {
+    IFolderSchema,
+    IResourceSchema,
+    IUserSchema,
+    MemberSchool,
+    User,
+} from "@db/models";
 import { AccountType } from "@util/Enums";
 
-export async function sendUserUploadResponseEmail(
-    receiver: IUserSchema,
-    resource: IResourceSchema
-) {
+export async function sendUserUploadResponseEmail(receiver: IUserSchema) {
     const { email, firstName, lastName } = receiver;
 
     await transport.sendMail({
@@ -18,12 +21,6 @@ export async function sendUserUploadResponseEmail(
         <br /><br />
         Please take note that your document/file is under the review of the vetting system of C.O.R.E. You will receive a confirmation email within three to five (3-5) working days once it is approved for uploading into the System. 
         <br /><br />
-        Here are the details of your upload request: <br />
-        <b>File name</b>: ${resource.filename} <br />
-        <b>File type</b>: ${resource.fileType} <br />
-        <b>Date requested to upload</b>: ${resource.dateAdded.toLocaleDateString()} <br />
-        <b>Status</b>: ${resource.status.replace("_", " ")} <br />
-        <br /><br />
         For further inquiries, kindly contact CEAP at info@ceap.org.ph and ceap-aimu@ceap.org.ph.
         <br /><br />
         Thank you!
@@ -33,27 +30,44 @@ export async function sendUserUploadResponseEmail(
         Catholic Educational Association of the Philippines (CEAP)
         `,
     });
-    if (receiver.accountType === AccountType.MS_USER) {
-        const admins = await User.find({
-            memberSchool: receiver.memberSchool,
-            accountType: AccountType.MS_ADMIN,
-        });
+    switch (receiver.accountType) {
+        case AccountType.MS_USER:
+            const admins = await User.find({
+                memberSchool: receiver.memberSchool,
+                accountType: AccountType.MS_ADMIN,
+            });
 
-        const queue: Promise<void>[] = [];
-        for (let admin of admins) {
-            queue.push(
-                sendUploadRequestNotification(admin, receiver, resource)
-            );
-        }
+            let adminQueue: Promise<void>[] = [];
+            for (let admin of admins) {
+                adminQueue.push(sendUploadRequestNotification(admin, receiver));
+            }
 
-        await Promise.all(queue);
+            await Promise.all(adminQueue);
+            return;
+        case AccountType.MS_ADMIN:
+            const ceapAdmins = await User.find({
+                accountType: [
+                    AccountType.CEAP_ADMIN,
+                    AccountType.CEAP_SUPER_ADMIN,
+                ],
+            });
+            const ms = await MemberSchool.findById(receiver.memberSchool);
+            let ceapQueue: Promise<void>[] = [];
+            for (let ceapAdmin of ceapAdmins) {
+                ceapQueue.push(
+                    sendAdminUploadRequestNotification(
+                        ceapAdmin,
+                        receiver,
+                        ms?.name
+                    )
+                );
+            }
     }
 }
 
 export async function sendUploadRequestNotification(
     receiver: IUserSchema,
-    uploader: IUserSchema,
-    resource: IResourceSchema
+    uploader: IUserSchema
 ) {
     const { email, firstName, lastName } = receiver;
 
@@ -66,15 +80,38 @@ export async function sendUploadRequestNotification(
         <br /><br />
         Greetings of Peace!
         <br /><br />
-        ${uploader.firstName} ${
-            uploader.lastName
-        } has requested to upload a resource to C.O.R.E. and is now upon your review and approval.
+        ${uploader.firstName} ${uploader.lastName} has requested to upload a resource to C.O.R.E. and is now upon your review and approval.
         <br /><br />
-        Here are the details of his/her upload request:<br />
-        <b>File name</b>: ${resource.filename}<br />
-        <b>File type</b>: ${resource.fileType}<br />
-        <b>Date requested to upload</b>: ${resource.dateAdded.toLocaleString()}<br />
-        <b>Status</b>: ${resource.status.replace("_", " ")}
+        Kindly proceed to C.O.R.E. Upload Requests page to access and review the resource.
+        <br /><br />
+        For further inquiries, kindly contact CEAP at info@ceap.org.ph and ceap-aimu@ceap.org.ph.
+        <br /><br />
+        Thank you!
+        <br /><br />
+        Kind Regards,
+        <br />
+        Catholic Educational Association of the Philippines (CEAP)
+                `,
+    });
+}
+
+export async function sendAdminUploadRequestNotification(
+    receiver: IUserSchema,
+    uploader: IUserSchema,
+    memberSchool?: string
+) {
+    const { email, firstName, lastName } = receiver;
+
+    await transport.sendMail({
+        from: process.env.SERVICE_EMAIL,
+        to: email,
+        subject: "Request For Upload",
+        html: `
+        Dear ${firstName} ${lastName}, 
+        <br /><br />
+        Greetings of Peace!
+        <br /><br />
+        ${uploader.firstName} ${uploader.lastName}, a Member School Admin from ${memberSchool}, has requested to upload resources to C.O.R.E. and is now upon your review and approval.
         <br /><br />
         Kindly proceed to C.O.R.E. Upload Requests page to access and review the resource.
         <br /><br />

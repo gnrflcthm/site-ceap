@@ -13,14 +13,10 @@ import { sendUserUploadResponseEmail } from "@util/email";
 import { File, Files } from "formidable";
 
 export default authenticatedHandler().post(async (req, res) => {
-    const files = req.files;
     Object.keys(req.body).forEach(
         (key) => (req.body[key] = JSON.parse(req.body[key]))
     );
-    // console.log(req.body);
-    // console.log(Array.isArray(req.files));
     if (req.files) {
-        // const fileUpload = files["fileUpload" as keyof Files];
         const fileKeys = Object.keys(req.files);
         try {
             for (let key of fileKeys) {
@@ -116,6 +112,7 @@ export default authenticatedHandler().post(async (req, res) => {
             await Promise.all(deleteQueue);
 
             if (user) {
+                await sendUserUploadResponseEmail(user)
                 await logAction(
                     user,
                     Action.UPLOAD_REQUEST,

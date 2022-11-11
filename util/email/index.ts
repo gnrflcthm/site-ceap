@@ -5,12 +5,14 @@ import {
     sendAdminRejectEmail,
     sendUserRegisterNotif,
     sendNewCEAPUserEmail,
-    sendDeletedAccountNotif
+    sendDeletedAccountNotif,
 } from "./register";
 import {
     sendUploadRequestNotification,
     sendUserUploadResponseEmail,
     sendUploadRequestAcceptEmail,
+    sendAdminUploadRequestNotification,
+    sendUploadRequestRejectEmail,
 } from "./uploadRequest";
 
 export {
@@ -23,5 +25,7 @@ export {
     sendUserUploadResponseEmail,
     sendUploadRequestAcceptEmail,
     sendNewCEAPUserEmail,
-    sendDeletedAccountNotif
+    sendDeletedAccountNotif,
+    sendAdminUploadRequestNotification,
+    sendUploadRequestRejectEmail,
 };
