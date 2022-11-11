@@ -96,6 +96,7 @@ const Uploads: PageWithLayout<
                         {data &&
                             data.map((resource) => (
                                 <ResourceData
+                                    showStatus={true}
                                     key={resource.id}
                                     resource={resource}
                                     refetch={refetch}
@@ -162,7 +163,7 @@ export const getServerSideProps: GetServerSideProps<{
                 uploadRequests: uploadRequests.map((ur) => ({
                     ...ur.toJSON(),
                     dateAdded: ur.dateAdded.toDateString(),
-                    memberSchool: ur.memberSchool?.toHexString || ""
+                    memberSchool: ur.memberSchool?.toHexString || "",
                 })),
             },
         };
