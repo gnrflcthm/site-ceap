@@ -15,12 +15,8 @@ import {
     Center,
     useToken,
     HStack,
-    Text,
-    VStack,
-    CircularProgress,
-    Grid,
-    useBreakpoint,
-    useDisclosure,
+    IconButton,
+    Button,
 } from "@chakra-ui/react";
 import SearchBar from "@components/SearchBar";
 import { FormEvent, useEffect, useState } from "react";
@@ -30,32 +26,45 @@ import { Folder, IFolderSchema, IResourceSchema } from "@db/models";
 import TabButton from "@components/Accounts/TabButton";
 import { useData } from "@util/hooks/useData";
 import { connectDB } from "@db/index";
-import ResourceItem from "@components/Resources/ResourceItem";
-import FolderItem from "@components/Resources/FolderItem";
-import { AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
+import { BsGridFill, BsListUl } from "react-icons/bs";
+import { FaFolderOpen } from "react-icons/fa";
 
-type ResourceType = IResourceSchema & {
+export type ResourceItemType = IResourceSchema & {
     id: string;
-    uploadedBy: string;
-    folder: string;
+    uploadedBy?: { id: string; firstName: string; lastName: string };
+    memberSchool?: { id: string; name: string };
 };
 
-type FolderType = IFolderSchema & { id: string; root: string };
+export type FolderType = IFolderSchema & { id: string; root: string };
 
-type ResourceOrFolder = ResourceType | FolderType;
-
-const EditResourceModal = dynamic(
-    () => import("@components/Resources/EditResourceModal")
+const DisplayFolders = dynamic(
+    () => import("@components/Resources/DisplayFolders")
+);
+const DisplayResources = dynamic(
+    () => import("@components/Resources/DisplayResources")
 );
 
 const FolderPage: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ classification, current, query: q }) => {
     const [mode, setMode] = useState<"folders" | "resources">("folders");
+    const [view, setView] = useState<"list" | "grid">("list");
 
-    const { data, isLoading, refetch, clear } = useData<ResourceOrFolder[]>(
-        `/api/resource/folders/${current?.id}/folders`
+    const {
+        data: folders,
+        isLoading: foldersLoading,
+        refetch: refetchFolders,
+        clear: clearFolders,
+    } = useData<FolderType[]>(`/api/resource/folders/${current?.id}/folders`);
+
+    const {
+        data: resources,
+        isLoading: resourcesLoading,
+        refetch: refetchResources,
+        clear: clearResources,
+    } = useData<ResourceItemType[]>(
+        `/api/resource/folders/${current?.id}/resources`
     );
 
     const pageTitle =
@@ -63,21 +72,11 @@ const FolderPage: PageWithLayout<
 
     const [query, setQuery] = useState<string>(q || "");
 
-    const [primary, secondary, neutralizerLight, neutralizerDark] = useToken(
-        "colors",
-        ["primary", "secondary", "neutralizerLight", "neutralizerDark"]
-    );
-
-    const [selected, setSelected] = useState<
-        | (IResourceSchema & {
-              id: string;
-              folder: string;
-              uploadedBy: string;
-          })
-        | undefined
-    >(undefined);
-
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [primary, neutralizerLight, neutralizerDark] = useToken("colors", [
+        "primary",
+        "neutralizerLight",
+        "neutralizerDark",
+    ]);
 
     const router = useRouter();
 
@@ -91,17 +90,6 @@ const FolderPage: PageWithLayout<
         }
     };
 
-    const manageResource = (
-        resource: IResourceSchema & {
-            id: string;
-            folder: string;
-            uploadedBy: string;
-        }
-    ) => {
-        setSelected(resource);
-        onOpen();
-    };
-
     const search = (e: FormEvent) => {
         e.preventDefault();
         if (query) {
@@ -111,16 +99,8 @@ const FolderPage: PageWithLayout<
 
     useEffect(() => {
         setMode("folders");
-        refetch();
+        refetchFolders();
     }, [current]);
-
-    const navigateFolder = (folderId: string) => {
-        router.push(
-            `/resources/classification/${encodeURIComponent(
-                classification?.toLowerCase() as string
-            )}/${folderId}`
-        );
-    };
 
     return (
         <>
@@ -200,14 +180,28 @@ const FolderPage: PageWithLayout<
                         </HStack>
                     </Flex>
                 </Center>
-                <Flex p={"4"} justify={"flex-start"} h={"8vh"}>
+                <Flex p={"4"} justify={"space-between"} h={"8vh"}>
                     <HStack>
+                        {current && current.root !== undefined && (
+                            <Button
+                                w={"fit-content"}
+                                onClick={() =>
+                                    router.push(
+                                        `/resources/classification/${encodeURIComponent(
+                                            classification?.toLowerCase() as string
+                                        )}/${current.root.id}`
+                                    )
+                                }
+                            >
+                                <Box as={FaFolderOpen} mr={"2"} />
+                                Return
+                            </Button>
+                        )}
                         <TabButton
                             onClick={() => {
-                                if (!isLoading) {
+                                if (!resourcesLoading) {
                                     setMode("folders");
-                                    clear();
-                                    refetch();
+                                    refetchFolders();
                                 }
                             }}
                             isActive={mode === "folders"}
@@ -216,12 +210,9 @@ const FolderPage: PageWithLayout<
                         </TabButton>
                         <TabButton
                             onClick={() => {
-                                if (!isLoading) {
+                                if (!foldersLoading) {
                                     setMode("resources");
-                                    clear();
-                                    refetch(
-                                        `/api/resource/folders/${current?.id}/resources`
-                                    );
+                                    refetchResources();
                                 }
                             }}
                             isActive={mode === "resources"}
@@ -229,14 +220,47 @@ const FolderPage: PageWithLayout<
                             Resources
                         </TabButton>
                     </HStack>
+                    <Flex>
+                        <IconButton
+                            icon={<BsGridFill />}
+                            aria-label={"grid"}
+                            w={"fit-content"}
+                            rounded={"0"}
+                            roundedLeft={"md"}
+                            borderColor={"primary"}
+                            color={
+                                view === "grid"
+                                    ? "neutralizerLight"
+                                    : "neutralizerDark"
+                            }
+                            bg={view === "grid" ? "primary" : "transparent"}
+                            onClick={() => setView("grid")}
+                        />
+                        <IconButton
+                            icon={<BsListUl />}
+                            aria-label={"list"}
+                            w={"fit-content"}
+                            rounded={"0"}
+                            roundedRight={"md"}
+                            borderColor={"primary"}
+                            color={
+                                view === "list"
+                                    ? "neutralizerLight"
+                                    : "neutralizerDark"
+                            }
+                            bg={view === "list" ? "primary" : "transparent"}
+                            onClick={() => setView("list")}
+                        />
+                    </Flex>
                 </Flex>
+                <Flex w={"full"} px={"8"} h={'1rem'}>{current && current.fullPath}</Flex>
                 <Flex
                     justify={"flex-start"}
                     align={"stretch"}
                     px={"8"}
                     py={"4"}
                     w={"full"}
-                    h={{ base: "65vh", md: "72vh" }}
+                    h={{ base: "calc(65vh - 1rem)", md: "calc(72vh - 1rem)" }}
                     overflow={"auto"}
                     overflowX={"hidden"}
                     css={{
@@ -254,110 +278,32 @@ const FolderPage: PageWithLayout<
                         },
                     }}
                 >
-                    <Grid
-                        w={"full"}
-                        h={"fit-content"}
-                        gridTemplateColumns={{
-                            base: "repeat(2, 1fr)",
-                            md: "repeat(3, 1fr)",
-                            xl: "repeat(4, 1fr)",
-                        }}
-                        justifyItems={"center"}
-                        alignItems={"start"}
-                        gap={"4"}
-                    >
-                        {(() => {
-                            if (data && !isLoading) {
-                                if (data.length > 0) {
-                                    if ("blobPath" in data[0]) {
-                                        return (
-                                            <>
-                                                {data.map((d) => (
-                                                    <ResourceItem
-                                                        resource={
-                                                            d as ResourceType
-                                                        }
-                                                        reload={() => {
-                                                            if (!isLoading) {
-                                                                setMode(
-                                                                    "resources"
-                                                                );
-                                                                clear();
-                                                                refetch(
-                                                                    `/api/resource/folders/${current?.id}/resources`
-                                                                );
-                                                            }
-                                                        }}
-                                                        onManage={
-                                                            manageResource
-                                                        }
-                                                    />
-                                                ))}
-                                            </>
-                                        );
-                                    } else {
-                                        return (
-                                            <>
-                                                {data.map((f) => (
-                                                    <FolderItem
-                                                        folder={f as FolderType}
-                                                        onClick={() =>
-                                                            navigateFolder(f.id)
-                                                        }
-                                                    />
-                                                ))}
-                                            </>
-                                        );
+                    {(() => {
+                        if (mode === "resources") {
+                            return (
+                                <DisplayResources
+                                    resources={resources}
+                                    view={view}
+                                    loading={resourcesLoading}
+                                    refetchResources={refetchResources}
+                                />
+                            );
+                        } else {
+                            return (
+                                <DisplayFolders
+                                    folders={folders}
+                                    view={view}
+                                    loading={foldersLoading}
+                                    reload={refetchFolders}
+                                    classification={
+                                        classification as FileClassification
                                     }
-                                } else {
-                                    return (
-                                        <Text gridColumn={"1 / 5"}>
-                                            There are currently no {mode}{" "}
-                                            available.
-                                        </Text>
-                                    );
-                                }
-                            } else {
-                                if (isLoading) {
-                                    return (
-                                        <Center
-                                            w={"full"}
-                                            placeSelf={"center"}
-                                            gridColumn={"1/6"}
-                                        >
-                                            <CircularProgress
-                                                isIndeterminate
-                                                color={"secondary"}
-                                                size={12}
-                                            />
-                                        </Center>
-                                    );
-                                } else {
-                                    return (
-                                        <Text>
-                                            There are currently no {mode}{" "}
-                                            available.
-                                        </Text>
-                                    );
-                                }
-                            }
-                        })()}
-                    </Grid>
+                                />
+                            );
+                        }
+                    })()}
                 </Flex>
             </Box>
-            <AnimatePresence>
-                {isOpen && selected && (
-                    <EditResourceModal
-                        resource={selected}
-                        onDismiss={() => onClose()}
-                        refetch={() =>
-                            refetch(
-                                `/api/resource/folders/${current?.id}/resources`
-                            )
-                        }
-                    />
-                )}
-            </AnimatePresence>
         </>
     );
 };
