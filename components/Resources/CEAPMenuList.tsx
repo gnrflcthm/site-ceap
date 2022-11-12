@@ -1,19 +1,15 @@
-import { MenuItem, MenuList, useDisclosure, useToast } from "@chakra-ui/react";
-import { IResourceSchema } from "@db/models";
+import { MenuItem, MenuList, useToast } from "@chakra-ui/react";
 import { FileAccessibility, ResourceStatus } from "@util/Enums";
 import axios from "axios";
+import { ResourceItemType } from "pages/resources/classification/[classification]/[[...folderId]]";
 import { FC } from "react";
 
 const CEAPMenuList: FC<{
     onDownload: Function;
     onManage: Function;
-    resource: IResourceSchema & {
-        id: string;
-        uploadedBy: string;
-        folder: string;
-    };
+    resource: ResourceItemType;
     reload: Function;
-}> = ({ onDownload, resource, reload = () => {}, onManage = () => {}}) => {
+}> = ({ onDownload, resource, reload = () => {}, onManage = () => {} }) => {
     const toast = useToast();
 
     const updateStatus = () => {
@@ -34,7 +30,7 @@ const CEAPMenuList: FC<{
             .then(() => {
                 toast({
                     status: "success",
-                    title: "Resource Has Been Archived",
+                    title: `Resource ${status === ResourceStatus.ARCHIVED ? "has been archived" : "is now avaialble for viewing"} `,
                 });
                 reload();
             })
@@ -49,7 +45,7 @@ const CEAPMenuList: FC<{
 
     return (
         <>
-            <MenuList>
+            <MenuList color={"neutralizerDark"} onClick={e => e.stopPropagation()}>
                 <MenuItem onClick={() => onDownload()}>Download</MenuItem>
                 <MenuItem onClick={() => onManage(resource)}>Manage</MenuItem>
                 <MenuItem onClick={() => updateStatus()}>
@@ -58,7 +54,6 @@ const CEAPMenuList: FC<{
                         : "Make Available"}
                 </MenuItem>
             </MenuList>
-            
         </>
     );
 };

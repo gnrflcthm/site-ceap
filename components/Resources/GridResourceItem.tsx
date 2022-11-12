@@ -1,50 +1,54 @@
-import { FC, useContext } from "react";
-
 import {
-    As,
-    Box,
+    Tooltip,
+    VStack,
+    Menu,
+    MenuButton,
     Center,
     HStack,
     Text,
-    VStack,
-    Tooltip,
-    Menu,
-    MenuButton,
-    MenuList,
+    Box,
+    As,
 } from "@chakra-ui/react";
-import { FaDownload, FaEllipsisV } from "react-icons/fa";
-
-import axios, { AxiosError } from "axios";
 import { AuthContext } from "@context/AuthContext";
-import { ClientResourceType } from "pages/resources/search";
-
-import { FaFileAlt, FaFileImage, FaFileVideo, FaFilePdf } from "react-icons/fa";
 import { AccountType, FileType } from "@util/Enums";
-import dynamic from "next/dynamic";
-import { IResourceSchema } from "@db/models";
+import axios, { AxiosError } from "axios";
+import { ResourceItemType } from "pages/resources/classification/[classification]/[[...folderId]]";
+import { FC, useContext } from "react";
+import {
+    FaEllipsisV,
+    FaDownload,
+    FaFileAlt,
+    FaFileImage,
+    FaFilePdf,
+    FaFileVideo,
+} from "react-icons/fa";
+import CEAPMenuList from "./CEAPMenuList";
+import UserMenuList from "./UserMenuList";
 
-const UserMenuList = dynamic(
-    () => import("@components/Resources/UserMenuList")
-);
+import { filesize } from "filesize";
 
-const CEAPMenuList = dynamic(
-    () => import("@components/Resources/CEAPMenuList")
-);
-
-const ResourceItem: FC<{
-    resource: IResourceSchema & {
-        id: string;
-        uploadedBy: string;
-        folder: string;
-    };
+const GridResourceItem: FC<{
+    resource: ResourceItemType;
     reload: Function;
     onManage: Function;
 }> = ({ resource, reload, onManage }) => {
     const { user } = useContext(AuthContext);
 
+    const icon: As = (() => {
+        switch (resource.fileType) {
+            case FileType.DOCUMENT:
+                return FaFileAlt;
+            case FileType.IMAGE:
+                return FaFileImage;
+            case FileType.PDF:
+                return FaFilePdf;
+            case FileType.VIDEO:
+                return FaFileVideo;
+        }
+    })();
+
     const download = () => {
         const url = `/api/resource${user ? "/a" : ""}/download/${resource.id}`;
-
         axios
             .get(url)
             .then((res) => {
@@ -61,36 +65,15 @@ const ResourceItem: FC<{
             });
     };
 
-    const icon: As = (() => {
-        switch (resource.fileType) {
-            case FileType.DOCUMENT:
-                return FaFileAlt;
-            case FileType.IMAGE:
-                return FaFileImage;
-            case FileType.PDF:
-                return FaFilePdf;
-            case FileType.VIDEO:
-                return FaFileVideo;
-        }
-    })();
-
-    let size = "";
-    if (resource.size) {
-        if (resource.size < 1000000) {
-            size = `${(resource.size * Math.pow(10, -3)).toFixed(1)} KB`;
-        } else {
-            size = `${(resource.size * Math.pow(10, -6)).toFixed(1)} MB`;
-        }
-    }
-
     return (
         <Tooltip label={resource.filename} placement={"top"}>
             <VStack
                 position={"relative"}
                 rounded={"md"}
+                shadow={"md"}
+                borderWidth={'thin'}
+                borderColor={"gray.200"}
                 p={"4"}
-                borderWidth={"thin"}
-                borderColor={"neutralizerDark"}
                 flexDir={"column"}
                 cursor={"pointer"}
                 w={"12rem"}
@@ -125,13 +108,7 @@ const ResourceItem: FC<{
                                         <CEAPMenuList
                                             onDownload={() => download()}
                                             onManage={onManage}
-                                            resource={
-                                                resource as IResourceSchema & {
-                                                    id: string;
-                                                    uploadedBy: string;
-                                                    folder: string;
-                                                }
-                                            }
+                                            resource={resource}
                                             reload={() => reload()}
                                         />
                                     );
@@ -149,7 +126,6 @@ const ResourceItem: FC<{
                         color: "secondary",
                         borderColor: "secondary",
                     }}
-                    // onClick={() => download()}
                 >
                     <Center mb={"4"}>
                         <Box
@@ -175,7 +151,10 @@ const ResourceItem: FC<{
                             color={"blackAlpha.700"}
                             textTransform={"uppercase"}
                         >
-                            {size}
+                            {
+                                resource.size && 
+                                filesize(resource.size) as string
+                            }
                         </Text>
                         <Box as={FaDownload} color={"inherit"} />
                     </HStack>
@@ -185,4 +164,4 @@ const ResourceItem: FC<{
     );
 };
 
-export default ResourceItem;
+export default GridResourceItem;

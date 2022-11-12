@@ -3,7 +3,7 @@ import { FC } from "react";
 
 const UserMenuList: FC<{ onDownload: Function }> = ({ onDownload }) => {
     return (
-        <MenuList>
+        <MenuList onClick={(e) => e.stopPropagation()}>
             <MenuItem onClick={() => onDownload()}>Download</MenuItem>
         </MenuList>
     );

@@ -11,6 +11,8 @@ import {
     useToast,
     VStack,
     Text,
+    Textarea,
+    Box,
 } from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
 import {
@@ -26,7 +28,7 @@ import {
     ResourceStatus,
 } from "@util/Enums";
 import { useData } from "@util/hooks/useData";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import FolderSelectModal from "@components/Uploads/FolderSelectModal";
 
 const EditResourceModal: FC<{
@@ -44,6 +46,10 @@ const EditResourceModal: FC<{
     const [location, setLocation] = useState<
         (IFolderSchema & { id: string; root?: { id: string } }) | undefined
     >(undefined);
+
+    const [description, setDescription] = useState<string>(
+        resource.description || ""
+    );
 
     const [status, setStatus] = useState<ResourceStatus>(resource.status);
 
@@ -71,6 +77,7 @@ const EditResourceModal: FC<{
                 classification,
                 status,
                 folder: location?.id,
+                description,
             })
             .then(() => {
                 toast({
@@ -209,6 +216,48 @@ const EditResourceModal: FC<{
                                 required
                                 disabled={loading || !location}
                             />
+                            <Box w={"full"} position={"relative"}>
+                                <AnimatePresence>
+                                    <Box
+                                        mb={"1"}
+                                        h={"1rem"}
+                                        w={"full"}
+                                        position={"absolute"}
+                                        top={"-1.5rem"}
+                                    >
+                                        {description && (
+                                            <Text
+                                                as={motion.p}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                fontSize={"sm"}
+                                                color={"secondary"}
+                                                fontWeight={"normal"}
+                                            >
+                                                File Description
+                                            </Text>
+                                        )}
+                                    </Box>
+                                </AnimatePresence>
+                                <Textarea
+                                    value={description}
+                                    onChange={(e) =>
+                                        setDescription(e.target.value)
+                                    }
+                                    borderWidth={"1px"}
+                                    borderColor={
+                                        description
+                                            ? "secondary"
+                                            : "neutralizerDark"
+                                    }
+                                    focusBorderColor={"secondary"}
+                                    _hover={{ border: "neutralizerDark" }}
+                                    placeholder={"Enter file description"}
+                                    maxH={"20vh"}
+                                    disabled={loading}
+                                ></Textarea>
+                            </Box>
                         </VStack>
                         {error && (
                             <Text
