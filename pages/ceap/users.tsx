@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
@@ -21,6 +21,7 @@ import {
     Tooltip,
     useDisclosure,
     useToast,
+    Select,
 } from "@chakra-ui/react";
 
 import { PageWithLayout } from "../_app";
@@ -34,7 +35,7 @@ import TabButton from "@components/Accounts/TabButton";
 
 import { useData } from "@util/hooks/useData";
 import { FaPlus, FaSearch, FaTimes } from "react-icons/fa";
-import SearchBar from "@components/Accounts/SearchBar";
+import SearchBar from "@components/SearchBar";
 import AddAdminPopup from "@components/Accounts/AddAdminPopup";
 import { AnimatePresence, motion } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
@@ -47,7 +48,10 @@ const CEAPUsers: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ accounts }) => {
     const toast = useToast();
-    const [current, setCurrent] = useState<"ceap" | "admin">("ceap");
+    const [current, setCurrent] = useState<"ceap" | "admin" | "none">("ceap");
+
+    const [query, setQuery] = useState<string>("");
+    const [criteria, setCriteria] = useState<string>("");
 
     const {
         isOpen: openCreateAdmin,
@@ -98,6 +102,12 @@ const CEAPUsers: PageWithLayout<
             });
     };
 
+    const searchUsers = (e: FormEvent) => {
+        e.preventDefault();
+        setCurrent("none");
+        refetch(`/api/admin/users?${criteria}=${query}`);
+    };
+
     return (
         <>
             <Head>
@@ -106,7 +116,12 @@ const CEAPUsers: PageWithLayout<
             <TopPanel title={"Manage Accounts"} />
             {user && !loading ? (
                 <>
-                    <Flex justify={"space-between"} align={"center"}>
+                    <Flex
+                        w={"full"}
+                        flexDir={{ base: "column", md: "row" }}
+                        justify={"space-between"}
+                        align={{ base: "stretch", md: "center" }}
+                    >
                         <Flex
                             justify={"flex-start"}
                             align={"center"}
@@ -140,40 +155,15 @@ const CEAPUsers: PageWithLayout<
                                     : "flex-end"
                             }
                             align={"stretch"}
-                            w={"40%"}
+                            w={{ base: "full", md: "70%" }}
                         >
-                            <Flex>
-                                {/* TODO: Add Search Functionality */}
-                                <SearchBar />
-                                <Tooltip
-                                    label={"Search"}
-                                    placement={"bottom"}
-                                    hasArrow
-                                >
-                                    <Center px={"4"}>
-                                        <Button
-                                            w={"full"}
-                                            _hover={{ color: "secondary" }}
-                                            bg={"transparent"}
-                                            color={"neutralizerDark"}
-                                        >
-                                            <Box
-                                                as={FaSearch}
-                                                m={"auto"}
-                                                cursor={"pointer"}
-                                                fontSize={"2xl"}
-                                            />
-                                        </Button>
-                                    </Center>
-                                </Tooltip>
-                            </Flex>
                             {current === "ceap" && (
                                 <Tooltip
                                     label={"Create Admin"}
                                     placement={"bottom"}
                                     hasArrow
                                 >
-                                    <Center px={"4"}>
+                                    <Center px={"1"}>
                                         <Button
                                             w={"full"}
                                             _hover={{ color: "secondary" }}
@@ -195,6 +185,82 @@ const CEAPUsers: PageWithLayout<
                                     </Center>
                                 </Tooltip>
                             )}
+                            <Flex
+                                w={"full"}
+                                as={"form"}
+                                onSubmit={searchUsers}
+                                justify={{ base: "center", md: "flex-end" }}
+                            >
+                                <Select
+                                    required
+                                    onChange={(e) => {
+                                        setCriteria(e.target.value);
+                                        setQuery("");
+                                    }}
+                                >
+                                    <option selected disabled>
+                                        Search Critieria
+                                    </option>
+                                    <option value="name">Name</option>
+                                    <option value="mobile">
+                                        Mobile Number
+                                    </option>
+                                    <option value="email">Email Address</option>
+                                    <option value="accountType">
+                                        Account Type
+                                    </option>
+                                    <option value="school">School</option>
+                                </Select>
+                                {criteria === "accountType" ? (
+                                    <Select
+                                        onChange={(e) =>
+                                            setQuery(e.target.value)
+                                        }
+                                    >
+                                        <option value={AccountType.CEAP_ADMIN}>
+                                            CEAP Admin
+                                        </option>
+                                        <option
+                                            value={AccountType.CEAP_SUPER_ADMIN}
+                                        >
+                                            CEAP Super Admin
+                                        </option>
+                                        <option value={AccountType.MS_ADMIN}>
+                                            Member School Admin
+                                        </option>
+                                    </Select>
+                                ) : (
+                                    <SearchBar
+                                        query={query}
+                                        setQuery={setQuery}
+                                        placeholder={"Search..."}
+                                        inputColor={"neutralizerDark"}
+                                        hasForm={true}
+                                    />
+                                )}
+                                <Tooltip
+                                    label={"Search"}
+                                    placement={"bottom"}
+                                    hasArrow
+                                >
+                                    <Center px={"4"}>
+                                        <Button
+                                            w={"full"}
+                                            _hover={{ color: "secondary" }}
+                                            bg={"transparent"}
+                                            color={"neutralizerDark"}
+                                            type={"submit"}
+                                        >
+                                            <Box
+                                                as={FaSearch}
+                                                m={"auto"}
+                                                cursor={"pointer"}
+                                                fontSize={"2xl"}
+                                            />
+                                        </Button>
+                                    </Center>
+                                </Tooltip>
+                            </Flex>
                         </Flex>
                     </Flex>
                     <TableContainer maxH={"inherit"} overflowY={"auto"}>

@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import AuthGetServerSideProps, {
@@ -20,6 +20,7 @@ import {
     Tooltip,
     useDisclosure,
     useToast,
+    Select,
 } from "@chakra-ui/react";
 
 import { PageWithLayout } from "./_app";
@@ -33,7 +34,6 @@ import UserData from "@components/Accounts/UserData";
 import TabButton from "@components/Accounts/TabButton";
 
 import { useData } from "@util/hooks/useData";
-import SearchBar from "@components/Accounts/SearchBar";
 import { FaSearch } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
@@ -42,6 +42,7 @@ import ConfirmationModal from "@components/ConfirmationModal";
 
 import { AccountType } from "@util/Enums";
 import { IUserSchema, connectDB, User } from "@db/index";
+import SearchBar from "@components/SearchBar";
 
 // TODO: Add accepted roles for every GetServersideProps page if applicable
 
@@ -49,9 +50,12 @@ const ManageAccounts: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ accounts }) => {
     const toast = useToast();
-    const [current, setCurrent] = useState<"admin" | "users">("admin");
+    const [current, setCurrent] = useState<"admin" | "users" | "none">("admin");
     const { user, loading } = useContext(AuthContext);
     const { data, isLoading, refetch } = useData("", accounts);
+
+    const [query, setQuery] = useState<string>("");
+    const [criteria, setCriteria] = useState<string>("");
 
     const {
         isOpen: openEditUser,
@@ -96,6 +100,12 @@ const ManageAccounts: PageWithLayout<
         showEditUserModal();
     };
 
+    const searchUsers = (e: FormEvent) => {
+        e.preventDefault();
+        setCurrent("none");
+        refetch(`/api/admin/users?${criteria}=${query}`);
+    };
+
     return (
         <>
             <Head>
@@ -104,7 +114,11 @@ const ManageAccounts: PageWithLayout<
             <TopPanel title={"Manage Accounts"} />
             {user && !loading ? (
                 <>
-                    <Flex justify={"space-between"} align={"center"}>
+                    <Flex
+                        flexDir={{ base: "column", md: "row" }}
+                        justify={"space-between"}
+                        align={{ base: "stretch", md: "center" }}
+                    >
                         <Flex
                             justify={"flex-start"}
                             align={"center"}
@@ -130,19 +144,48 @@ const ManageAccounts: PageWithLayout<
                                 Users
                             </TabButton>
                         </Flex>
-                        <Flex justify={"flex-end"} align={"stretch"}>
-                            <SearchBar />
+                        <Flex
+                            w={"full"}
+                            as={"form"}
+                            onSubmit={searchUsers}
+                            px={"2"}
+                            justify={{ base: "center", md: "flex-end" }}
+                        >
+                            <Select
+                                required
+                                onChange={(e) => {
+                                    setCriteria(e.target.value);
+                                    setQuery("");
+                                }}
+                            >
+                                <option selected disabled>
+                                    Search Critieria
+                                </option>
+                                <option value="name">Name</option>
+                                <option value="mobile">Mobile Number</option>
+                                <option value="email">Email Address</option>
+                                <option value="schoolId">School ID</option>
+                            </Select>
+                            <SearchBar
+                                query={query}
+                                setQuery={setQuery}
+                                placeholder={"Search..."}
+                                inputColor={"neutralizerDark"}
+                                hasForm={true}
+                            />
+
                             <Tooltip
                                 label={"Search"}
                                 placement={"bottom"}
                                 hasArrow
                             >
-                                <Center px={"4"}>
+                                <Center px={"1"}>
                                     <Button
                                         w={"full"}
                                         _hover={{ color: "secondary" }}
                                         bg={"transparent"}
                                         color={"neutralizerDark"}
+                                        type={"submit"}
                                     >
                                         <Box
                                             as={FaSearch}

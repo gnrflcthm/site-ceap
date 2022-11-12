@@ -7,16 +7,25 @@ import { FaSearch } from "react-icons/fa";
 const SearchBar: FC<{
     query: string;
     setQuery: Function;
-    onSearch: Function;
+    onSearch?: Function;
     width?: string | { [key: string]: any };
     inputColor?: string;
     placeholderColor?: string;
-}> = ({ query, setQuery, onSearch, width, inputColor = "neutralizerLight", placeholderColor = "#888888" }) => {
-    const [focused, setFocused] = useState<boolean>(false);
-
+    placeholder?: string;
+    hasForm?: boolean;
+}> = ({
+    query,
+    setQuery,
+    onSearch = () => {},
+    width,
+    inputColor = "neutralizerLight",
+    placeholderColor = "#888888",
+    placeholder,
+    hasForm = false,
+}) => {
     return (
         <Flex
-            as={"form"}
+            as={hasForm ? "div" : "form"}
             position={"relative"}
             w={width || "full"}
             onSubmit={(e) => onSearch(e)}
@@ -28,18 +37,12 @@ const SearchBar: FC<{
                 type={"text"}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={"Search title of resource"}
-                // border={"none"}
-                // borderBottom={"1px solid"}
-                // borderBottomColor={"neutralizerLight"}
+                placeholder={placeholder || ""}
                 focusBorderColor={"secondary"}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
                 color={inputColor}
                 _placeholder={{
                     color: placeholderColor,
                 }}
-                // color={"neutralizerLight"}
                 autoComplete={"off"}
                 name={"q"}
             />
