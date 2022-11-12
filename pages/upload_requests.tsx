@@ -191,15 +191,16 @@ export const getServerSideProps: GetServerSideProps<{
             status: ResourceStatus.FOR_ADMIN_REVIEW,
             memberSchool: user.memberSchool,
         })
-            .populate("uploadedBy", ["id", "displayName", "memberSchool"])
+            .populate("uploadedBy", ["id", "displayName"])
             .populate("folder", ["id", "name", "fullPath"])
             .exec();
-
+        console.log(uploadRequests);
         return {
             props: {
                 uploadRequests: uploadRequests.map((ur) => ({
                     ...ur.toJSON(),
                     dateAdded: ur.dateAdded.toDateString(),
+                    memberSchool: ur.memberSchool?.toHexString(),
                 })),
             },
         };
