@@ -233,6 +233,7 @@ const CEAPUsers: PageWithLayout<
                                         placeholder={"Search..."}
                                         inputColor={"neutralizerDark"}
                                         hasForm={true}
+                                        showIcon={false}
                                     />
                                 )}
                                 <Tooltip

@@ -13,6 +13,7 @@ const SearchBar: FC<{
     placeholderColor?: string;
     placeholder?: string;
     hasForm?: boolean;
+    showIcon?: boolean;
 }> = ({
     query,
     setQuery,
@@ -22,6 +23,7 @@ const SearchBar: FC<{
     placeholderColor = "#888888",
     placeholder,
     hasForm = false,
+    showIcon = true,
 }) => {
     return (
         <Flex
@@ -46,15 +48,17 @@ const SearchBar: FC<{
                 autoComplete={"off"}
                 name={"q"}
             />
-            <Box
-                as={FaSearch}
-                position={"absolute"}
-                top={"50%"}
-                transform={"auto"}
-                translateY={"-50%"}
-                right={"4"}
-                color={inputColor || "neutralizerDark"}
-            />
+            {showIcon && (
+                <Box
+                    as={FaSearch}
+                    position={"absolute"}
+                    top={"50%"}
+                    transform={"auto"}
+                    translateY={"-50%"}
+                    right={"4"}
+                    color={inputColor || "neutralizerDark"}
+                />
+            )}
         </Flex>
     );
 };

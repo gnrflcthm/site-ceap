@@ -158,8 +158,12 @@ const ManageAccounts: PageWithLayout<
                                     setQuery("");
                                 }}
                             >
-                                <option value="name" selected>Name</option>
-                                <option value="mobileNumber">Mobile Number</option>
+                                <option value="name" selected>
+                                    Name
+                                </option>
+                                <option value="mobileNumber">
+                                    Mobile Number
+                                </option>
                                 <option value="email">Email Address</option>
                                 <option value="schoolId">School ID</option>
                             </Select>
@@ -169,6 +173,7 @@ const ManageAccounts: PageWithLayout<
                                 placeholder={"Search..."}
                                 inputColor={"neutralizerDark"}
                                 hasForm={true}
+                                showIcon={false}
                             />
 
                             <Tooltip
