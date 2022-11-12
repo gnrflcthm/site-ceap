@@ -25,7 +25,7 @@ export default authenticatedHandler([
 
             await connectDB();
             const user = await User.findOne({ authId: req.uid });
-
+            query = query.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
             if (user?.accountType === AccountType.MS_ADMIN) {
                 let users: any[] = [];
                 switch (criteria) {
