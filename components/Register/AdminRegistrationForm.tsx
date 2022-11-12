@@ -1,9 +1,18 @@
 import { FC, useState, FormEvent, useMemo } from "react";
 
-import { Button, CircularProgress, Heading, VStack } from "@chakra-ui/react";
+import {
+    Button,
+    CircularProgress,
+    Heading,
+    Text,
+    useDisclosure,
+    VStack,
+} from "@chakra-ui/react";
 import CoreSelect from "@components/CoreSelect";
 import axios, { AxiosError } from "axios";
 import CoreInput from "@components/CoreInput";
+import { AnimatePresence } from "framer-motion";
+import DPAModal from "@components/Modal/DPAModal";
 
 const AdminRegistrationForm: FC<{
     memberSchools: any[];
@@ -25,6 +34,8 @@ const AdminRegistrationForm: FC<{
             .filter((reg, i, arr) => arr.indexOf(reg) === i)
             .map((reg) => ({ name: reg, value: reg }));
     }, [memberSchools]);
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     const register = (e: FormEvent) => {
         e.preventDefault();
@@ -51,75 +62,94 @@ const AdminRegistrationForm: FC<{
     };
 
     return (
-        <VStack as={"form"} onSubmit={register} w={"full"} spacing={"8"}>
-            <Heading fontSize={"2xl"} w={"full"} textAlign={"center"}>
-                Member School Admin Registration
-            </Heading>
-            <CoreInput
-                name="lastName"
-                setValue={setLastName}
-                placeholder={"Last Name"}
-                value={lastName}
-                required
-                disabled={loading}
-            />
-            <CoreInput
-                name="firstName"
-                setValue={setFirstName}
-                placeholder={"First Name"}
-                value={firstName}
-                required
-                disabled={loading}
-            />
-            <CoreInput
-                name="middleName"
-                setValue={setMiddleName}
-                placeholder={"Middle Name"}
-                value={middleName}
-                disabled={loading}
-            />
-            <CoreInput
-                name="mobileNumber"
-                setValue={setMobileNumber}
-                placeholder={"Mobile Number (+639xxxxxxxxx)"}
-                value={mobileNumber}
-                disabled={loading}
-                pattern={"^\\+63\\d{10}$"}
-            />
-            <CoreInput
-                name="email"
-                setValue={setEmail}
-                placeholder={"Email Address"}
-                value={email}
-                required
-                disabled={loading}
-            />
-            <CoreInput
-                type={"select"}
-                value={region}
-                setValue={setRegion}
-                name={"region"}
-                placeholder={"Region of your school"}
-                selectPrompt={"Select A Region"}
-                values={regions}
-            />
-            {region && (
-                <CoreSelect
-                    name={"memberSchool"}
-                    // @ts-ignore
-                    options={memberSchools}
-                    placeholder={"School or Organization"}
-                    setValue={setMemberSchool}
-                    isGrouped
+        <>
+            <VStack as={"form"} onSubmit={register} w={"full"} spacing={"8"}>
+                <Heading fontSize={"2xl"} w={"full"} textAlign={"center"}>
+                    Member School Admin Registration
+                </Heading>
+                <CoreInput
+                    name="lastName"
+                    setValue={setLastName}
+                    placeholder={"Last Name"}
+                    value={lastName}
                     required
                     disabled={loading}
-                    filter={region}
                 />
-            )}
-            <Button type={"submit"} variant={"secondary"} disabled={loading}>
-                {loading ? <CircularProgress size={8} /> : "Register"}
-            </Button>
-        </VStack>
+                <CoreInput
+                    name="firstName"
+                    setValue={setFirstName}
+                    placeholder={"First Name"}
+                    value={firstName}
+                    required
+                    disabled={loading}
+                />
+                <CoreInput
+                    name="middleName"
+                    setValue={setMiddleName}
+                    placeholder={"Middle Name"}
+                    value={middleName}
+                    disabled={loading}
+                />
+                <CoreInput
+                    name="mobileNumber"
+                    setValue={setMobileNumber}
+                    placeholder={"Mobile Number (+639xxxxxxxxx)"}
+                    value={mobileNumber}
+                    disabled={loading}
+                    pattern={"^\\+63\\d{10}$"}
+                />
+                <CoreInput
+                    name="email"
+                    setValue={setEmail}
+                    placeholder={"Email Address"}
+                    value={email}
+                    required
+                    disabled={loading}
+                />
+                <CoreInput
+                    type={"select"}
+                    value={region}
+                    setValue={setRegion}
+                    name={"region"}
+                    placeholder={"Region of your school"}
+                    selectPrompt={"Select A Region"}
+                    values={regions}
+                />
+                {region && (
+                    <CoreSelect
+                        name={"memberSchool"}
+                        // @ts-ignore
+                        options={memberSchools}
+                        placeholder={"School or Organization"}
+                        setValue={setMemberSchool}
+                        isGrouped
+                        required
+                        disabled={loading}
+                        filter={region}
+                    />
+                )}
+                <Button
+                    type={"submit"}
+                    variant={"secondary"}
+                    disabled={loading}
+                >
+                    {loading ? <CircularProgress size={8} /> : "Register"}
+                </Button>
+                <Text textAlign={"center"}>
+                    By registering, you are agreeing to our{" "}
+                    <Button
+                        variant={"link"}
+                        display={"inline"}
+                        onClick={() => onOpen()}
+                    >
+                        Terms and Conditions
+                    </Button>
+                </Text>
+            </VStack>
+            <AnimatePresence>
+                {isOpen && <DPAModal onDismiss={() => onClose()} />}
+            </AnimatePresence>
+        </>
     );
 };
 

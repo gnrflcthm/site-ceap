@@ -8,11 +8,14 @@ import {
     CircularProgress,
     Text,
     Center,
+    useDisclosure,
 } from "@chakra-ui/react";
 import axios, { AxiosError } from "axios";
 
 import CoreInput from "@components/CoreInput";
 import CoreSelect from "@components/CoreSelect";
+import { AnimatePresence } from "framer-motion";
+import DPAModal from "@components/Modal/DPAModal";
 
 const RegistrationForm: FC<{
     memberSchools: any[];
@@ -37,6 +40,8 @@ const RegistrationForm: FC<{
             .filter((reg, i, arr) => arr.indexOf(reg) === i)
             .map((reg) => ({ name: reg, value: reg }));
     }, [memberSchools]);
+
+    const { isOpen, onClose, onOpen } = useDisclosure();
 
     const register = (e: FormEvent) => {
         e.preventDefault();
@@ -162,20 +167,36 @@ const RegistrationForm: FC<{
                 </Center>
             </VStack>
             <Text mt={"4"} textAlign={"center"}>
+                By registering, you are agreeing to our{" "}
+                <Button
+                    variant={"link"}
+                    display={"inline"}
+                    onClick={() => onOpen()}
+                >
+                    Terms and Conditions
+                </Button>
+            </Text>
+            <Text mt={"4"} textAlign={"center"}>
                 Can't find your region or school at the list?
                 <Link href={"/registration/admin_registration"} passHref>
-                    <Text
+                    <Button
+                        variant={"link"}
                         display={"block"}
                         as={"a"}
                         color={"primary"}
                         textDecor={"underline"}
                         cursor={"pointer"}
+                        textAlign={"center"}
+                        w={"full"}
                     >
                         Register as an Administrator of your school
-                    </Text>
+                    </Button>
                 </Link>
                 .
             </Text>
+            <AnimatePresence>
+                {isOpen && <DPAModal onDismiss={() => onClose()} />}
+            </AnimatePresence>
         </>
     );
 };
