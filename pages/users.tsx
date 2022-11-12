@@ -159,7 +159,7 @@ const ManageAccounts: PageWithLayout<
                                 }}
                             >
                                 <option value="name" selected>Name</option>
-                                <option value="mobile">Mobile Number</option>
+                                <option value="mobileNumber">Mobile Number</option>
                                 <option value="email">Email Address</option>
                                 <option value="schoolId">School ID</option>
                             </Select>

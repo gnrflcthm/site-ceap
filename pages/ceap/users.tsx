@@ -199,7 +199,7 @@ const CEAPUsers: PageWithLayout<
                                     }}
                                 >
                                     <option value="name" selected>Name</option>
-                                    <option value="mobile">
+                                    <option value="mobileNumber">
                                         Mobile Number
                                     </option>
                                     <option value="email">Email Address</option>
