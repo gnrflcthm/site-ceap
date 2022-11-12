@@ -8,6 +8,8 @@ import { AccountType } from "@util/Enums";
 import Head from "next/head";
 import TopPanel from "@components/TopPanel";
 import {
+    Box,
+    Button,
     Center,
     CircularProgress,
     Select,
@@ -24,7 +26,7 @@ import {
 import TableHeader from "@components/TableHeader";
 import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
 import LogData from "@components/Logs/LogData";
-import { FaFileAlt } from "react-icons/fa";
+import { FaFileAlt, FaSync } from "react-icons/fa";
 
 import { AnimatePresence } from "framer-motion";
 import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
@@ -69,11 +71,24 @@ const Logs: PageWithLayout<
             <Stack
                 direction={{ base: "column-reverse", md: "row" }}
                 p={"4"}
-                h={{ base: "9rem", md: "4.5rem" }}
+                minH={{ base: "11rem", md: "4.5rem" }}
                 overflow={"hidden"}
                 as={"form"}
                 onSubmit={search}
             >
+                <Button
+                    onClick={() => {
+                        refetch(`/api/admin/logs`);
+                        setQuery("");
+                    }}
+                    px={"8"}
+                    w={{ base: "full", md: "max-content" }}
+                >
+                    <Center mr={"2"}>
+                        <Box as={FaSync} w={"8"} />
+                    </Center>
+                    <Text color={"inherit"}>Refresh</Text>
+                </Button>
                 <Select
                     w={{ base: "full", md: "30%" }}
                     onChange={(e) => {
@@ -82,7 +97,9 @@ const Logs: PageWithLayout<
                     }}
                     required
                 >
-                    <option value={"name"} selected>User's Name</option>
+                    <option value={"name"} selected>
+                        User's Name
+                    </option>
                     <option value={"action"}>Action</option>
                     <option value={"details"}>Details</option>
                 </Select>
@@ -95,13 +112,17 @@ const Logs: PageWithLayout<
                     hasForm
                 />
             </Stack>
-            <TableContainer overflowY={"auto"} h={"85vh"}>
+            <TableContainer overflowY={"auto"}>
                 <Table>
                     <Thead
                         bg={"gray.100"}
                         position={"sticky"}
                         top={"1"}
                         zIndex={"2"}
+                        maxH={{
+                            base: "calc(85vh-11rem)",
+                            md: "calc(85vh-4.5rem)",
+                        }}
                     >
                         <Tr>
                             <TableHeader heading={"Date Performed"} />
@@ -180,7 +201,7 @@ export const getServerSideProps: GetServerSideProps<{
                 case AccountType.CEAP_ADMIN:
                     const logs = await Log.find({})
                         .populate("user", ["id", "displayName"])
-                        .limit(15);
+                        .limit(30);
 
                     return {
                         props: {
@@ -198,7 +219,7 @@ export const getServerSideProps: GetServerSideProps<{
                         memberSchool: user.memberSchool,
                     })
                         .populate("user", ["id", "displayName"])
-                        .limit(15);
+                        .limit(30);
                     return {
                         props: {
                             logs: logData.map((log) => ({
