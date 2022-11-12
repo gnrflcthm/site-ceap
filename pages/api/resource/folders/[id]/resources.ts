@@ -27,14 +27,18 @@ export default authenticatedHandler([], true).get(async (req, res) => {
             folder: id,
             accessibility,
             status,
-        });
+        })
+            .populate("uploadedBy", ["id", "firstName", "lastName"])
+            .populate("memberSchool", ["id", "name"]);
         res.status(200).json(resources.map((resource) => resource.toJSON()));
     } else {
         const resources = await Resource.find({
             folder: id,
             accessibility: FileAccessibility.PUBLIC,
             status: ResourceStatus.APPROVED,
-        });
+        })
+            .populate("uploadedBy", ["id", "firstName", "lastName"])
+            .populate("memberSchool", ["id", "name"]);
         res.status(200).json(resources.map((resource) => resource.toJSON()));
     }
 });
