@@ -10,12 +10,20 @@ import {
     useToken,
     Grid,
     useDisclosure,
+    CircularProgress,
 } from "@chakra-ui/react";
 
 import SearchBar from "@components/SearchBar";
 import Head from "next/head";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { connectDB, IResourceSchema, Resource, User } from "@db/index";
+import {
+    connectDB,
+    IMemberSchoolSchema,
+    IResourceSchema,
+    IUserSchema,
+    Resource,
+    User,
+} from "@db/index";
 import {
     AccountType,
     FileAccessibility,
@@ -24,12 +32,17 @@ import {
     ResourceStatus,
 } from "@util/Enums";
 import { useRouter } from "next/router";
-import ResourceItem from "@components/Resources/ResourceItem";
 import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
 import { AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
+import ListView from "@components/Resources/ListView";
+import { ResourceItemType } from "./classification/[classification]/[[...folderId]]";
+import ListResourceItem from "@components/Resources/ListResourceItem";
+import DisplayResources from "@components/Resources/DisplayResources";
+import { Document } from "mongoose";
+import { useData } from "@util/hooks/useData";
 
 const EditResourceModal = dynamic(
     () => import("@components/Resources/EditResourceModal")
@@ -37,8 +50,8 @@ const EditResourceModal = dynamic(
 
 const SearchResource: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ data }) => {
-    const [query, setQuery] = useState<string>(data?.query || "");
+> = ({ q }) => {
+    const [query, setQuery] = useState<string>(q || "");
     const [primary] = useToken("colors", ["primary"]);
     const router = useRouter();
 
@@ -58,6 +71,17 @@ const SearchResource: PageWithLayout<
         router.push(`/resources/search/?q=${query}`);
     };
 
+    const {
+        data: resources,
+        isLoading,
+        error,
+        refetch,
+    } = useData<ResourceItemType[]>(`/api/resource/a/search?q=${query}`);
+
+    useEffect(() => {
+        refetch();
+    }, [q]);
+
     const manageResource = (
         resource: IResourceSchema & {
             id: string;
@@ -68,7 +92,6 @@ const SearchResource: PageWithLayout<
         setSelected(resource);
         onOpen();
     };
-
     return (
         <>
             <Head>
@@ -84,37 +107,26 @@ const SearchResource: PageWithLayout<
                 >
                     <SearchBar {...{ query, setQuery, onSearch: search }} />
                 </Center>
-                {data?.resources ? (
-                    <Grid
-                        w={"full"}
-                        h={"fit-content"}
-                        gridTemplateColumns={{
-                            base: "repeat(2, 1fr)",
-                            md: "repeat(3, 1fr)",
-                            xl: "repeat(4, 1fr)",
-                        }}
-                        justifyItems={"center"}
-                        alignItems={"start"}
-                        gap={"4"}
-                        mt={"4"}
-                    >
-                        {data.resources.map((resource) => (
-                            <ResourceItem
-                                resource={resource}
-                                reload={() => router.reload()}
-                                onManage={manageResource}
-                            />
-                        ))}
-                    </Grid>
+                {resources && resources.length > 0 ? (
+                    <Box p={"4"}>
+                        <DisplayResources
+                            resources={resources}
+                            loading={false}
+                            view={"list"}
+                            refetchResources={() => {}}
+                        />
+                    </Box>
                 ) : (
                     <Center minH={"20vh"}>
-                        <Text
-                            color={"neutralizerLight"}
-                            fontWeight={"bold"}
-                            fontSize={"2xl"}
-                        >
-                            No Resources Found
-                        </Text>
+                        {isLoading ? (
+                            <CircularProgress
+                                isIndeterminate
+                                size={8}
+                                color={"secondary"}
+                            />
+                        ) : (
+                            <Text fontSize={"xl"}>No Resources Found</Text>
+                        )}
                     </Center>
                 )}
             </Box>
@@ -142,16 +154,9 @@ export interface ClientResourceType {
 }
 
 export const getServerSideProps: GetServerSideProps<{
-    data?: {
-        resources?: (IResourceSchema & {
-            id: string;
-            folder: string;
-            uploadedBy: string;
-        })[];
-        query?: string;
-    };
+    q?: string;
 }> = AuthGetServerSideProps(
-    async ({ query, uid }: GetServerSidePropsContextWithUser) => {
+    async ({ query }: GetServerSidePropsContextWithUser) => {
         let q: string | undefined;
 
         if (query.q) {
@@ -161,47 +166,10 @@ export const getServerSideProps: GetServerSideProps<{
                 q = query.q;
             }
         }
-
-        await connectDB();
-
-        const user = await User.findOne({ authId: uid });
-
-        const accessibility: FileAccessibility[] = [FileAccessibility.PUBLIC];
-        const status: ResourceStatus[] = [ResourceStatus.APPROVED];
-
-        if (user) {
-            switch (user.accountType) {
-                case AccountType.CEAP_SUPER_ADMIN:
-                case AccountType.CEAP_ADMIN:
-                    accessibility.push(FileAccessibility.HIDDEN);
-                    status.push(ResourceStatus.ARCHIVED);
-                default:
-                    accessibility.push(FileAccessibility.PRIVATE);
-            }
-        }
-
         if (q) {
-            const resources = await Resource.find({
-                filename: { $regex: `.*${q}.*`, $options: "i" },
-                status,
-                accessibility,
-                classification: query.c || Object.keys(FileClassification),
-            })
-                .select(
-                    "id filename classification fileType accessibility size status uploadedBy folder"
-                )
-                .limit(15);
-
             return {
                 props: {
-                    data: {
-                        resources: resources.map((resource) => ({
-                            ...resource.toJSON(),
-                            uploadedBy: resource.uploadedBy?.toHexString(),
-                            folder: resource.folder?.toHexString(),
-                        })),
-                        query: q,
-                    },
+                    q,
                 },
             };
         } else {
