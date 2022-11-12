@@ -156,6 +156,10 @@ const UploadRequests: PageWithLayout<
             <AnimatePresence>
                 {showResourceModal && !showUploadModal && (
                     <AcceptResourceModal
+                        reload={() => {
+                            setCurrent("requests");
+                            refetch(`/api/resource/a/requests`);
+                        }}
                         resource={currentResource}
                         close={() => {
                             closeResourceModal();
@@ -196,7 +200,7 @@ export const getServerSideProps: GetServerSideProps<{
                 uploads: uploads.map((resources) => ({
                     ...resources.toJSON(),
                     dateAdded: resources.dateAdded.toDateString(),
-                    memberSchool: resources.memberSchool?.toHexString() || ""
+                    memberSchool: resources.memberSchool?.toHexString() || "",
                 })),
             },
         };

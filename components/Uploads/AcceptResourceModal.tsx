@@ -33,17 +33,20 @@ export const accessibilityValues = [
     { name: "Private", value: FileAccessibility.PRIVATE },
 ];
 
-export const classifications = Object.keys(SelectClassifications).map((key) => ({
-    name: key,
-    value: SelectClassifications[key as keyof typeof SelectClassifications],
-}));
+export const classifications = Object.keys(SelectClassifications).map(
+    (key) => ({
+        name: key,
+        value: SelectClassifications[key as keyof typeof SelectClassifications],
+    })
+);
 
 export type FolderType = IFolderSchema & { id: string; root?: FolderType };
 
 const AcceptResourceModal: FC<{
+    reload: Function;
     resource?: ResourceType;
     close: Function;
-}> = ({ resource, close }) => {
+}> = ({ resource, close, reload }) => {
     const [filename, setFilename] = useState<string>(resource?.filename || "");
     const [accessibility, setAccessibility] = useState<FileAccessibility>(
         FileAccessibility.PUBLIC
@@ -90,6 +93,7 @@ const AcceptResourceModal: FC<{
                 status: ResourceStatus.APPROVED,
                 accept: true,
             });
+            reload();
             toast({
                 status: "success",
                 title: "Successfully Published Resource",
