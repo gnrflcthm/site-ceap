@@ -25,7 +25,12 @@ export default authenticatedHandler().delete(async (req, res) => {
         res.status(200);
 
         const user = await User.findById(resource.uploadedBy);
-        if (user) await sendUploadRequestRejectEmail(user, resource);
+        if (
+            user &&
+            user._id.toHexString() !== resource.uploadedBy?.toHexString()
+        ) {
+            await sendUploadRequestRejectEmail(user, resource);
+        }
 
         const a = await User.findOne({ authId: req.uid });
         if (a) {
