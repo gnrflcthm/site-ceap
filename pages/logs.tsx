@@ -26,7 +26,6 @@ import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
 import LogData from "@components/Logs/LogData";
 import { FaFileAlt } from "react-icons/fa";
 
-import { generateAuditReport } from "@util/reports";
 import { AnimatePresence } from "framer-motion";
 import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
 import SearchBar from "@components/SearchBar";
@@ -43,11 +42,14 @@ const Logs: PageWithLayout<
     } = useDisclosure();
 
     const [query, setQuery] = useState<string>("");
-    const [criteria, setCriteria] = useState<string>("");
+    const [criteria, setCriteria] = useState<string>("name");
 
     const { data, refetch, isLoading } = useData("", logs);
 
     const search = (e: FormEvent) => {
+        if (!criteria) {
+            return;
+        }
         e.preventDefault();
         refetch(`/api/admin/logs?${criteria}=${query}`);
     };
@@ -80,10 +82,7 @@ const Logs: PageWithLayout<
                     }}
                     required
                 >
-                    <option disabled selected>
-                        Search Criteria
-                    </option>
-                    <option value={"name"}>User's Name</option>
+                    <option value={"name"} selected>User's Name</option>
                     <option value={"action"}>Action</option>
                     <option value={"details"}>Details</option>
                 </Select>

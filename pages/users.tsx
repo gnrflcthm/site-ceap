@@ -55,7 +55,7 @@ const ManageAccounts: PageWithLayout<
     const { data, isLoading, refetch } = useData("", accounts);
 
     const [query, setQuery] = useState<string>("");
-    const [criteria, setCriteria] = useState<string>("");
+    const [criteria, setCriteria] = useState<string>("name");
 
     const {
         isOpen: openEditUser,
@@ -158,10 +158,7 @@ const ManageAccounts: PageWithLayout<
                                     setQuery("");
                                 }}
                             >
-                                <option selected disabled>
-                                    Search Critieria
-                                </option>
-                                <option value="name">Name</option>
+                                <option value="name" selected>Name</option>
                                 <option value="mobile">Mobile Number</option>
                                 <option value="email">Email Address</option>
                                 <option value="schoolId">School ID</option>
