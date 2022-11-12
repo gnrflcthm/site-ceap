@@ -117,6 +117,7 @@ const FolderPage: PageWithLayout<
                     h={{ base: "20vh", md: "13vh" }}
                 >
                     <SearchBar
+                        placeholder={"Search For Resources"}
                         query={query}
                         setQuery={setQuery}
                         onSearch={search}
@@ -253,7 +254,9 @@ const FolderPage: PageWithLayout<
                         />
                     </Flex>
                 </Flex>
-                <Flex w={"full"} px={"8"} h={'1rem'}>{current && current.fullPath}</Flex>
+                <Flex w={"full"} px={"8"} h={"1rem"}>
+                    {current && current.fullPath}
+                </Flex>
                 <Flex
                     justify={"flex-start"}
                     align={"stretch"}

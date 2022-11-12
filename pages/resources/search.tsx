@@ -105,7 +105,14 @@ const SearchResource: PageWithLayout<
                     w={"full"}
                     bg={`${primary}EE`}
                 >
-                    <SearchBar {...{ query, setQuery, onSearch: search }} />
+                    <SearchBar
+                        {...{
+                            query,
+                            setQuery,
+                            onSearch: search,
+                            placeholder: "Search For Resources",
+                        }}
+                    />
                 </Center>
                 {resources && resources.length > 0 ? (
                     <Box p={"4"}>

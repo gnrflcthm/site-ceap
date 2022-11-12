@@ -67,7 +67,12 @@ const Resources: PageWithLayout = () => {
                         </Text>
                         <Box w={{ base: "full", lg: "50%" }}>
                             <SearchBar
-                                {...{ query, setQuery, onSearch: search }}
+                                {...{
+                                    query,
+                                    setQuery,
+                                    onSearch: search,
+                                    placeholder: "Search For Resources",
+                                }}
                             />
                         </Box>
                     </VStack>
