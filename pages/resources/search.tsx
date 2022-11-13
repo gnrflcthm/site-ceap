@@ -11,6 +11,9 @@ import {
     Grid,
     useDisclosure,
     CircularProgress,
+    IconButton,
+    HStack,
+    Button,
 } from "@chakra-ui/react";
 
 import SearchBar from "@components/SearchBar";
@@ -43,6 +46,7 @@ import ListResourceItem from "@components/Resources/ListResourceItem";
 import DisplayResources from "@components/Resources/DisplayResources";
 import { Document } from "mongoose";
 import { useData } from "@util/hooks/useData";
+import { FaCaretLeft } from "react-icons/fa";
 
 const EditResourceModal = dynamic(
     () => import("@components/Resources/EditResourceModal")
@@ -98,13 +102,15 @@ const SearchResource: PageWithLayout<
                 <title>CORE</title>
             </Head>
             <Box>
-                <Center
+                <HStack
                     p={"4"}
-                    flexDir={"column"}
                     position={"relative"}
                     w={"full"}
                     bg={`${primary}EE`}
                 >
+                    <Button aria-label={"Return"} variant={"transparent"} leftIcon={<FaCaretLeft />} onClick={() => router.push("/")}>
+                        <Text color={"neutralizerLight"}>Back</Text>
+                    </Button>
                     <SearchBar
                         {...{
                             query,
@@ -113,7 +119,7 @@ const SearchResource: PageWithLayout<
                             placeholder: "Search For Resources",
                         }}
                     />
-                </Center>
+                </HStack>
                 {resources && resources.length > 0 ? (
                     <Box p={"4"}>
                         <DisplayResources
