@@ -113,7 +113,7 @@ const GridResourceItem: FC<{
                                         />
                                     );
                                 default:
-                                    <UserMenuList
+                                    return <UserMenuList
                                         onDownload={() => download()}
                                     />;
                             }

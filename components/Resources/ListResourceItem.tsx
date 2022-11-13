@@ -207,9 +207,11 @@ const ListResourceItem: FC<{
                                             />
                                         );
                                     default:
-                                        <UserMenuList
-                                            onDownload={() => download()}
-                                        />;
+                                        return (
+                                            <UserMenuList
+                                                onDownload={() => download()}
+                                            />
+                                        );
                                 }
                             } else {
                                 return (
