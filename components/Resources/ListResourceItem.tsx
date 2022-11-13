@@ -206,6 +206,10 @@ const ListResourceItem: FC<{
                                                 reload={() => reload()}
                                             />
                                         );
+                                    default:
+                                        <UserMenuList
+                                            onDownload={() => download()}
+                                        />;
                                 }
                             } else {
                                 return (

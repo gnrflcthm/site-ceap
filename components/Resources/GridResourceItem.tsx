@@ -71,7 +71,7 @@ const GridResourceItem: FC<{
                 position={"relative"}
                 rounded={"md"}
                 shadow={"md"}
-                borderWidth={'thin'}
+                borderWidth={"thin"}
                 borderColor={"gray.200"}
                 p={"4"}
                 flexDir={"column"}
@@ -112,6 +112,10 @@ const GridResourceItem: FC<{
                                             reload={() => reload()}
                                         />
                                     );
+                                default:
+                                    <UserMenuList
+                                        onDownload={() => download()}
+                                    />;
                             }
                         } else {
                             return (
@@ -151,10 +155,8 @@ const GridResourceItem: FC<{
                             color={"blackAlpha.700"}
                             textTransform={"uppercase"}
                         >
-                            {
-                                resource.size && 
-                                filesize(resource.size) as string
-                            }
+                            {resource.size &&
+                                (filesize(resource.size) as string)}
                         </Text>
                         <Box as={FaDownload} color={"inherit"} />
                     </HStack>
