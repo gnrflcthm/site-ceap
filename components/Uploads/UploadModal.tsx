@@ -133,6 +133,7 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                 });
         } else {
             setError("No Files Selected");
+            setProcessing(false);
         }
     };
 
