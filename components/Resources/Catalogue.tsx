@@ -8,7 +8,10 @@ const Catalogue: FC = () => {
     return (
         <Grid
             pos={"relative"}
-            gridTemplateColumns={"repeat(3, minmax(0, 1fr))"}
+            gridTemplateColumns={{
+                base: "repeat(1, minmax(0, 1fr))",
+                md: "repeat(3, minmax(0, 1fr))",
+            }}
             gridAutoRows={"1fr"}
             gap={"10"}
             px={{ base: "8", lg: "24" }}

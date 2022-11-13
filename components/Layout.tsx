@@ -32,7 +32,7 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
                     {children}
                 </Flex>
             </MobileContext.Provider>
-            <Box
+            {/* <Box
                 rounded={"full"}
                 position={"fixed"}
                 right={"2"}
@@ -42,7 +42,7 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
                 p={"2"}
             >
                 <Text fontWeight={"bold"}>{breakpoint}</Text>
-            </Box>
+            </Box> */}
         </Flex>
     );
 };

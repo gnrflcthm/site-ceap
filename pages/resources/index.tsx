@@ -56,10 +56,14 @@ const Resources: PageWithLayout = () => {
                         spacing={"10"}
                         position={"relative"}
                         py={"20"}
+                        px={"4"}
                         w={"full"}
                         bg={`${primary}CC`}
                     >
-                        <Image src={coreNavLogo.src} w={"25%"} />
+                        <Image
+                            src={coreNavLogo.src}
+                            w={{ base: "50%", md: "25%" }}
+                        />
                         <Text color={"neutralizerLight"} textAlign={"center"}>
                             CORE is a repository of educational resources and
                             institutional documents for CEAP member schools'
@@ -87,7 +91,7 @@ const Resources: PageWithLayout = () => {
                         <Text
                             fontWeight={"bold"}
                             color={"primary"}
-                            fontSize={"5xl"}
+                            fontSize={{ base: "3xl", md: "4xl" }}
                             textAlign={"center"}
                             mb={"10"}
                         >
