@@ -7,6 +7,7 @@ import { Box, Button, Input, Textarea, Text, Center } from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
 import { AnimatePresence, motion } from "framer-motion";
 import { FileUpload } from "./RequestUploadModal";
+import { verifyFileType } from "@util/helper";
 
 const AddFileModal: FC<{
     onDismiss: Function;
@@ -37,8 +38,20 @@ const AddFileModal: FC<{
         return "";
     }, [file]);
 
+    const [error, setError] = useState<string>("");
+
     const addFile = (e: FormEvent) => {
         e.preventDefault();
+
+        try {
+            if (file) {
+                verifyFileType(file?.name);
+            }
+        } catch (err) {
+            console.log(err);
+            setError("Invalid File Input");
+            return;
+        }
 
         let fTemp = "";
         if (filename.trim().substring(filename.lastIndexOf(".")) === ext) {
@@ -161,6 +174,16 @@ const AddFileModal: FC<{
                         ></Textarea>
                     </Box>
                 </Box>
+                {error && (
+                    <Text
+                        color={"red"}
+                        w={"full"}
+                        textAlign={"center"}
+                        fontSize={"md"}
+                    >
+                        {error}
+                    </Text>
+                )}
                 <Box w={"full"} p={"4"}>
                     <Button
                         type={"submit"}

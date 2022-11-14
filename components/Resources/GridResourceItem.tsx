@@ -21,6 +21,7 @@ import {
     FaFileImage,
     FaFilePdf,
     FaFileVideo,
+    FaFileAudio,
 } from "react-icons/fa";
 import CEAPMenuList from "./CEAPMenuList";
 import UserMenuList from "./UserMenuList";
@@ -44,6 +45,8 @@ const GridResourceItem: FC<{
                 return FaFilePdf;
             case FileType.VIDEO:
                 return FaFileVideo;
+            case FileType.AUDIO:
+                return FaFileAudio;
         }
     })();
 

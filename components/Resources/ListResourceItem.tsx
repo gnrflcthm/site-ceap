@@ -18,6 +18,7 @@ import {
     FaFileImage,
     FaFilePdf,
     FaFileVideo,
+    FaFileAudio,
     FaUser,
 } from "react-icons/fa";
 import CEAPMenuList from "./CEAPMenuList";
@@ -63,6 +64,8 @@ const ListResourceItem: FC<{
                 return FaFilePdf;
             case FileType.VIDEO:
                 return FaFileVideo;
+            case FileType.AUDIO:
+                return FaFileAudio;
         }
     })();
 
