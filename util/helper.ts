@@ -8,14 +8,14 @@ function verifyFileType(filename: string): FileType {
 
     if (extension === ".pdf") {
         fileType = FileType.PDF;
-    } else if ([".jpeg", ".png"].includes(extension)) {
+    } else if ([".jpeg", ".jpg", ".png"].includes(extension)) {
         fileType = FileType.IMAGE;
-    } else if (extension === ".mp4") {
+    } else if ([".mp4", ".mov", ".avi"].includes(extension)) {
         fileType = FileType.VIDEO;
+    } else if (extension === ".mp3") {
+        fileType = FileType.AUDIO;
     } else if (
-        [".doc", ".docx", ".rtf", ".xls", ".xlsx", ".ppt", ".pptx"].includes(
-            extension
-        )
+        [".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"].includes(extension)
     ) {
         fileType = FileType.DOCUMENT;
     } else {

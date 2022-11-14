@@ -32,6 +32,7 @@ export enum FileType {
     IMAGE = "IMAGE",
     VIDEO = "VIDEO",
     DOCUMENT = "DOCUMENT",
+    AUDIO = "AUDIO",
 }
 
 export enum AccountType {
