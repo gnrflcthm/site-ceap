@@ -32,7 +32,8 @@ const GridResourceItem: FC<{
     resource: ResourceItemType;
     reload: Function;
     onManage: Function;
-}> = ({ resource, reload, onManage }) => {
+    onView: Function
+}> = ({ resource, reload, onManage, onView }) => {
     const { user } = useContext(AuthContext);
 
     const icon: As = (() => {
@@ -83,6 +84,7 @@ const GridResourceItem: FC<{
                 _hover={{
                     borderColor: "secondary",
                 }}
+                onClick={() => onView(resource)}
             >
                 <Menu>
                     <MenuButton

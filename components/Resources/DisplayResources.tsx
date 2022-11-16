@@ -116,6 +116,7 @@ const DisplayResources: FC<{
                             resource={resource}
                             onManage={manageResource}
                             reload={() => refetchResources()}
+                            onView={viewResource}
                         />
                     ))}
                 </GridView>
@@ -130,6 +131,12 @@ const DisplayResources: FC<{
                             }
                             onDismiss={() => closeEditModal()}
                             refetch={() => refetchResources()}
+                        />
+                    )}
+                    {showResource && currentResource && (
+                        <ResourceInfoModal
+                            resourceId={currentResource.id}
+                            onDismiss={() => closeResource()}
                         />
                     )}
                 </AnimatePresence>
