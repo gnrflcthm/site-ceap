@@ -39,6 +39,39 @@ export default authenticatedHandler([
                 }
             });
 
+            if (
+                [AccountType.CEAP_SUPER_ADMIN, AccountType.MS_ADMIN].includes(
+                    user.accountType
+                )
+            ) {
+                if (updated.includes("accountType"))
+                    switch (user.accountType) {
+                        case AccountType.CEAP_SUPER_ADMIN:
+                            const ceapAdminCount = await User.count({
+                                accountType: AccountType.CEAP_SUPER_ADMIN,
+                            });
+                            if (ceapAdminCount === 1) {
+                                res.statusMessage =
+                                    "Cannot demote existing CEAP Super Admin.";
+                                throw new Error(
+                                    "Cannot demote existing CEAP Super Admin."
+                                );
+                            }
+                        case AccountType.MS_ADMIN:
+                            const adminCount = await User.count({
+                                memberSchool: user.memberSchool,
+                                accountType: AccountType.MS_ADMIN,
+                            });
+                            if (adminCount === 1) {
+                                res.statusMessage =
+                                    "Cannot demote the only admin.";
+                                throw new Error(
+                                    "Cannot demote the only admin."
+                                );
+                            }
+                    }
+            }
+
             // Firebase Updates
             let newData: { [key: string]: string } = {};
             for (let key of updated) {
