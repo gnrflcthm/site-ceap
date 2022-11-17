@@ -83,6 +83,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                 });
         } else {
             setError("No Files Selected");
+            setUploading(false);
         }
     };
 
