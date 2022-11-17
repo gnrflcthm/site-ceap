@@ -52,14 +52,14 @@ const UserRegistrationPage: NextPage<
                 minH={"100vh"}
                 w={"100vw"}
                 overflow={"hidden"}
-                overflowY={"auto"}
             >
                 <VStack
                     spacing={"0"}
                     bg={"neutralizerLight"}
                     w={{ base: "100%", md: "70%", lg: "35%", xl: "25%" }}
+                    h={"100vh"}
+                    overflow={"hidden"}
                     overflowY={"auto"}
-                    overflowX={"hidden"}
                     borderColor={"blackAlpha.200"}
                 >
                     <Flex
