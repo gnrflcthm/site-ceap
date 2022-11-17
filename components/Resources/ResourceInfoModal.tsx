@@ -1,14 +1,15 @@
-import { VStack, Text, Center, CircularProgress } from "@chakra-ui/react";
+import { VStack, Text, Center, CircularProgress, Button } from "@chakra-ui/react";
 import Modal from "@components/Modal/Modal";
 import ModalHeader from "@components/Modal/ModalHeader";
 import Overlay from "@components/Modal/Overlay";
+import { AuthContext } from "@context/AuthContext";
 import { IMemberSchoolSchema, IResourceSchema, IUserSchema } from "@db/models";
 import { AccountType } from "@util/Enums";
 import { getFileClassification } from "@util/helper";
 import { useData } from "@util/hooks/useData";
+import axios, { AxiosError } from "axios";
 import { filesize } from "filesize";
-import { ResourceItemType } from "pages/resources/classification/[classification]/[[...folderId]]";
-import { FC } from "react";
+import { FC, useContext } from "react";
 
 const ResourceInfoModal: FC<{
     resourceId: string;
@@ -25,6 +26,30 @@ const ResourceInfoModal: FC<{
         }
     >(`/api/resource/${resourceId}`);
 
+    const { user } = useContext(AuthContext);
+
+    const download = () => {
+        if (resource) {
+            const url = `/api/resource${user ? "/a" : ""}/download/${
+                resourceId
+            }`;
+            axios
+                .get(url)
+                .then((res) => {
+                    const data = res.data;
+
+                    const anchor = document.createElement("a");
+                    anchor.setAttribute("href", data.downloadLink);
+                    anchor.setAttribute("download", resource.filename);
+
+                    anchor.click();
+                })
+                .catch((err: AxiosError) => {
+                    console.log(err.response?.statusText);
+                });
+        }
+    };
+
     return (
         <Overlay>
             <Modal>
@@ -35,9 +60,9 @@ const ResourceInfoModal: FC<{
                             <Text textTransform={"uppercase"} fontSize={"md"}>
                                 File Name
                             </Text>
-                            <Text fontWeight={"bold"} pl={"2"}>
+                            <Button variant={'link'} onClick={() => download()} fontWeight={"bold"} pl={"2"}>
                                 {resource.filename}
-                            </Text>
+                            </Button>
                             <Text textTransform={"uppercase"} fontSize={"md"}>
                                 File Description
                             </Text>
