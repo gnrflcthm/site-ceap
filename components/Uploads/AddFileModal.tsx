@@ -43,6 +43,11 @@ const AddFileModal: FC<{
     const addFile = (e: FormEvent) => {
         e.preventDefault();
 
+        if (!file) {
+            setError("No File Selected.")
+            return;
+        }
+
         try {
             if (file) {
                 verifyFileType(file?.name);
@@ -140,7 +145,6 @@ const AddFileModal: FC<{
                         value={filename}
                         placeholder={"File Name"}
                         disabled={!file}
-                        required
                     />
                     <Box w={"full"} mt={"4"}>
                         <AnimatePresence>
