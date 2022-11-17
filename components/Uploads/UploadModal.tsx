@@ -243,7 +243,7 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                                     setError("No Classification Selected.");
                                 }
                             }}
-                            placeholder={"Folder Locatiion"}
+                            placeholder={"Folder Location"}
                             required
                             disabled={processing}
                         />

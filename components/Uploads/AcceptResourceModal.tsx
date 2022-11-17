@@ -188,7 +188,7 @@ const AcceptResourceModal: FC<{
                                             );
                                         }
                                     }}
-                                    placeholder={"Folder Locatiion"}
+                                    placeholder={"Folder Location"}
                                     required
                                     disabled={loading}
                                 />
