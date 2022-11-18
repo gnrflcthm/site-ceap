@@ -66,25 +66,24 @@ const DisplayResources: FC<{
 
     if (!resources || resources?.length < 1) {
         return (
-            <Center w={"full"}>
-                <Text>There are currently no resources to display.</Text>
-            </Center>
+            // <Center w={"full"}>
+            //     <Text>There are currently no resources to display.</Text>
+            // </Center>
+            <></>
         );
     }
 
     if (view === "list") {
         return (
             <>
-                <ListView>
-                    {resources?.map((resource) => (
-                        <ListResourceItem
-                            resource={resource}
-                            onManage={manageResource}
-                            reload={() => refetchResources()}
-                            onView={viewResource}
-                        />
-                    ))}
-                </ListView>
+                {resources?.map((resource) => (
+                    <ListResourceItem
+                        resource={resource}
+                        onManage={manageResource}
+                        reload={() => refetchResources()}
+                        onView={viewResource}
+                    />
+                ))}
                 <AnimatePresence>
                     {showEditModal && currentResource && (
                         <EditResourceModal
@@ -110,16 +109,14 @@ const DisplayResources: FC<{
     } else {
         return (
             <>
-                <GridView>
-                    {resources?.map((resource) => (
-                        <GridResourceItem
-                            resource={resource}
-                            onManage={manageResource}
-                            reload={() => refetchResources()}
-                            onView={viewResource}
-                        />
-                    ))}
-                </GridView>
+                {resources?.map((resource) => (
+                    <GridResourceItem
+                        resource={resource}
+                        onManage={manageResource}
+                        reload={() => refetchResources()}
+                        onView={viewResource}
+                    />
+                ))}
                 <AnimatePresence>
                     {showEditModal && currentResource && (
                         <EditResourceModal

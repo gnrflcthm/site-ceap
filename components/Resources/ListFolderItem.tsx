@@ -1,17 +1,13 @@
-import { Box, Flex, Heading, HStack, Text } from "@chakra-ui/react";
-import { AuthContext } from "@context/AuthContext";
-import { useData } from "@util/hooks/useData";
+import { Box, Flex, Heading, HStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { FolderType } from "pages/resources/classification/[classification]/[[...folderId]]";
-import { FC, useContext } from "react";
-import { FaFile, FaFolder, FaRegFolder } from "react-icons/fa";
+import { FC } from "react";
+import { FaFolder } from "react-icons/fa";
 
 const ListFolderItem: FC<{
     folder: FolderType;
     navigateFolder: Function;
 }> = ({ folder, navigateFolder }) => {
-    const { user } = useContext(AuthContext);
-
     return (
         <HStack
             as={motion.div}

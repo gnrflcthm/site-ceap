@@ -3,6 +3,7 @@ import { FileClassification } from "@util/Enums";
 import { useRouter } from "next/router";
 import { FolderType } from "pages/resources/classification/[classification]/[[...folderId]]";
 import { FC } from "react";
+import GridFolderItem from "./GridFolderItem";
 import GridView from "./GridView";
 import ListFolderItem from "./ListFolderItem";
 import ListView from "./ListView";
@@ -12,11 +13,9 @@ const DisplayFolders: FC<{
     view: "list" | "grid";
     loading: boolean;
     reload: Function;
-    classification: FileClassification
+    classification: FileClassification;
 }> = ({ folders, view, loading = true, reload, classification }) => {
-
     const router = useRouter();
-
 
     const navigateFolder = (folderId: string) => {
         router.push(
@@ -25,7 +24,6 @@ const DisplayFolders: FC<{
             )}/${folderId}`
         );
     };
-
 
     if (loading) {
         return (
@@ -41,27 +39,34 @@ const DisplayFolders: FC<{
 
     if (!folders || folders?.length < 1) {
         return (
-            <Center w={"full"}>
-                <Text>There are currently no folders to display.</Text>
-            </Center>
+            // <Center w={"full"}>
+            //     <Text>There are currently no folders to display.</Text>
+            // </Center>
+            <></>
         );
     }
 
     if (view === "list") {
         return (
-            <ListView>
+            <>
                 {folders.map((folder) => (
-                    <ListFolderItem folder={folder} navigateFolder={navigateFolder} />
+                    <ListFolderItem
+                        folder={folder}
+                        navigateFolder={navigateFolder}
+                    />
                 ))}
-            </ListView>
+            </>
         );
     } else {
         return (
-            <GridView columnTemplate={"repeat(2, 1fr)"}>
+            <>
                 {folders.map((folder) => (
-                    <ListFolderItem folder={folder} navigateFolder={navigateFolder} />
+                    <GridFolderItem
+                        folder={folder}
+                        navigateFolder={navigateFolder}
+                    />
                 ))}
-            </GridView>
+            </>
         );
     }
 };

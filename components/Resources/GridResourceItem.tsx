@@ -96,6 +96,7 @@ const GridResourceItem: FC<{
                         _hover={{
                             bg: "#00000044",
                         }}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <Box
                             as={FaEllipsisV}

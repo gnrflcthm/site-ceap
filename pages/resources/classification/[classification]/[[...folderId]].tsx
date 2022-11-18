@@ -17,6 +17,8 @@ import {
     HStack,
     IconButton,
     Button,
+    Text,
+    CircularProgress,
 } from "@chakra-ui/react";
 import SearchBar from "@components/SearchBar";
 import { FormEvent, useEffect, useState } from "react";
@@ -29,6 +31,8 @@ import { connectDB } from "@db/index";
 import dynamic from "next/dynamic";
 import { BsGridFill, BsListUl } from "react-icons/bs";
 import { FaFolderOpen } from "react-icons/fa";
+import ListView from "@components/Resources/ListView";
+import GridView from "@components/Resources/GridView";
 
 export type ResourceItemType = IResourceSchema & {
     id: string;
@@ -100,6 +104,7 @@ const FolderPage: PageWithLayout<
     useEffect(() => {
         setMode("folders");
         refetchFolders();
+        refetchResources();
     }, [current]);
 
     return (
@@ -181,46 +186,13 @@ const FolderPage: PageWithLayout<
                         </HStack>
                     </Flex>
                 </Center>
-                <Flex p={"4"} justify={"space-between"} h={"8vh"}>
-                    <HStack>
-                        {current && current.root !== undefined && (
-                            <Button
-                                w={"fit-content"}
-                                onClick={() =>
-                                    router.push(
-                                        `/resources/classification/${encodeURIComponent(
-                                            classification?.toLowerCase() as string
-                                        )}/${current.root.id}`
-                                    )
-                                }
-                            >
-                                <Box as={FaFolderOpen} mr={"2"} />
-                                Return
-                            </Button>
-                        )}
-                        <TabButton
-                            onClick={() => {
-                                if (!resourcesLoading) {
-                                    setMode("folders");
-                                    refetchFolders();
-                                }
-                            }}
-                            isActive={mode === "folders"}
-                        >
-                            Folders
-                        </TabButton>
-                        <TabButton
-                            onClick={() => {
-                                if (!foldersLoading) {
-                                    setMode("resources");
-                                    refetchResources();
-                                }
-                            }}
-                            isActive={mode === "resources"}
-                        >
-                            Resources
-                        </TabButton>
-                    </HStack>
+                <Flex
+                    p={"4"}
+                    justify={"space-between"}
+                    align={"center"}
+                    h={"8vh"}
+                >
+                    <Text>{current && current.fullPath}</Text>
                     <Flex>
                         <IconButton
                             icon={<BsGridFill />}
@@ -254,12 +226,10 @@ const FolderPage: PageWithLayout<
                         />
                     </Flex>
                 </Flex>
-                <Flex w={"full"} px={"8"} h={"1rem"}>
-                    {current && current.fullPath}
-                </Flex>
                 <Flex
                     justify={"flex-start"}
                     align={"stretch"}
+                    columnGap={"4"}
                     px={"8"}
                     py={"4"}
                     w={"full"}
@@ -282,27 +252,58 @@ const FolderPage: PageWithLayout<
                     }}
                 >
                     {(() => {
-                        if (mode === "resources") {
+                        if (resourcesLoading || foldersLoading) {
                             return (
-                                <DisplayResources
-                                    resources={resources}
-                                    view={view}
-                                    loading={resourcesLoading}
-                                    refetchResources={refetchResources}
-                                />
+                                <Center w={"full"}>
+                                    <CircularProgress
+                                        isIndeterminate
+                                        color={"secondary"}
+                                        size={8}
+                                    />
+                                </Center>
                             );
                         } else {
-                            return (
-                                <DisplayFolders
-                                    folders={folders}
-                                    view={view}
-                                    loading={foldersLoading}
-                                    reload={refetchFolders}
-                                    classification={
-                                        classification as FileClassification
-                                    }
-                                />
-                            );
+                            if (view === "grid") {
+                                return (
+                                    <GridView>
+                                        <DisplayFolders
+                                            folders={folders}
+                                            view={view}
+                                            loading={foldersLoading}
+                                            reload={refetchFolders}
+                                            classification={
+                                                classification as FileClassification
+                                            }
+                                        />
+                                        <DisplayResources
+                                            resources={resources}
+                                            view={view}
+                                            loading={resourcesLoading}
+                                            refetchResources={refetchResources}
+                                        />
+                                    </GridView>
+                                );
+                            } else {
+                                return (
+                                    <ListView>
+                                        <DisplayFolders
+                                            folders={folders}
+                                            view={view}
+                                            loading={foldersLoading}
+                                            reload={refetchFolders}
+                                            classification={
+                                                classification as FileClassification
+                                            }
+                                        />
+                                        <DisplayResources
+                                            resources={resources}
+                                            view={view}
+                                            loading={resourcesLoading}
+                                            refetchResources={refetchResources}
+                                        />
+                                    </ListView>
+                                );
+                            }
                         }
                     })()}
                 </Flex>
