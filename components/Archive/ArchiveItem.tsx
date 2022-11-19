@@ -25,6 +25,9 @@ const UserInfoModal = dynamic(() => import("@components/Modal/UserInfoModal"));
 const EditResourceModal = dynamic(
     () => import("@components/Resources/EditResourceModal")
 );
+const ResourceInfoModal = dynamic(
+    () => import("@components/Resources/ResourceInfoModal")
+);
 
 const ArchiveItem: FC<{
     resource: ArchiveType;
@@ -69,28 +72,34 @@ const ArchiveItem: FC<{
             });
     };
 
-    const download = async () => {
-        try {
-            setProcessing(true);
-            const { data } = await axios.get<{ downloadLink: string }>(
-                `/api/resource/a/download/${resource.id}`
-            );
+    // const download = async () => {
+    //     try {
+    //         setProcessing(true);
+    //         const { data } = await axios.get<{ downloadLink: string }>(
+    //             `/api/resource/a/download/${resource.id}`
+    //         );
 
-            const anchor = document.createElement("a");
-            anchor.setAttribute("href", data.downloadLink);
-            anchor.setAttribute("download", resource.filename);
+    //         const anchor = document.createElement("a");
+    //         anchor.setAttribute("href", data.downloadLink);
+    //         anchor.setAttribute("download", resource.filename);
 
-            anchor.click();
-        } catch (err) {
-            console.log(err);
-            toast({
-                status: "error",
-                title: "Error In Retrieving Resource",
-            });
-        } finally {
-            setProcessing(false);
-        }
-    };
+    //         anchor.click();
+    //     } catch (err) {
+    //         console.log(err);
+    //         toast({
+    //             status: "error",
+    //             title: "Error In Retrieving Resource",
+    //         });
+    //     } finally {
+    //         setProcessing(false);
+    //     }
+    // };
+
+    const {
+        isOpen: showResource,
+        onOpen: openResource,
+        onClose: closeResource,
+    } = useDisclosure();
 
     return (
         <>
@@ -109,7 +118,7 @@ const ArchiveItem: FC<{
                 <Td px={"4"} py={"2"}>
                     <Button
                         variant={"link"}
-                        onClick={() => download()}
+                        onClick={() => /*download*/ openResource()}
                         fontSize={textFontSize}
                     >
                         {resource.filename}
@@ -190,6 +199,12 @@ const ArchiveItem: FC<{
                         onReject={() => closeDelete()}
                         onAccept={() => deleteItem()}
                         willProcessOnAccept={true}
+                    />
+                )}
+                {showResource && (
+                    <ResourceInfoModal
+                        onDismiss={() => closeResource()}
+                        resourceId={resource.id}
                     />
                 )}
             </AnimatePresence>
