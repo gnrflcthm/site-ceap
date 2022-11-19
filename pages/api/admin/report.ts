@@ -17,7 +17,7 @@ export default authenticatedHandler().post(async (req, res) => {
             path.join(process.cwd(), "/temp", fileName)
         );
         file.pipe(res);
-        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Content-Type", "application/pdf");
         res.statusMessage = fileName;
         res.status(200);
     } catch (err) {

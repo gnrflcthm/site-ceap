@@ -48,7 +48,7 @@ const GenerateReportsModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                 setLoading(false);
                 return;
             }
-
+            
             axios
                 .post(
                     "/api/admin/report",

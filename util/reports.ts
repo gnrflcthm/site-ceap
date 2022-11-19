@@ -45,7 +45,10 @@ export async function generateAuditReport(
     doc.table(6, 15, temp, createHeaders(Object.keys(temp[0])), {});
 
     let s = from.toISOString().split("T")[0];
-    const fileName = `AuditReports(${s}).pdf`;
+    let e = to.toISOString().split("T")[0];
+
+
+    const fileName = `AuditReports(${s === e ? s : s + " - " + e}).pdf`;
 
     doc.save(`temp/${fileName}`);
 
