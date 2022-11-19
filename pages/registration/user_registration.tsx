@@ -9,9 +9,10 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Box, VStack, Flex } from "@chakra-ui/react";
+import { Box, VStack, Flex, useToken, Center } from "@chakra-ui/react";
 
 import logo from "@assets/CORE_L.png";
+import bg from "@assets/aboutimghd.jpg";
 
 import { RegistrationForm, SuccessPage } from "@components/Register";
 import { FaArrowLeft } from "react-icons/fa";
@@ -41,23 +42,28 @@ const UserRegistrationPage: NextPage<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ memberSchools }) => {
     const [state, setState] = useState<RegistrationState>("fillup");
-
+    const [primary] = useToken("colors", ["primary"]);
     return (
         <>
             <Head>
                 <title>CORE: Registration</title>
             </Head>
-            <Flex
-                bg={"neutralizerDark"}
+            <Center
                 minH={"100vh"}
                 w={"100vw"}
                 overflow={"hidden"}
+                bg={`linear-gradient(${primary}99, ${primary}99), url(${bg.src})`}
+                bgPos={"center"}
+                bgAttachment={"fixed"}
+                bgRepeat={"no-repeat"}
+                bgSize={"cover"}
             >
                 <VStack
                     spacing={"0"}
                     bg={"neutralizerLight"}
-                    w={{ base: "100%", md: "70%", lg: "35%", xl: "25%" }}
-                    h={"100vh"}
+                    w={{ base: "100%", md: "70%", lg: "50%" }}
+                    maxH={"100vh"}
+                    rounded={"md"}
                     overflow={"hidden"}
                     overflowY={"auto"}
                     borderColor={"blackAlpha.200"}
@@ -104,7 +110,7 @@ const UserRegistrationPage: NextPage<
                         />
                     </Box>
                 </VStack>
-            </Flex>
+            </Center>
         </>
     );
 };

@@ -7,9 +7,10 @@ import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
 import AdminRegistrationForm from "@components/Register/AdminRegistrationForm";
-import { Box, Center, Flex } from "@chakra-ui/react";
+import { Box, Center, Flex, useToken } from "@chakra-ui/react";
 
 import logo from "@assets/CORE_L.png";
+import bg from "@assets/aboutimghd.jpg";
 import { useState } from "react";
 import { SuccessPage } from "@components/Register";
 
@@ -22,20 +23,29 @@ const AdminRegistrationPage: NextPage<
     const [state, setState] = useState<"registration" | "success">(
         "registration"
     );
-
+    const [primary] = useToken("colors", ["primary"]);
     return (
         <>
             <Head>
                 <title>CORE Admin Registration</title>
             </Head>
-            <Center minH={"100vh"} minW={"100vw"} bg={"neutralizerDark"} overflow={"auto"}>
+            <Center
+                minH={"100vh"}
+                minW={"100vw"}
+                overflow={"auto"}
+                bg={`linear-gradient(${primary}99, ${primary}99), url(${bg.src})`}
+                bgPos={"center"}
+                bgAttachment={"fixed"}
+                bgRepeat={"no-repeat"}
+                bgSize={"cover"}
+            >
                 <Flex
                     flexDir={"column"}
                     bg="neutralizerLight"
                     rounded={"md"}
                     shadow={"lg"}
                     py={"4"}
-                    w={{ base: "100%%", md: "50%", lg: "25%" }}
+                    w={{ base: "100%%", md: "50%", lg: "40%" }}
                 >
                     <Flex
                         justify={"space-between"}
@@ -88,7 +98,7 @@ const AdminRegistrationPage: NextPage<
 };
 
 export const getServerSideProps: GetServerSideProps<{
-    memberSchools: IMemberSchoolSchema[]
+    memberSchools: IMemberSchoolSchema[];
 }> = async () => {
     await connectDB();
 

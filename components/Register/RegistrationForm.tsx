@@ -24,7 +24,7 @@ const RegistrationForm: FC<{
     const [lastName, setLastName] = useState<string>("");
     const [firstName, setFirstName] = useState<string>("");
     const [middleName, setMiddleName] = useState<string>("");
-    const [birthday, setBirthday] = useState<Date | "">("");
+    // const [birthday, setBirthday] = useState<Date | "">("");
     const [memberSchoolId, setMemberSchoolId] = useState<string>("");
     const [region, setRegion] = useState<string>("");
     const [mobile, setMobile] = useState<string>("");
@@ -52,7 +52,7 @@ const RegistrationForm: FC<{
                 firstName,
                 lastName,
                 middleName,
-                birthday,
+                // birthday,
                 memberSchoolId,
                 email,
                 mobile,
@@ -96,13 +96,13 @@ const RegistrationForm: FC<{
                     value={middleName}
                     setValue={setMiddleName}
                 />
-                <CoreInput
+                {/* <CoreInput
                     placeholder={"Birthday"}
                     value={birthday}
                     setValue={setBirthday}
                     type={"date"}
                     required
-                />
+                /> */}
                 <CoreInput
                     placeholder={"Region of your school"}
                     value={region}
