@@ -194,7 +194,6 @@ export const getServerSideProps: GetServerSideProps<{
             .populate("uploadedBy", ["id", "displayName"])
             .populate("folder", ["id", "name", "fullPath"])
             .exec();
-        console.log(uploadRequests);
         return {
             props: {
                 uploadRequests: uploadRequests.map((ur) => ({

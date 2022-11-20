@@ -83,7 +83,6 @@ const CoreSelect: FC<{
                 // @ts-ignore
                 data[key].sort((a, b) => a.name.localeCompare(b.name));
             });
-            console.log(data);
             setSelectData(data);
         }
         setProcessing(false);
@@ -212,9 +211,6 @@ const CoreSelect: FC<{
                                                         setValue(id);
                                                         setSelected(name);
                                                         setQuery(name);
-                                                        console.log(
-                                                            `${name}: ${id}`
-                                                        );
                                                         setFocused(false);
                                                         setClickWithin(false);
                                                     }}

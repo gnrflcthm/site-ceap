@@ -63,10 +63,6 @@ const SideBar: FC = () => {
         return collapsed ? "-20vw" : "0vw";
     }, [collapsed, isMobile, user]);
 
-    useEffect(() => {
-        console.log("Collapsed: ", collapsed);
-        console.log("Width: ", sidebarWidth, "Position: ", sidebarPosition);
-    }, [sidebarWidth, sidebarPosition, breakpoint, collapsed]);
     return (
         <>
             <AnimatePresence>

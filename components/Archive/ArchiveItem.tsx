@@ -72,29 +72,6 @@ const ArchiveItem: FC<{
             });
     };
 
-    // const download = async () => {
-    //     try {
-    //         setProcessing(true);
-    //         const { data } = await axios.get<{ downloadLink: string }>(
-    //             `/api/resource/a/download/${resource.id}`
-    //         );
-
-    //         const anchor = document.createElement("a");
-    //         anchor.setAttribute("href", data.downloadLink);
-    //         anchor.setAttribute("download", resource.filename);
-
-    //         anchor.click();
-    //     } catch (err) {
-    //         console.log(err);
-    //         toast({
-    //             status: "error",
-    //             title: "Error In Retrieving Resource",
-    //         });
-    //     } finally {
-    //         setProcessing(false);
-    //     }
-    // };
-
     const {
         isOpen: showResource,
         onOpen: openResource,

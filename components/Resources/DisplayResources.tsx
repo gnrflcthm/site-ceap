@@ -1,22 +1,15 @@
 import {
-    Box,
     Center,
     CircularProgress,
-    Flex,
-    Heading,
-    Text,
     useDisclosure,
 } from "@chakra-ui/react";
 import { IResourceSchema } from "@db/models";
 import { AnimatePresence } from "framer-motion";
 import { ResourceItemType } from "pages/resources/classification/[classification]/[[...folderId]]";
 import { FC, useState } from "react";
-import { FaQuestion } from "react-icons/fa";
 import EditResourceModal from "./EditResourceModal";
 import GridResourceItem from "./GridResourceItem";
-import GridView from "./GridView";
-import ListResourceItem from "./ListResourceItem";
-import ListView from "./ListView";
+import GridView from "./GridView";import ListResourceItem from "./ListResourceItem";
 import ResourceInfoModal from "./ResourceInfoModal";
 
 const DisplayResources: FC<{
@@ -49,7 +42,6 @@ const DisplayResources: FC<{
     const viewResource = (resource: ResourceItemType) => {
         setCurrentResource(resource);
         openResource();
-        console.log("open resource info");
     };
 
     if (loading) {

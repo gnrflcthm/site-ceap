@@ -96,7 +96,6 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
         setFiles((f) => {
             const temp = f;
             temp[current] = file;
-            console.log(temp);
             return temp;
         });
         onClose();

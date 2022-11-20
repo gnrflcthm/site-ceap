@@ -73,7 +73,6 @@ const CoreInput: FC<{
                         setFocused(false);
                     }}
                     onChange={(e) => setValue(e.target.value)}
-                    onClick={(e) => console.log(e)}
                     _before={{ content: `""`, position: "absolute" }}
                     color={value ? "neutralizerDark" : "transparent"}
                     _focus={{

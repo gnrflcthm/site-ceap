@@ -7,7 +7,6 @@ import CoreInput from "@components/CoreInput";
 
 import {
     Button,
-    CircularProgress,
     useDisclosure,
     VStack,
     Text,
@@ -146,7 +145,6 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
         setFiles((f) => {
             const temp = f;
             temp[current] = file;
-            console.log(temp);
             return temp;
         });
         closeAddFile();

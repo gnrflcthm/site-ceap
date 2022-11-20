@@ -1,10 +1,8 @@
-import { FC, useMemo, useContext, useState, useEffect } from "react";
+import { FC, useMemo, useContext, useState } from "react";
 
 import { Center, VStack, Text, CircularProgress, Flex } from "@chakra-ui/react";
 
 import { FaBook, FaUser, FaSignOutAlt } from "react-icons/fa";
-
-import { BsCloudUpload } from "react-icons/bs";
 
 import CurrentUser from "./CurrentUser";
 import CoreNavItem from "./CoreNavItem";
@@ -33,10 +31,6 @@ const CoreNav: FC<{
             ),
         [user?.role]
     );
-
-    useEffect(() => {
-        console.log(user?.role + ": ", getAccountType(user?.role));
-    }, [user]);
 
     const onLogOut = () => {
         setLoggingOut(true);

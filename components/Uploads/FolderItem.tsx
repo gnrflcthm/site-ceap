@@ -5,7 +5,6 @@ import {
     Text,
     Input,
     As,
-    BreadcrumbLink,
 } from "@chakra-ui/react";
 import { FC, FormEvent, useState } from "react";
 import { FaFolder } from "react-icons/fa";
@@ -46,7 +45,6 @@ const FolderItem: FC<{
             as={GridItem}
             onClick={(e) => {
                 e.stopPropagation();
-                console.log(e.detail);
                 switch (e.detail) {
                     case 1:
                         onClick();
