@@ -91,7 +91,7 @@ const ForgotPassword: FC<{ setMode: Function }> = ({ setMode }) => {
                     <Text textAlign={"center"}>
                         The password reset link has been successfully sent to
                         your email. Kindly check your Spam folder if the
-                        password reset link is not in you inbox.
+                        password reset link is not in your inbox.
                     </Text>
                     <Button variant={"primary"} onClick={() => setMode("")}>
                         Return
