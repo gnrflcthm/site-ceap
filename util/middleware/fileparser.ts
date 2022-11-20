@@ -14,11 +14,12 @@ const form = formidable({
         let ext = path.extname(part.originalFilename || "");
         return `${nanoId(12)}${ext || ""}`;
     },
+    maxFileSize: 10_737_418_240,
 });
 
 export default async function parseMultipartForm(
     req: IncomingMessage & { body: Fields; files: Files | undefined },
-    _: ServerResponse,
+    res: ServerResponse,
     next: NextHandler
 ) {
     // @ts-ignore
@@ -38,11 +39,14 @@ export default async function parseMultipartForm(
                     "🚀 ~ file: fileparser.ts ~ line 25 ~ form.parse ~ err",
                     err
                 );
+                res.statusCode = 500;
+                res.statusMessage = "Error in uploading files";
+                res.end();
+                return;
             }
             next();
         });
     } else {
-        console.log("No Files To Be Parsed");
         next();
     }
 }

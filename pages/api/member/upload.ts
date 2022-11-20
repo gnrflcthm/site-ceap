@@ -25,6 +25,8 @@ export default authenticatedHandler().post(async (req, res) => {
                 const file = req.files[key] as File;
                 verifyFileType(file.newFilename);
             }
+            res.statusMessage = "Successfully Uploaded Files";
+            res.status(200);
         } catch (err) {
             if (err instanceof Error) console.error(err.message);
 
@@ -45,11 +47,12 @@ export default authenticatedHandler().post(async (req, res) => {
             }
 
             await Promise.all(deleteQueue);
+
+            res.statusMessage = "Error in uploading files."
+            res.status(500);
             return;
         }
 
-        res.statusMessage = "Successfully Uploaded Files";
-        res.status(200);
         res.end();
 
         await connectDB();
@@ -88,7 +91,7 @@ export default authenticatedHandler().post(async (req, res) => {
                         blobPath,
                         size,
                         uploadedBy: user,
-                        memberSchool: user?.memberSchool
+                        memberSchool: user?.memberSchool,
                     };
                     return fileData;
                 }
@@ -112,7 +115,7 @@ export default authenticatedHandler().post(async (req, res) => {
             await Promise.all(deleteQueue);
 
             if (user) {
-                await sendUserUploadResponseEmail(user)
+                await sendUserUploadResponseEmail(user);
                 await logAction(
                     user,
                     Action.UPLOAD_REQUEST,
@@ -121,7 +124,6 @@ export default authenticatedHandler().post(async (req, res) => {
                     } file${Object.keys(req.files).length === 1 ? "" : "s"}.`
                 );
             }
-
         } catch (err) {
             console.log("Error in uploading files to azure");
             console.log(err);
