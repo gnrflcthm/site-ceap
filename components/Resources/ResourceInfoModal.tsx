@@ -1,4 +1,10 @@
-import { VStack, Text, Center, CircularProgress, Button } from "@chakra-ui/react";
+import {
+    VStack,
+    Text,
+    Center,
+    CircularProgress,
+    Button,
+} from "@chakra-ui/react";
 import Modal from "@components/Modal/Modal";
 import ModalHeader from "@components/Modal/ModalHeader";
 import Overlay from "@components/Modal/Overlay";
@@ -30,9 +36,9 @@ const ResourceInfoModal: FC<{
 
     const download = () => {
         if (resource) {
-            const url = `/api/resource${user ? "/a" : ""}/download/${
-                resourceId
-            }`;
+            const url = `/api/resource${
+                user ? "/a" : ""
+            }/download/${resourceId}`;
             axios
                 .get(url)
                 .then((res) => {
@@ -60,7 +66,13 @@ const ResourceInfoModal: FC<{
                             <Text textTransform={"uppercase"} fontSize={"md"}>
                                 File Name
                             </Text>
-                            <Button variant={'link'} onClick={() => download()} fontWeight={"bold"} pl={"2"}>
+                            <Button
+                                variant={"link"}
+                                onClick={() => download()}
+                                fontWeight={"bold"}
+                                pl={"2"}
+                                textDecor={"underline"}
+                            >
                                 {resource.filename}
                             </Button>
                             <Text textTransform={"uppercase"} fontSize={"md"}>
