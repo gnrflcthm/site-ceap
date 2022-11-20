@@ -145,7 +145,7 @@ const FolderPage: PageWithLayout<
                         </Center>
                         <HStack
                             flex={"1"}
-                            w={"90%"}
+                            w={{ base: "full", md: "90%" }}
                             mt={"4"}
                             px={"4"}
                             overflow={"auto"}
@@ -189,10 +189,46 @@ const FolderPage: PageWithLayout<
                 <Flex
                     p={"4"}
                     justify={"space-between"}
-                    align={"center"}
+                    align={"start"}
                     h={"8vh"}
                 >
-                    <Text>{current && current.fullPath}</Text>
+                    <Flex
+                        flexDir={"column"}
+                        justify={current && current.root ? "flex-start" : "flex-end"}
+                        h={current && current.root ? "initial" : "full"}
+                        align={"start"}
+                    >
+                        {current && current.root !== undefined && (
+                            <Button
+                                w={"fit-content"}
+                                onClick={() =>
+                                    router.push(
+                                        `/resources/classification/${encodeURIComponent(
+                                            classification?.toLowerCase() as string
+                                        )}/${current.root.id}`
+                                    )
+                                }
+                            >
+                                <Box as={FaFolderOpen} mr={"2"} />
+                                Return
+                            </Button>
+                        )}
+                        <Text>
+                            {current &&
+                                current.fullPath &&
+                                (() => {
+                                    let path = current.fullPath
+                                        .substring(1)
+                                        .split("/");
+                                    if (path.length > 3) {
+                                        return `/${path[0]}/.../${path
+                                            .splice(path.length - 2)
+                                            .join("/")}`;
+                                    }
+                                    return current.fullPath;
+                                })()}
+                        </Text>
+                    </Flex>
                     <Flex>
                         <IconButton
                             icon={<BsGridFill />}
@@ -226,11 +262,12 @@ const FolderPage: PageWithLayout<
                         />
                     </Flex>
                 </Flex>
+                <Box px={"4"} fontSize={"sm"}></Box>
                 <Flex
                     justify={"flex-start"}
                     align={"stretch"}
                     columnGap={"4"}
-                    px={"8"}
+                    px={{ base: "2", md: "8" }}
                     py={"4"}
                     w={"full"}
                     h={{ base: "calc(65vh - 1rem)", md: "calc(72vh - 1rem)" }}
