@@ -37,7 +37,7 @@ const ResourceDataCEAPOptions: FC<{
                     </Text>
                 </MenuItem>
                 {isCurrent ? (
-                    <MenuItem onClick={() => onReject()} color={"red.500"}>
+                    <MenuItem onClick={() => onReject(false, "/api/resource/a/requests")} color={"red.500"}>
                         <Box as={FaTimesCircle} mr={"2"} />
                         <Text
                             fontSize={"md"}
@@ -62,7 +62,7 @@ const ResourceDataCEAPOptions: FC<{
                                 Accept
                             </Text>
                         </MenuItem>
-                        <MenuItem onClick={() => onReject()} color={"red.500"}>
+                        <MenuItem onClick={() => onReject(true, "/api/resource/a/requests")} color={"red.500"}>
                             <Box as={FaTimesCircle} mr={"2"} />
                             <Text
                                 fontSize={"md"}

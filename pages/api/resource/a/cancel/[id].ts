@@ -6,7 +6,7 @@ import { Action, logAction } from "@util/logging";
 import { sendUploadRequestRejectEmail } from "@util/email/uploadRequest";
 
 export default authenticatedHandler().delete(async (req, res) => {
-    const { id } = req.query;
+    const { id, action } = req.query;
 
     await connectDB();
 
@@ -25,10 +25,7 @@ export default authenticatedHandler().delete(async (req, res) => {
         res.status(200);
 
         const user = await User.findById(resource.uploadedBy);
-        if (
-            user &&
-            user._id.toHexString() !== resource.uploadedBy?.toHexString()
-        ) {
+        if (action && user && action === "reject") {
             await sendUploadRequestRejectEmail(user, resource);
         }
 

@@ -25,7 +25,7 @@ const ResourceDataAdminOptions: FC<{
     resourceId,
     onDownload,
     onForward = () => {},
-    onReject,
+    onReject = () => {},
     isCurrent = false,
     setProcessing,
     resourceStatus,
@@ -80,7 +80,16 @@ const ResourceDataAdminOptions: FC<{
                     </MenuItem>
                 )}
                 {resourceStatus !== ResourceStatus.APPROVED && (
-                    <MenuItem onClick={() => onReject()} color={"red.500"}>
+                    <MenuItem
+                        onClick={() => {
+                            if (isCurrent) {
+                                onReject(false);
+                            } else {
+                                onReject(true);
+                            }
+                        }}
+                        color={"red.500"}
+                    >
                         <Box as={FaBan} mr={"2"} />
                         <Text
                             fontSize={"md"}

@@ -70,10 +70,14 @@ const ResourceData: FC<{
         }
     };
 
-    const reject = async (refetchLink?: string) => {
+    const reject = async (isReject: boolean = false, refetchLink?: string) => {
         setProcessing(true);
         try {
-            await axios.delete(`/api/resource/a/cancel/${resource.id}`);
+            await axios.delete(
+                `/api/resource/a/cancel/${resource.id}?action=${
+                    isReject ? "reject" : "cancel"
+                }`
+            );
             toast({
                 status: "success",
                 title: "Successfully Removed Resource.",
@@ -186,11 +190,7 @@ const ResourceData: FC<{
                                             onAccept={() =>
                                                 onAccept(resource.id)
                                             }
-                                            onReject={() =>
-                                                reject(
-                                                    "/api/resource/a/requests"
-                                                )
-                                            }
+                                            onReject={reject}
                                         />
                                     );
 
@@ -202,7 +202,7 @@ const ResourceData: FC<{
                                             resourceId={resource.id}
                                             onDownload={() => download()}
                                             onForward={() => refetch()}
-                                            onReject={() => reject()}
+                                            onReject={reject}
                                             resourceStatus={resource.status}
                                         />
                                     );
@@ -210,7 +210,7 @@ const ResourceData: FC<{
                                     return (
                                         <ResourceDataUserOptions
                                             onDownload={() => download()}
-                                            onCancel={() => reject()}
+                                            onCancel={() => reject(false)}
                                         />
                                     );
                             }
