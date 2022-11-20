@@ -3,7 +3,6 @@ html {
 }
 
 *::-webkit-scrollbar {
-    position: absolute;
     height: 0.5rem;
     width: 0.5rem;
     /* background-color: #00000099; */
@@ -15,7 +14,7 @@ html {
 }
 
 *::-webkit-scrollbar-thumb {
-    /* border: 5px solid rgba(0,0,0,0); */
+    border: 5px solid rgba(0,0,0,0);
     background-clip: padding-box;
     border-radius: 2rem;
     background-color: white;
