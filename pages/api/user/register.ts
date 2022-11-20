@@ -1,13 +1,19 @@
 import handler from "@util/api/handler";
 
-import { connectDB, User, UserRegistration, MSAdminRegistration, MemberSchool } from "@db/index";
+import {
+    connectDB,
+    User,
+    UserRegistration,
+    MSAdminRegistration,
+    MemberSchool,
+} from "@db/index";
 import { sendUserRegisterNotif } from "@util/email";
 
 interface RegistrationData {
     firstName: string;
     lastName: string;
     middleName: string;
-    birthday: string;
+    // birthday: string;
     memberSchoolId: string;
     email: string;
     mobile: string;
@@ -21,7 +27,7 @@ export default handler().post(async (req, res) => {
         firstName,
         lastName,
         middleName,
-        birthday,
+        // birthday,
         email,
         mobile,
         memberSchoolId,
@@ -84,7 +90,7 @@ export default handler().post(async (req, res) => {
             lastName,
             middleName,
             schoolId,
-            birthday: new Date(birthday),
+            // birthday: birthday ? new Date(birthday) : null,
             email: email,
             mobileNumber: mobile,
             memberSchool,

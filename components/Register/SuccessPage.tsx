@@ -4,7 +4,7 @@ import { VStack, Heading, Text, Button } from "@chakra-ui/react";
 
 const SuccessPage: FC = () => {
     return (
-        <VStack spacing={"4"}>
+        <VStack spacing={"4"} p={'4'}>
             <Heading fontSize={"2xl"} textAlign={"center"}>
                 Thank You For Registering
             </Heading>

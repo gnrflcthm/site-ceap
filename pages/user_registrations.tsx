@@ -216,7 +216,7 @@ export const getServerSideProps: GetServerSideProps<{
                     props: {
                         registrations: registrations.map((reg) => ({
                             ...reg.toJSON(),
-                            birthday: reg.birthday?.toDateString(),
+                            birthday: reg.birthday?.toDateString() || "",
                             registeredAt: reg.registeredAt.toDateString(),
                         })),
                     },
