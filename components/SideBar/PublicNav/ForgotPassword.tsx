@@ -48,7 +48,7 @@ const ForgotPassword: FC<{ setMode: Function }> = ({ setMode }) => {
                     _hover={{
                         color: "secondary",
                     }}
-                    onClick={() => setMode("")}
+                    onClick={() => setMode("login")}
                 >
                     <Box as={FaCaretLeft} color={"inherit"} />
                     <Button variant={"transparent"} color={"inherit"}>
@@ -56,7 +56,9 @@ const ForgotPassword: FC<{ setMode: Function }> = ({ setMode }) => {
                     </Button>
                 </Flex>
             )}
-            <Heading mb={"8"}>Reset Password</Heading>
+            <Heading mb={"8"} textAlign={"center"}>
+                Reset Password
+            </Heading>
             {!(loading || success || error) && (
                 <VStack
                     as={"form"}
@@ -88,7 +90,8 @@ const ForgotPassword: FC<{ setMode: Function }> = ({ setMode }) => {
                 <Center as={VStack} flexDir={"column"}>
                     <Text textAlign={"center"}>
                         The password reset link has been successfully sent to
-                        your email.
+                        your email. Kindly check your Spam folder if the
+                        password reset link is not in you inbox.
                     </Text>
                     <Button variant={"primary"} onClick={() => setMode("")}>
                         Return

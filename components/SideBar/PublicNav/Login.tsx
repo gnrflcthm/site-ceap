@@ -9,12 +9,14 @@ import {
     Flex,
     Center,
     CircularProgress,
+    Box,
 } from "@chakra-ui/react";
 
 import "../../../firebase/client";
 
 import CoreInput from "@components/CoreInput";
 import { AuthContext } from "@context/AuthContext";
+import { FaCaretLeft } from "react-icons/fa";
 
 const Login: FC<{ setMode: Function }> = ({ setMode }) => {
     const [id, setId] = useState<string>("");
@@ -49,7 +51,26 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
                 </Center>
             ) : (
                 <>
-                    {" "}
+                    <Flex
+                        justify={"flex-start"}
+                        align={"center"}
+                        alignSelf={"flex-start"}
+                        color={"neturalizerDark"}
+                        _hover={{
+                            color: "secondary",
+                        }}
+                        w={"full"}
+                    >
+                        <Button
+                            variant={"transparent"}
+                            color={"inherit"}
+                            onClick={() => setMode("")}
+                            p={"0"}
+                        >
+                            <Box as={FaCaretLeft} color={"inherit"} />
+                            Return
+                        </Button>
+                    </Flex>
                     <Heading textAlign={"center"}>Login</Heading>
                     <VStack spacing={"8"} mt={"8"}>
                         <CoreInput
@@ -77,11 +98,11 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
                     <VStack mt={"4"}>
                         <Text fontSize={"md"} textAlign={"center"}>
                             Don't have an account?{" "}
-                            <Link href={"/registration/user_registration"} passHref>
-                                <Button
-                                    variant={"link"}
-                                    as={"a"}
-                                >
+                            <Link
+                                href={"/registration/user_registration"}
+                                passHref
+                            >
+                                <Button variant={"link"} as={"a"}>
                                     Register Now
                                 </Button>
                             </Link>
