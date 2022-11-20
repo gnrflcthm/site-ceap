@@ -24,7 +24,7 @@ const GridFolderItem: FC<{ folder: FolderType; navigateFolder: Function }> = ({
                 p={"4"}
                 flexDir={"column"}
                 cursor={"pointer"}
-                w={"12rem"}
+                w={{ base: "40", md: "12rem" }}
                 _hover={{
                     borderColor: "secondary",
                 }}

@@ -32,7 +32,7 @@ const GridResourceItem: FC<{
     resource: ResourceItemType;
     reload: Function;
     onManage: Function;
-    onView: Function
+    onView: Function;
 }> = ({ resource, reload, onManage, onView }) => {
     const { user } = useContext(AuthContext);
 
@@ -80,7 +80,7 @@ const GridResourceItem: FC<{
                 p={"4"}
                 flexDir={"column"}
                 cursor={"pointer"}
-                w={"12rem"}
+                w={{ base: "40", md: "12rem" }}
                 _hover={{
                     borderColor: "secondary",
                 }}
@@ -119,9 +119,11 @@ const GridResourceItem: FC<{
                                         />
                                     );
                                 default:
-                                    return <UserMenuList
-                                        onDownload={() => download()}
-                                    />;
+                                    return (
+                                        <UserMenuList
+                                            onDownload={() => download()}
+                                        />
+                                    );
                             }
                         } else {
                             return (
