@@ -11,6 +11,7 @@ import "../firebase/client";
 import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { validateUser } from "@util/api/validateUser";
+import { useToast } from "@chakra-ui/react";
 
 export interface CoreUser {
     uid?: string;
@@ -42,6 +43,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     });
 
     const auth = getAuth();
+    const toast = useToast();
 
     const login = async (email: string, password: string) => {
         return signInWithEmailAndPassword(auth, email, password)
@@ -68,6 +70,10 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         await axios.head("/api/user/logout");
         client.clear();
         setUser(undefined);
+        toast({
+            title: "You have successfully logged out.",
+            status: "success",
+        });
     };
 
     return (
