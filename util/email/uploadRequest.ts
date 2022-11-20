@@ -144,7 +144,7 @@ export async function sendUploadRequestAcceptEmail(
         <br /><br />
         Upon reviewing your request, we are glad to inform you that your document/file has been APPROVED for uploading. After examining its compliance with our policies, we have not detected any issues. Your document/file has been posted in the C.O.R.E. Resources page.
         <br /><br />
-        Here are the details of your upload request:
+        Here are the details of your upload request:<br />
         <b>File name</b>: ${resource.filename}<br />
         <b>File type</b>: ${resource.fileType}<br />
         <b>File location</b>: ${folder.fullPath}/${resource.filename}<br />

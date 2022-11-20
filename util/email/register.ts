@@ -17,7 +17,7 @@ export async function sendAcceptEmail(
     await transport.sendMail({
         from: process.env.SERVICE_EMAIL,
         to: email,
-        subject: "Account Registration",
+        subject: "Account Accepted",
         html: `
         Dear ${firstName} ${lastName}, 
         <br /><br />
