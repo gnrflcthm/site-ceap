@@ -284,7 +284,10 @@ const UploadModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
                             setFiles((files) => [...files, fileUpload]);
                             closeAddFile();
                         }}
-                        onDismiss={() => closeAddFile()}
+                        onDismiss={() => {
+                            closeAddFile();
+                            setCurrent(-1);
+                        }}
                         update={current !== -1}
                         currentFile={
                             current !== -1 ? files[current] : undefined

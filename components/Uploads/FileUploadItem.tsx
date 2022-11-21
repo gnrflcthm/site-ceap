@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import { Box, Flex, HStack, IconButton, Text, Tooltip } from "@chakra-ui/react";
+import { Grid, Flex, IconButton, Text, Tooltip } from "@chakra-ui/react";
 import { FileUpload } from "./RequestUploadModal";
 import { verifyFileType } from "@util/helper";
 import { FaCog, FaTrash } from "react-icons/fa";
@@ -11,19 +11,23 @@ const FileUploadItem: FC<{
     onRemove: Function;
 }> = ({ file, onEdit, onRemove }) => {
     return (
-        <Flex w={"full"} p={"2"} _hover={{ bg: "blackAlpha.100" }}>
-            <HStack flex={"1"}>
-                <Text
-                    w={"70%"}
-                    textOverflow={"ellipsis"}
-                    whiteSpace={"nowrap"}
-                    overflow={"hidden"}
-                >
-                    {file.filename}
-                </Text>
-                <Text>{verifyFileType(file.filename)}</Text>
-            </HStack>
-            <HStack>
+        <Grid
+            w={"full"}
+            _hover={{ bg: "blackAlpha.100" }}
+            templateColumns={"60% 30% 10%"}
+            p={"2"}
+            alignItems={"center"}
+        >
+            <Text
+                textOverflow={"ellipsis"}
+                whiteSpace={"nowrap"}
+                overflow={"hidden"}
+                fontWeight={"bold"}
+            >
+                {file.filename}
+            </Text>
+            <Text justifySelf={"center"}>{verifyFileType(file.filename)}</Text>
+            <Flex justifySelf={"end"}>
                 <Tooltip label={"Edit"}>
                     <IconButton
                         color={"primary"}
@@ -42,8 +46,8 @@ const FileUploadItem: FC<{
                         onClick={() => onRemove()}
                     />
                 </Tooltip>
-            </HStack>
-        </Flex>
+            </Flex>
+        </Grid>
     );
 };
 

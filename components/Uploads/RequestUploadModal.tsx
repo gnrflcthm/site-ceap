@@ -113,7 +113,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                     title={"Request For Upload"}
                     onDismiss={() => close()}
                 />
-                <Box as={"form"} onSubmit={upload} p={"4"}>
+                <Box as={"form"} onSubmit={upload} p={"4"} w={"full"}>
                     <Flex justify={"end"} mb={"2"}>
                         <Button w={"fit-content"} onClick={() => onOpen()}>
                             <Box as={FaFile} mr={"4"} />
@@ -127,6 +127,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                         border={"1px solid"}
                         borderColor={"neutralizerDark"}
                         justify={files.length > 0 ? "flex-start" : "center"}
+                        w={"full"}
                     >
                         {files.length > 0 ? (
                             files.map((file, i) => (
@@ -171,7 +172,10 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                             setFiles((files) => [...files, fileUpload]);
                             onClose();
                         }}
-                        onDismiss={() => onClose()}
+                        onDismiss={() => {
+                            onClose();
+                            setCurrent(-1);
+                        }}
                         update={current !== -1}
                         currentFile={
                             current !== -1 ? files[current] : undefined

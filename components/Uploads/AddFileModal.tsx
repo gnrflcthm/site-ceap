@@ -70,7 +70,7 @@ const AddFileModal: FC<{
             filename: fTemp,
             description,
         };
-
+        console.log(fileData);
         if (update) {
             onUpdate(fileData);
         } else {
@@ -134,7 +134,6 @@ const AddFileModal: FC<{
                                 if (e.currentTarget.files)
                                     setFile(e.currentTarget.files[0]);
                             }}
-                            required
                         />
                         <Text>
                             {file ? file.name : "Click Or Drag Files to Upload"}

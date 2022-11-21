@@ -60,7 +60,12 @@ const ResourceInfoModal: FC<{
         <Overlay>
             <Modal>
                 <ModalHeader title={"Resource"} onDismiss={() => onDismiss()} />
-                <VStack align={"flex-start"} p={"4"}>
+                <VStack
+                    align={"flex-start"}
+                    p={"4"}
+                    maxH={"70vh"}
+                    overflowY={"auto"}
+                >
                     {resource && !isLoading ? (
                         <>
                             <Text textTransform={"uppercase"} fontSize={"md"}>
@@ -72,6 +77,9 @@ const ResourceInfoModal: FC<{
                                 fontWeight={"bold"}
                                 pl={"2"}
                                 textDecor={"underline"}
+                                whiteSpace={"normal"}
+                                textAlign={"start"}
+                                fontSize={"lg"}
                             >
                                 {resource.filename}
                             </Button>
@@ -83,6 +91,21 @@ const ResourceInfoModal: FC<{
                                 pl={"2"}
                                 maxH={"10rem"}
                                 overflowY={"auto"}
+                                css={{
+                                    "&::-webkit-scrollbar": {
+                                        width: "0.5rem",
+                                        backgroundColor: "#66666633",
+                                        borderRadius: "1rem",
+                                    },
+                                    "&::-webkit-scrollbar-track": {
+                                        width: "0.5rem",
+                                    },
+                                    "&::-webkit-scrollbar-thumb": {
+                                        border: `5px solid #CCCCCCFF`,
+                                        "background-clip": "padding-box",
+                                        borderRadius: "2rem",
+                                    },
+                                }}
                             >
                                 {resource.description || ""}
                             </Text>
