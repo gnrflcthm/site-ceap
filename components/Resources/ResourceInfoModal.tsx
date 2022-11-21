@@ -79,7 +79,7 @@ const ResourceInfoModal: FC<{
                                 textDecor={"underline"}
                                 whiteSpace={"normal"}
                                 textAlign={"start"}
-                                fontSize={"lg"}
+                                fontSize={{ base: "md", md: "lg" }}
                             >
                                 {resource.filename}
                             </Button>

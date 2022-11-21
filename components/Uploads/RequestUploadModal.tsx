@@ -115,8 +115,13 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                 />
                 <Box as={"form"} onSubmit={upload} p={"4"} w={"full"}>
                     <Flex justify={"end"} mb={"2"}>
-                        <Button w={"fit-content"} onClick={() => onOpen()}>
-                            <Box as={FaFile} mr={"4"} />
+                        <Button
+                            w={"fit-content"}
+                            onClick={() => onOpen()}
+                            fontSize={{ base: "sm", md: "md" }}
+                            p={{ base: "1.5", md: "2" }}
+                        >
+                            <Box as={FaFile} mr={{ base: "2", md: "4" }} />
                             Add File
                         </Button>
                     </Flex>

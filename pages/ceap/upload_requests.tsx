@@ -34,7 +34,7 @@ import { Resource, connectDB, IResourceSchema } from "@db/index";
 import { AccountType, ResourceStatus, FileType } from "@util/Enums";
 import TabButton from "@components/Accounts/TabButton";
 import { useState } from "react";
-import { FaCloudUploadAlt } from "react-icons/fa";
+import { FaCloudUploadAlt, FaUpload } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import AcceptResourceModal from "@components/Uploads/AcceptResourceModal";
 import UploadModal from "@components/Uploads/UploadModal";
@@ -66,7 +66,13 @@ const UploadRequests: PageWithLayout<
             <NextHead>
                 <title>Uploads</title>
             </NextHead>
-            <TopPanel title={"Upload Requests"} />
+            <TopPanel
+                title={"Upload Requests"}
+                actionIcon={FaUpload}
+                actionText={"Upload"}
+                onActionClick={() => openUploadModal()}
+                hasAction
+            />
             <Flex justify={"space-between"} align={"center"}>
                 <Flex
                     justify={"flex-start"}
@@ -81,7 +87,7 @@ const UploadRequests: PageWithLayout<
                         }}
                         isActive={current === "requests"}
                     >
-                        Upload Requests
+                        Requests
                     </TabButton>
                     <TabButton
                         onClick={() => {
@@ -93,21 +99,10 @@ const UploadRequests: PageWithLayout<
                         My Uploads
                     </TabButton>
                 </Flex>
-                <Flex justify={"flex-end"} align={"center"} m={"2"} w={"full"}>
-                    <Button
-                        variant={"secondary"}
-                        onClick={() => openUploadModal()}
-                        w={"fit-content"}
-                        rounded={"md"}
-                    >
-                        Upload Resource
-                        <Box as={FaCloudUploadAlt} ml={"4"} fontSize={"xl"} />
-                    </Button>
-                </Flex>
             </Flex>
             <TableContainer maxH={"inherit"} overflowY={"auto"}>
                 <Table>
-                    <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
+                    <Thead bg={"gray.100"} position={"sticky"} top={"0"} zIndex={4}>
                         <Tr>
                             <TableHeader heading={"Date Uploaded"} sortable />
                             <TableHeader heading={"File Name"} />

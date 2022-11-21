@@ -35,17 +35,19 @@ export default authenticatedHandler().get(async (req, res) => {
                 if (user) {
                     switch (user.accountType) {
                         case AccountType.MS_ADMIN:
-                            if (
-                                user.memberSchool?.toHexString() !==
-                                //@ts-ignore
-                                resource.memberSchool?.toHexString()
-                            ) {
-                                res.statusMessage =
-                                    "You don't have enough permission to access the resource.";
-                                res.statusCode = 401;
-                                throw new Error(
-                                    "You don't have enough permission to access the resource."
-                                );
+                            if (resource.status !== ResourceStatus.APPROVED) {
+                                if (
+                                    user.memberSchool?.toHexString() !==
+                                    //@ts-ignore
+                                    resource.memberSchool?.toHexString()
+                                ) {
+                                    res.statusMessage =
+                                        "You don't have enough permission to access the resource.";
+                                    res.statusCode = 401;
+                                    throw new Error(
+                                        "You don't have enough permission to access the resource."
+                                    );
+                                }
                             }
                             break;
                         case AccountType.MS_USER:

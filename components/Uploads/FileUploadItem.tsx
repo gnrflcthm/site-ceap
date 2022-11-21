@@ -14,7 +14,7 @@ const FileUploadItem: FC<{
         <Grid
             w={"full"}
             _hover={{ bg: "blackAlpha.100" }}
-            templateColumns={"60% 30% 10%"}
+            templateColumns={"1fr 1fr 0.5fr"}
             p={"2"}
             alignItems={"center"}
         >
@@ -35,6 +35,9 @@ const FileUploadItem: FC<{
                         icon={<FaCog />}
                         variant={"transparent"}
                         onClick={() => onEdit()}
+                        p={"0"}
+                        m={"0"}
+                        minW={"8"}
                     />
                 </Tooltip>
                 <Tooltip label={"Remove"}>
@@ -44,6 +47,9 @@ const FileUploadItem: FC<{
                         icon={<FaTrash />}
                         variant={"transparent"}
                         onClick={() => onRemove()}
+                        p={"0"}
+                        m={"0"}
+                        minW={"8"}
                     />
                 </Tooltip>
             </Flex>

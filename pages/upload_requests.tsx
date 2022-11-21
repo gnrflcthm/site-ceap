@@ -35,7 +35,7 @@ import {
 import TableHeader from "@components/TableHeader";
 import { useData } from "@util/hooks/useData";
 import TabButton from "@components/Accounts/TabButton";
-import { FaCloudUploadAlt, FaSearch } from "react-icons/fa";
+import { FaCloudUploadAlt, FaSearch, FaUpload } from "react-icons/fa";
 import { useState } from "react";
 
 const RequestUploadModal = dynamic(
@@ -62,7 +62,13 @@ const UploadRequests: PageWithLayout<
             <Head>
                 <title>Upload Requests</title>
             </Head>
-            <TopPanel title={"Upload Requests"} />
+            <TopPanel
+                title={"Upload Requests"}
+                actionIcon={FaUpload}
+                actionText={"Upload"}
+                onActionClick={() => openUploadModal()}
+                hasAction
+            />
             <Flex justify={"space-between"} align={"center"}>
                 <Flex
                     justify={"flex-start"}
@@ -77,7 +83,7 @@ const UploadRequests: PageWithLayout<
                         }}
                         isActive={current === "requests"}
                     >
-                        Upload Requests
+                        Requests
                     </TabButton>
                     <TabButton
                         onClick={() => {
@@ -89,21 +95,10 @@ const UploadRequests: PageWithLayout<
                         My Uploads
                     </TabButton>
                 </Flex>
-                <Flex justify={"flex-end"} align={"center"} m={"2"} w={"full"}>
-                    <Button
-                        variant={"secondary"}
-                        onClick={() => openUploadModal()}
-                        w={"fit-content"}
-                        rounded={"md"}
-                    >
-                        Request For Upload
-                        <Box as={FaCloudUploadAlt} ml={"4"} fontSize={"xl"} />
-                    </Button>
-                </Flex>
             </Flex>
             <TableContainer maxH={"inherit"} overflowY={"auto"}>
                 <Table>
-                    <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
+                    <Thead bg={"gray.100"} position={"sticky"} top={"0"} zIndex={4}>
                         <Tr>
                             <TableHeader heading={"Date Uploaded"} sortable />
                             <TableHeader heading={"File Name"} />

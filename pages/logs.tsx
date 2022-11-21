@@ -26,7 +26,7 @@ import {
 import TableHeader from "@components/TableHeader";
 import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
 import LogData from "@components/Logs/LogData";
-import { FaFileAlt, FaSync } from "react-icons/fa";
+import { FaDownload, FaFileAlt, FaSync } from "react-icons/fa";
 
 import { AnimatePresence } from "framer-motion";
 import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
@@ -64,8 +64,8 @@ const Logs: PageWithLayout<
             <TopPanel
                 title={"Audit Logs"}
                 hasAction
-                actionIcon={FaFileAlt}
-                actionText={"Generate Reports"}
+                actionIcon={FaDownload}
+                actionText={"Export"}
                 onActionClick={() => openReports()}
             />
             <Stack

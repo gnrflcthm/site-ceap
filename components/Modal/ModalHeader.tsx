@@ -14,7 +14,7 @@ const ModalHeader: FC<{ title: string; onDismiss?: Function }> = ({
             p={"4"}
             roundedTop={"inherit"}
         >
-            <Heading fontSize={"2xl"} color={"neutralizerLight"}>
+            <Heading fontSize={{base: "lg", md: "2xl"}} color={"neutralizerLight"}>
                 {title}
             </Heading>
             {onDismiss && (

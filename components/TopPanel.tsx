@@ -1,13 +1,5 @@
 import { FC } from "react";
-import {
-    Flex,
-    Heading,
-    Button,
-    Text,
-    As,
-    Box,
-    Center,
-} from "@chakra-ui/react";
+import { Flex, Heading, Button, Text, As, Box, Center } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
 const TopPanel: FC<{
@@ -44,7 +36,7 @@ const TopPanel: FC<{
             {hasAction && (
                 <Button
                     variant={"transparent"}
-                    px={'4'}
+                    px={{ base: "0", md: "4" }}
                     color={"neutralizerLight"}
                     onClick={() => onActionClick()}
                     m={"0"}
@@ -52,7 +44,7 @@ const TopPanel: FC<{
                     <Center
                         as={motion.div}
                         color={"inherit"}
-                        mr={"2"}
+                        mr={actionText ? "2" : "0"}
                     >
                         <Box as={actionIcon} color={"inherit"} />
                     </Center>{" "}

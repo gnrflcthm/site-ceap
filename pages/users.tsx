@@ -150,6 +150,8 @@ const ManageAccounts: PageWithLayout<
                             onSubmit={searchUsers}
                             px={"2"}
                             justify={{ base: "center", md: "flex-end" }}
+                            flexDir={{ base: "column", md: "row" }}
+                            mb={{ base: "1.5", md: "0" }}
                         >
                             <Select
                                 required
@@ -157,6 +159,7 @@ const ManageAccounts: PageWithLayout<
                                     setCriteria(e.target.value);
                                     setQuery("");
                                 }}
+                                mb={{ base: "1.5", md: "2" }}
                             >
                                 <option value="name" selected>
                                     Name
@@ -167,37 +170,41 @@ const ManageAccounts: PageWithLayout<
                                 <option value="email">Email Address</option>
                                 <option value="schoolId">School ID</option>
                             </Select>
-                            <SearchBar
-                                query={query}
-                                setQuery={setQuery}
-                                placeholder={"Search..."}
-                                inputColor={"neutralizerDark"}
-                                hasForm={true}
-                                showIcon={false}
-                            />
+                            <Flex>
+                                <SearchBar
+                                    query={query}
+                                    setQuery={setQuery}
+                                    placeholder={"Search..."}
+                                    inputColor={"neutralizerDark"}
+                                    hasForm={true}
+                                    showIcon={false}
+                                />
 
-                            <Tooltip
-                                label={"Search"}
-                                placement={"bottom"}
-                                hasArrow
-                            >
-                                <Center px={"1"}>
-                                    <Button
-                                        w={"full"}
-                                        _hover={{ color: "secondary" }}
-                                        bg={"transparent"}
-                                        color={"neutralizerDark"}
-                                        type={"submit"}
-                                    >
-                                        <Box
-                                            as={FaSearch}
-                                            m={"auto"}
-                                            cursor={"pointer"}
-                                            fontSize={"2xl"}
-                                        />
-                                    </Button>
-                                </Center>
-                            </Tooltip>
+                                <Tooltip
+                                    label={"Search"}
+                                    placement={"bottom"}
+                                    hasArrow
+                                >
+                                    <Center px={"1"}>
+                                        <Button
+                                            w={"full"}
+                                            _hover={{ color: "secondary" }}
+                                            bg={"transparent"}
+                                            color={"neutralizerDark"}
+                                            type={"submit"}
+                                            p={"0"}
+                                            m={"0"}
+                                        >
+                                            <Box
+                                                as={FaSearch}
+                                                m={"auto"}
+                                                cursor={"pointer"}
+                                                fontSize={"2xl"}
+                                            />
+                                        </Button>
+                                    </Center>
+                                </Tooltip>
+                            </Flex>
                         </Flex>
                     </Flex>
                     <TableContainer maxH={"inherit"} overflowY={"auto"}>
@@ -246,6 +253,11 @@ const ManageAccounts: PageWithLayout<
                                             </Center>
                                         </Td>
                                     </Tr>
+                                )}
+                                {!isLoading && !data && (
+                                    <Center>
+                                        There are currently no users.
+                                    </Center>
                                 )}
                             </Tbody>
                         </Table>

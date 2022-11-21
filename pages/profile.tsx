@@ -12,6 +12,8 @@ import {
     SimpleGrid,
     Flex,
     Button,
+    useToast,
+    CircularProgress,
 } from "@chakra-ui/react";
 import Layout from "@components/Layout";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -34,6 +36,7 @@ const Profile: PageWithLayout<
 > = ({ userInfo }) => {
     const [updating, setUpdating] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const toast = useToast();
 
     const [showUpdatePassword, setShowUpdatePassword] =
         useState<boolean>(false);
@@ -48,8 +51,18 @@ const Profile: PageWithLayout<
             .post("/api/user/update", {
                 displayName /* Add more fields according to updateable fields */,
             })
+            .then(() => {
+                toast({
+                    title: "Profile Updated Successfully",
+                    status: "success",
+                });
+            })
             .catch((err: AxiosError) => {
                 console.log(err.response?.statusText);
+                toast({
+                    title: "An Error Has Occured While Updating Your Profile",
+                    status: "error",
+                });
             })
             .finally(() => {
                 setUpdating(false);
@@ -71,7 +84,7 @@ const Profile: PageWithLayout<
                 overflowY={"auto"}
             >
                 <TopPanel title={"Profile"} />
-                <VStack align={"flex-start"} p={"4"}>
+                <VStack align={"flex-start"} p={"4"} m={"0"}>
                     <Heading fontSize={{ base: "lg", lg: "2xl" }}>
                         Basic Information
                     </Heading>
@@ -129,40 +142,43 @@ const Profile: PageWithLayout<
                     show={showUpdatePassword}
                     setShow={setShowUpdatePassword}
                 />
+                {updating && (
+                    <Flex justify={"flex-end"} align={"center"} p={"4"}>
+                        <Button
+                            w={"fit-content"}
+                            onClick={() => {
+                                setDisplayName(userInfo?.displayName || "");
+                                setUpdating(false);
+                            }}
+                            mr={"2"}
+                            bg={"red.500"}
+                            _hover={{
+                                bg: "red.300",
+                            }}
+                            disabled={loading}
+                            size={{ base: "sm", md: "md" }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            w={"fit-content"}
+                            bg={"green.500"}
+                            _hover={{
+                                bg: "green.300",
+                            }}
+                            onClick={() => save()}
+                            disabled={loading}
+                            size={{ base: "sm", md: "md" }}
+                        >
+                            {loading ? (
+                                <CircularProgress isIndeterminate size={6} />
+                            ) : (
+                                "Save Changes"
+                            )}
+                        </Button>
+                    </Flex>
+                )}
             </VStack>
-            {updating && (
-                <Flex
-                    justify={"flex-end"}
-                    align={"center"}
-                    p={"4"}
-                    bg={"primary"}
-                >
-                    <Button
-                        w={"fit-content"}
-                        onClick={() => {
-                            setDisplayName(userInfo?.displayName || "");
-                            setUpdating(false);
-                        }}
-                        mr={"2"}
-                        bg={"red.500"}
-                        _hover={{
-                            bg: "red.300",
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        w={"fit-content"}
-                        bg={"green.500"}
-                        _hover={{
-                            bg: "green.300",
-                        }}
-                        onClick={() => save()}
-                    >
-                        Save Changes
-                    </Button>
-                </Flex>
-            )}
         </>
     );
 };

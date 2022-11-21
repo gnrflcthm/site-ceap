@@ -44,7 +44,7 @@ const AddFileModal: FC<{
         e.preventDefault();
 
         if (!file) {
-            setError("No File Selected.")
+            setError("No File Selected.");
             return;
         }
 
@@ -97,15 +97,9 @@ const AddFileModal: FC<{
                     title={`${update ? "Update" : "Add"} File`}
                     onDismiss={() => onDismiss()}
                 />
-                <Box
-                    as={"form"}
-                    onSubmit={addFile}
-                    id={"addFileForm"}
-                    px={"4"}
-                    py={"6"}
-                >
+                <Box as={"form"} onSubmit={addFile} id={"addFileForm"} p={"4"}>
                     <Center
-                        h={"32"}
+                        h={{ base: "24", md: "32" }}
                         bg={"white"}
                         position={"relative"}
                         rounded={"md"}
@@ -135,7 +129,7 @@ const AddFileModal: FC<{
                                     setFile(e.currentTarget.files[0]);
                             }}
                         />
-                        <Text>
+                        <Text textAlign={"center"}>
                             {file ? file.name : "Click Or Drag Files to Upload"}
                         </Text>
                     </Center>

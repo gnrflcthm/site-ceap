@@ -6,17 +6,18 @@ const TabButton: FC<
 > = ({ children, isActive = false, onClick }) => {
     return (
         <Button
+            fontSize={{ base: "sm", md: "md" }}
             rounded={"full"}
             onClick={() => onClick()}
             bg={isActive ? "secondary" : "initial"}
-            w={'fit-content'}
-            mx={'1'}
-            color={isActive ? "neutralizerLight": "neutralizerDark"}
+            w={"fit-content"}
+            mx={"1"}
+            color={isActive ? "neutralizerLight" : "neutralizerDark"}
             borderColor={isActive ? "transparent" : "neutralizerDark"}
             _hover={{
                 bg: "secondary",
                 borderColor: "transparent",
-                color: "neutralizerLight"
+                color: "neutralizerLight",
             }}
         >
             {children}

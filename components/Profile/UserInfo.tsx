@@ -69,6 +69,7 @@ const UserInfo: FC<{
                                 />
                             )}
                             <Text
+                                textAlign={{ base: "end", md: "initial" }}
                                 color={
                                     isEditable ? "primary" : "neutralizerDark"
                                 }

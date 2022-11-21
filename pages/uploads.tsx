@@ -58,7 +58,11 @@ const Uploads: PageWithLayout<
             <Head>
                 <title>My Uploads</title>
             </Head>
-            <TopPanel title={"My Uploads"} />
+            <TopPanel title={"My Uploads"} 
+                actionIcon={FaSync}
+                onActionClick={() => refetch()}
+                hasAction
+            />
             <HStack w={"full"} p={"4"} justify={"flex-end"}>
                 <Button
                     variant={"secondary"}
@@ -66,10 +70,10 @@ const Uploads: PageWithLayout<
                     w={"min-content"}
                     rounded={"md"}
                 >
-                    Request For Upload
+                    Upload
                     <Box as={FaCloudUploadAlt} ml={"4"} fontSize={"xl"} />
                 </Button>
-                <Button
+                {/* <Button
                     variant={"secondary"}
                     onClick={() => refetch()}
                     w={"min-content"}
@@ -77,11 +81,11 @@ const Uploads: PageWithLayout<
                 >
                     Refresh
                     <Box as={FaSync} ml={"4"} fontSize={"xl"} />
-                </Button>
+                </Button> */}
             </HStack>
             <TableContainer maxH={"inherit"} overflowY={"auto"}>
                 <Table>
-                    <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
+                    <Thead bg={"gray.100"} position={"sticky"} top={"0"} zIndex={4}>
                         <Tr>
                             <TableHeader heading={"Date Uploaded"} sortable />
                             <TableHeader heading={"File Name"} />

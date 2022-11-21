@@ -74,7 +74,6 @@ const UserRegistrations: PageWithLayout<
             <TopPanel
                 title={"User Registrations"}
                 actionIcon={FaSync}
-                actionText={"Refresh"}
                 onActionClick={refetch}
                 actionIsProcessing={isLoading}
                 hasAction
