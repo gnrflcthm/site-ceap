@@ -76,7 +76,7 @@ const Login: FC<{ setMode: Function }> = ({ setMode }) => {
                         <CoreInput
                             value={id}
                             setValue={setId}
-                            placeholder={"Email or Contact No."}
+                            placeholder={"Email Address"}
                             required
                         />
                         <CoreInput
