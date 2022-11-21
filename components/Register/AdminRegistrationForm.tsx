@@ -43,11 +43,11 @@ const AdminRegistrationForm: FC<{
 
         axios
             .post("/api/admin/register", {
-                firstName,
-                middleName,
-                lastName,
+                firstName: firstName.trim(),
+                middleName: middleName.trim(),
+                lastName: lastName.trim(),
                 mobileNumber,
-                email,
+                email: email.trim(),
                 memberSchoolId: memberSchool,
             })
             .then((res) => {

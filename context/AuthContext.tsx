@@ -46,7 +46,7 @@ export const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const toast = useToast();
 
     const login = async (email: string, password: string) => {
-        return signInWithEmailAndPassword(auth, email, password)
+        return signInWithEmailAndPassword(auth, email.trim(), password)
             .then(async ({ user }) => {
                 const token = await user.getIdToken(true);
                 await axios.head("/api/user/login", {

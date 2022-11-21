@@ -49,14 +49,14 @@ const RegistrationForm: FC<{
 
         axios
             .post("/api/user/register", {
-                firstName,
-                lastName,
-                middleName,
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                middleName: middleName.trim(),
                 // birthday,
                 memberSchoolId,
-                email,
-                mobile,
-                schoolId,
+                email: email.trim(),
+                mobile: mobile.trim(),
+                schoolId: schoolId.trim(),
             })
             .then(() => {
                 setLoading(false);
