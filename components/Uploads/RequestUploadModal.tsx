@@ -39,7 +39,11 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
 
     const [progress, setProgress] = useState<number>(0);
 
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const {
+        isOpen: showAddFile,
+        onOpen: openAddFile,
+        onClose: closeAddFile,
+    } = useDisclosure();
 
     const upload = async (e: FormEvent) => {
         e.preventDefault();
@@ -89,7 +93,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
 
     const onEdit = (i: number) => {
         setCurrent(i);
-        onOpen();
+        openAddFile();
     };
 
     const updateFile = (file: FileUpload) => {
@@ -98,7 +102,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
             temp[current] = file;
             return temp;
         });
-        onClose();
+        closeAddFile();
         setCurrent(-1);
     };
 
@@ -114,10 +118,15 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                     onDismiss={() => close()}
                 />
                 <Box as={"form"} onSubmit={upload} p={"4"} w={"full"}>
-                    <Flex justify={"end"} mb={"2"}>
+                    <Flex
+                        justify={"end"}
+                        align={"center"}
+                        mb={"2"}
+                        columnGap={"2"}
+                    >
                         <Button
                             w={"fit-content"}
-                            onClick={() => onOpen()}
+                            onClick={() => openAddFile()}
                             fontSize={{ base: "sm", md: "md" }}
                             p={{ base: "1.5", md: "2" }}
                         >
@@ -171,14 +180,14 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                 </Box>
             </Modal>
             <AnimatePresence>
-                {isOpen && (
+                {showAddFile && (
                     <AddFileModal
                         onAdd={(fileUpload: FileUpload) => {
                             setFiles((files) => [...files, fileUpload]);
-                            onClose();
+                            closeAddFile();
                         }}
                         onDismiss={() => {
-                            onClose();
+                            closeAddFile();
                             setCurrent(-1);
                         }}
                         update={current !== -1}

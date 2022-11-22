@@ -3,11 +3,27 @@ import { FC, useState, useEffect, useMemo, FormEvent } from "react";
 import Overlay from "@components/Modal/Overlay";
 import Modal from "@components/Modal/Modal";
 import ModalHeader from "@components/Modal/ModalHeader";
-import { Box, Button, Input, Textarea, Text, Center } from "@chakra-ui/react";
+import {
+    Box,
+    Button,
+    Input,
+    Textarea,
+    Text,
+    Center,
+    Flex,
+    useDisclosure,
+    Tooltip,
+} from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
 import { AnimatePresence, motion } from "framer-motion";
 import { FileUpload } from "./RequestUploadModal";
 import { verifyFileType } from "@util/helper";
+import { FaQuestionCircle } from "react-icons/fa";
+import dynamic from "next/dynamic";
+
+const UploadGuidelinesModal = dynamic(
+    () => import("@components/Uploads/UploadGuidelinesModal")
+);
 
 const AddFileModal: FC<{
     onDismiss: Function;
@@ -90,108 +106,150 @@ const AddFileModal: FC<{
         }
     }, [file]);
 
+    const {
+        isOpen: showHelp,
+        onOpen: openHelp,
+        onClose: closeHelp,
+    } = useDisclosure();
+
     return (
-        <Overlay>
-            <Modal>
-                <ModalHeader
-                    title={`${update ? "Update" : "Add"} File`}
-                    onDismiss={() => onDismiss()}
-                />
-                <Box as={"form"} onSubmit={addFile} id={"addFileForm"} p={"4"}>
-                    <Center
-                        h={{ base: "24", md: "32" }}
-                        bg={"white"}
-                        position={"relative"}
-                        rounded={"md"}
-                        transition={"all 0.2s"}
-                        borderWidth={"thick"}
-                        borderStyle={"dashed"}
-                        borderColor={dragging ? "secondary" : "gray.400"}
-                        fontWeight={"bold"}
-                        _hover={{
-                            borderColor: "secondary",
-                        }}
-                        overflow={"hidden"}
-                        mb={"8"}
-                    >
-                        <Input
-                            position={"absolute"}
-                            h={"full"}
-                            w={"full"}
-                            type={"file"}
-                            opacity={"0"}
-                            onDragEnter={() => setDragging(true)}
-                            onDragLeave={() => setDragging(false)}
-                            cursor={"pointer"}
-                            onDrop={(e) => setFile(e.dataTransfer.files[0])}
-                            onChange={(e) => {
-                                if (e.currentTarget.files)
-                                    setFile(e.currentTarget.files[0]);
-                            }}
-                        />
-                        <Text textAlign={"center"}>
-                            {file ? file.name : "Click Or Drag Files to Upload"}
-                        </Text>
-                    </Center>
-                    <CoreInput
-                        setValue={setFilename}
-                        value={filename}
-                        placeholder={"File Name"}
-                        disabled={!file}
+        <>
+            <Overlay>
+                <Modal>
+                    <ModalHeader
+                        title={`${update ? "Update" : "Add"} File`}
+                        onDismiss={() => onDismiss()}
                     />
-                    <Box w={"full"} mt={"4"}>
-                        <AnimatePresence>
-                            <Box mb={"1"} h={"1rem"}>
-                                {description && (
-                                    <Text
-                                        as={motion.p}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        fontSize={"sm"}
-                                        color={"secondary"}
-                                        fontWeight={"normal"}
-                                    >
-                                        File Description
-                                    </Text>
-                                )}
-                            </Box>
-                        </AnimatePresence>
-                        <Textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            borderWidth={"1px"}
-                            borderColor={
-                                description ? "secondary" : "neutralizerDark"
-                            }
-                            focusBorderColor={"secondary"}
-                            _hover={{ border: "neutralizerDark" }}
-                            placeholder={"Enter file description"}
-                            maxH={"20vh"}
-                        ></Textarea>
+                    <Flex
+                        justify={"flex-end"}
+                        px={"4"}
+                        pt={"4"}
+                        m={"0 !important"}
+                        position={'relative'}
+                    >
+                        <Tooltip label={"Help"}>
+                            <Box
+                                as={FaQuestionCircle}
+                                cursor={"pointer"}
+                                h={"full"}
+                                w={"6"}
+                                _hover={{
+                                    color: "primary",
+                                }}
+                                onClick={() => openHelp()}
+                            />
+                        </Tooltip>
+                    </Flex>
+                    <Box
+                        as={"form"}
+                        onSubmit={addFile}
+                        id={"addFileForm"}
+                        p={"4"}
+                    >
+                        <Center
+                            h={{ base: "24", md: "32" }}
+                            bg={"white"}
+                            position={"relative"}
+                            rounded={"md"}
+                            transition={"all 0.2s"}
+                            borderWidth={"thick"}
+                            borderStyle={"dashed"}
+                            borderColor={dragging ? "secondary" : "gray.400"}
+                            fontWeight={"bold"}
+                            _hover={{
+                                borderColor: "secondary",
+                            }}
+                            overflow={"hidden"}
+                            mb={"8"}
+                        >
+                            <Input
+                                position={"absolute"}
+                                h={"full"}
+                                w={"full"}
+                                type={"file"}
+                                opacity={"0"}
+                                onDragEnter={() => setDragging(true)}
+                                onDragLeave={() => setDragging(false)}
+                                cursor={"pointer"}
+                                onDrop={(e) => setFile(e.dataTransfer.files[0])}
+                                onChange={(e) => {
+                                    if (e.currentTarget.files)
+                                        setFile(e.currentTarget.files[0]);
+                                }}
+                            />
+                            <Text textAlign={"center"}>
+                                {file
+                                    ? file.name
+                                    : "Click Or Drag Files to Upload"}
+                            </Text>
+                        </Center>
+                        <CoreInput
+                            setValue={setFilename}
+                            value={filename}
+                            placeholder={"File Name"}
+                            disabled={!file}
+                        />
+                        <Box w={"full"} mt={"4"}>
+                            <AnimatePresence>
+                                <Box mb={"1"} h={"1rem"}>
+                                    {description && (
+                                        <Text
+                                            as={motion.p}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            fontSize={"sm"}
+                                            color={"secondary"}
+                                            fontWeight={"normal"}
+                                        >
+                                            File Description
+                                        </Text>
+                                    )}
+                                </Box>
+                            </AnimatePresence>
+                            <Textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                borderWidth={"1px"}
+                                borderColor={
+                                    description
+                                        ? "secondary"
+                                        : "neutralizerDark"
+                                }
+                                focusBorderColor={"secondary"}
+                                _hover={{ border: "neutralizerDark" }}
+                                placeholder={"Enter file description"}
+                                maxH={"20vh"}
+                            ></Textarea>
+                        </Box>
                     </Box>
-                </Box>
-                {error && (
-                    <Text
-                        color={"red"}
-                        w={"full"}
-                        textAlign={"center"}
-                        fontSize={"md"}
-                    >
-                        {error}
-                    </Text>
+                    {error && (
+                        <Text
+                            color={"red"}
+                            w={"full"}
+                            textAlign={"center"}
+                            fontSize={"md"}
+                        >
+                            {error}
+                        </Text>
+                    )}
+                    <Box w={"full"} p={"4"}>
+                        <Button
+                            type={"submit"}
+                            form={"addFileForm"}
+                            variant={"secondary"}
+                        >
+                            {update ? "Update File" : "Add File"}
+                        </Button>
+                    </Box>
+                </Modal>
+            </Overlay>
+            <AnimatePresence>
+                {showHelp && (
+                    <UploadGuidelinesModal onDismiss={() => closeHelp()} />
                 )}
-                <Box w={"full"} p={"4"}>
-                    <Button
-                        type={"submit"}
-                        form={"addFileForm"}
-                        variant={"secondary"}
-                    >
-                        {update ? "Update File" : "Add File"}
-                    </Button>
-                </Box>
-            </Modal>
-        </Overlay>
+            </AnimatePresence>
+        </>
     );
 };
 
