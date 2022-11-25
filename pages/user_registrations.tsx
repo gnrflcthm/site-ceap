@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
@@ -20,9 +20,13 @@ import {
     Thead,
     Center,
     Td,
+    Flex,
+    Button,
+    Text,
+    Box,
 } from "@chakra-ui/react";
 
-import { FaSync } from "react-icons/fa";
+import { FaCaretLeft, FaCaretRight, FaSync } from "react-icons/fa";
 
 import TableHeader from "@components/TableHeader";
 import { AuthContext } from "@context/AuthContext";
@@ -52,19 +56,10 @@ const UserRegistrations: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ registrations }) => {
     const { user, loading } = useContext(AuthContext);
-
-    const { data, isLoading, error, refetch } = useData<
-        | (IUserRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              birthday?: string;
-          })[]
-        | (IMSAdminRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              memberSchool: { id: string; name: string };
-          })[]
-    >("/api/member/registrations", registrations);
+    const [page, setPage] = useState<number>(1);
+    const { data, isLoading, error, refetch } = useData<IRegistrationInfo[]>(
+        `/api/member/registrations?p=${page}`
+    );
 
     return (
         <>
@@ -79,6 +74,30 @@ const UserRegistrations: PageWithLayout<
                 actionIsProcessing={isLoading}
                 hasAction
             />
+
+            <Flex align={"center"} justify={"end"}>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(`/api/member/registrations?p=${page - 1}`);
+                        setPage((p) => p - 1);
+                    }}
+                    disabled={page - 1 <= 0 || isLoading}
+                >
+                    <Box as={FaCaretLeft} color={"primary"} />
+                </Button>
+                <Text>{page}</Text>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(`/api/member/registrations?p=${page + 1}`);
+                        setPage((p) => p + 1);
+                    }}
+                    disabled={isLoading || (data && data?.length < 30)}
+                >
+                    <Box as={FaCaretRight} color={"primary"} />
+                </Button>
+            </Flex>
             {loading || !user ? (
                 <Center w={"full"} h={"full"}>
                     <CircularProgress isIndeterminate />
@@ -161,6 +180,18 @@ const UserRegistrations: PageWithLayout<
     );
 };
 
+export type IRegistrationInfo =
+    | (IUserRegistrationSchema & {
+          id: string;
+          registeredAt: string;
+          birthday?: string;
+      })
+    | (IMSAdminRegistrationSchema & {
+          id: string;
+          registeredAt: string;
+          memberSchool: { id: string; name: string };
+      });
+
 export const getServerSideProps: GetServerSideProps<{
     registrations?:
         | (IUserRegistrationSchema & {
@@ -175,60 +206,61 @@ export const getServerSideProps: GetServerSideProps<{
           })[];
 }> = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        await connectDB();
+        // await connectDB();
 
-        const user = await User.findOne({ authId: uid });
+        // const user = await User.findOne({ authId: uid });
 
-        if (!user) {
-            return {
-                redirect: {
-                    destination: "/",
-                    statusCode: 301,
-                },
-            };
-        }
+        // if (!user) {
+        //     return {
+        //         redirect: {
+        //             destination: "/",
+        //             statusCode: 301,
+        //         },
+        //     };
+        // }
 
-        let registrations = [];
+        // let registrations = [];
 
-        switch (user.accountType) {
-            case AccountType.CEAP_ADMIN:
-            case AccountType.CEAP_SUPER_ADMIN:
-                registrations = await MSAdminRegistration.find()
-                    .populate("memberSchool", ["id", "name"])
-                    .exec();
+        // switch (user.accountType) {
+        //     case AccountType.CEAP_ADMIN:
+        //     case AccountType.CEAP_SUPER_ADMIN:
+        //         registrations = await MSAdminRegistration.find()
+        //             .populate("memberSchool", ["id", "name"])
+        //             .exec();
 
-                return {
-                    props: {
-                        registrations: registrations.map((reg) => ({
-                            ...reg.toJSON(),
-                            registeredAt: reg.registeredAt.toDateString(),
-                        })),
-                    },
-                };
-            case AccountType.MS_ADMIN:
-                registrations = await UserRegistration.find({
-                    memberSchool: user?.memberSchool,
-                })
-                    .populate("memberSchool", ["id", "name"])
-                    .exec();
+        //         return {
+        //             props: {
+        //                 registrations: registrations.map((reg) => ({
+        //                     ...reg.toJSON(),
+        //                     registeredAt: reg.registeredAt.toDateString(),
+        //                 })),
+        //             },
+        //         };
+        //     case AccountType.MS_ADMIN:
+        //         registrations = await UserRegistration.find({
+        //             memberSchool: user?.memberSchool,
+        //         })
+        //             .populate("memberSchool", ["id", "name"])
+        //             .exec();
 
-                return {
-                    props: {
-                        registrations: registrations.map((reg) => ({
-                            ...reg.toJSON(),
-                            birthday: reg.birthday?.toDateString(),
-                            registeredAt: reg.registeredAt.toDateString(),
-                        })),
-                    },
-                };
-            default:
-                return {
-                    redirect: {
-                        destination: "/",
-                        statusCode: 301,
-                    },
-                };
-        }
+        //         return {
+        //             props: {
+        //                 registrations: registrations.map((reg) => ({
+        //                     ...reg.toJSON(),
+        //                     birthday: reg.birthday?.toDateString(),
+        //                     registeredAt: reg.registeredAt.toDateString(),
+        //                 })),
+        //             },
+        //         };
+        //     default:
+        return {
+            // redirect: {
+            //     destination: "/",
+            //     statusCode: 301,
+            // },
+            props: {},
+        };
+        // }
     }
 );
 
