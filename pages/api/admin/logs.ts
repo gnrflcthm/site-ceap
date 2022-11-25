@@ -1,7 +1,6 @@
-import { IUserSchema } from "./../../../db/models/User";
-import { ILogSchema } from "./../../../db/models/Log";
+import { ILogSchema } from "@db/models/Log";
 import { connectDB } from "@db/index";
-import { IResourceSchema, Log, User } from "@db/models";
+import { Log, User } from "@db/models";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import { AccountType } from "@util/Enums";
 
@@ -14,6 +13,15 @@ export default authenticatedHandler([
         await connectDB();
         const user = await User.findOne({ authId: req.uid }).orFail();
 
+        let page: number = 0;
+
+        if (req.query.p && !Array.isArray(req.query.p)) {
+            try {
+                let temp = parseInt(req.query.p) - 1;
+                page = temp < 0 ? 0 : temp;
+            } catch (err) {}
+        }
+
         if (req.query) {
             const criteria = Object.keys(req.query)[0];
 
@@ -23,10 +31,14 @@ export default authenticatedHandler([
                 query = query[0];
             }
 
-            let logs: (ILogSchema & { user?: IResourceSchema })[] = [];
+            let logs: (ILogSchema & { user?: any })[] = [];
+            const isAdministrative = [
+                AccountType.CEAP_ADMIN,
+                AccountType.CEAP_SUPER_ADMIN,
+            ].includes(req.role);
             switch (criteria) {
                 case "name":
-                    const users = await User.find({
+                    let users = await User.find({
                         $or: [
                             {
                                 firstName: {
@@ -45,25 +57,69 @@ export default authenticatedHandler([
 
                     const ids = users.map((u) => u.id);
 
-                    logs = await Log.find({ user: ids }).populate("user");
+                    if (isAdministrative) {
+                        logs = await Log.find({ user: ids })
+                            .populate("user")
+                            .skip(page * 30)
+                            .limit(30)
+                            .sort({ datePerformed: -1 });
+                    } else {
+                        logs = await Log.find({
+                            user: ids,
+                            memberSchool: user.memberSchool,
+                        })
+                            .populate("user")
+                            .skip(page * 30)
+                            .limit(30)
+                            .sort({ datePerformed: -1 });
+                    }
                     break;
                 default:
-                    logs = await Log.find({
-                        [criteria]: { $regex: `.*${query}.*`, $options: "i" },
-                    }).populate("user");
+                    if (isAdministrative) {
+                        logs = await Log.find({
+                            [criteria]: {
+                                $regex: `.*${query}.*`,
+                                $options: "i",
+                            },
+                        })
+                            .populate("user")
+                            .skip(page * 30)
+                            .limit(30)
+                            .sort({ datePerformed: -1 });
+                    } else {
+                        logs = await Log.find({
+                            [criteria]: {
+                                $regex: `.*${query}.*`,
+                                $options: "i",
+                            },
+                            memberSchool: user.memberSchool,
+                        })
+                            .populate("user")
+                            .skip(page * 30)
+                            .limit(30)
+                            .sort({ datePerformed: -1 });
+                    }
             }
             res.status(200).json(logs);
         } else {
-            let logs: (ILogSchema & { user?: IUserSchema })[] = [];
+            let logs: (ILogSchema & { user?: any })[] = [];
             switch (user.accountType) {
                 case AccountType.CEAP_ADMIN:
                 case AccountType.CEAP_SUPER_ADMIN:
-                    logs = await Log.find({}).populate("user");
+                    logs = await Log.find({})
+                        .populate("user")
+                        .skip(page * 30)
+                        .limit(30)
+                        .sort({ datePerformed: -1 });
                     break;
                 case AccountType.MS_ADMIN:
                     logs = await Log.find({
                         memberSchool: user.memberSchool,
-                    }).populate("user");
+                    })
+                        .populate("user")
+                        .skip(page * 30)
+                        .limit(30)
+                        .sort({ datePerformed: -1 });
             }
             res.status(200).json(logs);
         }

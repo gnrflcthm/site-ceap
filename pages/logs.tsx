@@ -12,6 +12,7 @@ import {
     Button,
     Center,
     CircularProgress,
+    Flex,
     Select,
     Stack,
     Table,
@@ -26,17 +27,19 @@ import {
 import TableHeader from "@components/TableHeader";
 import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
 import LogData from "@components/Logs/LogData";
-import { FaFileAlt, FaSync } from "react-icons/fa";
+import { FaFileAlt, FaSync, FaCaretLeft, FaCaretRight } from "react-icons/fa";
 
 import { AnimatePresence } from "framer-motion";
 import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
 import SearchBar from "@components/SearchBar";
 import { FormEvent, useState } from "react";
 import { useData } from "@util/hooks/useData";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const Logs: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ logs }) => {
+> = ({ logs, page: currentPage }) => {
     const {
         isOpen: showReports,
         onOpen: openReports,
@@ -45,15 +48,20 @@ const Logs: PageWithLayout<
 
     const [query, setQuery] = useState<string>("");
     const [criteria, setCriteria] = useState<string>("name");
+    const [page, setPage] = useState<number>(currentPage || 0);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
 
-    const { data, refetch, isLoading } = useData("", logs);
+    const { data, refetch, isLoading } =
+        useData<LogDataInfo[]>("/api/admin/logs");
 
     const search = (e: FormEvent) => {
         if (!criteria) {
             return;
         }
         e.preventDefault();
-        refetch(`/api/admin/logs?${criteria}=${query}`);
+        setIsSearching(true);
+        setPage(1);
+        refetch(`/api/admin/logs?${criteria}=${query}&p=1`);
     };
 
     return (
@@ -80,6 +88,7 @@ const Logs: PageWithLayout<
                     onClick={() => {
                         refetch(`/api/admin/logs`);
                         setQuery("");
+                        setPage(1);
                     }}
                     px={"8"}
                     w={{ base: "full", md: "max-content" }}
@@ -112,6 +121,45 @@ const Logs: PageWithLayout<
                     hasForm
                 />
             </Stack>
+            <Flex align={"center"} justify={"end"}>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        if (isSearching) {
+                            refetch(
+                                `/api/admin/logs?${criteria}=${query}&p=${
+                                    page - 1
+                                }`
+                            );
+                        } else {
+                            refetch(`/api/admin/logs?p=${page - 1}`);
+                        }
+                        setPage((p) => p - 1);
+                    }}
+                    disabled={page - 1 <= 0 || isLoading}
+                >
+                    <Box as={FaCaretLeft} color={"primary"} />
+                </Button>
+                <Text>{page}</Text>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        if (isSearching) {
+                            refetch(
+                                `/api/admin/logs?${criteria}=${query}&p=${
+                                    page + 1
+                                }`
+                            );
+                        } else {
+                            refetch(`/api/admin/logs?p=${page + 1}`);
+                        }
+                        setPage((p) => p + 1);
+                    }}
+                    disabled={isLoading || data?.length === 0}
+                >
+                    <Box as={FaCaretRight} color={"primary"} />
+                </Button>
+            </Flex>
             <TableContainer overflowY={"auto"}>
                 <Table>
                     <Thead
@@ -189,52 +237,10 @@ export type LogDataInfo = ILogSchema & {
     memberSchool?: string;
 };
 
-export const getServerSideProps: GetServerSideProps<{
-    logs?: LogDataInfo[];
-}> = AuthGetServerSideProps(
+export const getServerSideProps: GetServerSideProps = AuthGetServerSideProps(
     async (ctx: GetServerSidePropsContextWithUser) => {
-        await connectDB();
-        const user = await User.findOne({ authId: ctx.uid });
-        if (user) {
-            switch (user.accountType) {
-                case AccountType.CEAP_SUPER_ADMIN:
-                case AccountType.CEAP_ADMIN:
-                    const logs = await Log.find({})
-                        .populate("user", ["id", "displayName"])
-                        .limit(30);
-
-                    return {
-                        props: {
-                            logs: logs.map((log) => ({
-                                ...log.toJSON(),
-                                datePerformed: log.datePerformed.toString(),
-                                memberSchool:
-                                    log?.memberSchool?.toHexString() || "",
-                            })),
-                        },
-                    };
-
-                case AccountType.MS_ADMIN:
-                    const logData = await Log.find({
-                        memberSchool: user.memberSchool,
-                    })
-                        .populate("user", ["id", "displayName"])
-                        .limit(30);
-                    return {
-                        props: {
-                            logs: logData.map((log) => ({
-                                ...log.toJSON(),
-                                datePerformed: log.datePerformed.toString(),
-                                memberSchool:
-                                    log?.memberSchool?.toHexString() || "",
-                            })),
-                        },
-                    };
-            }
-        }
-
         return {
-            notFound: true,
+            props: {},
         };
     },
     [AccountType.CEAP_SUPER_ADMIN, AccountType.CEAP_ADMIN, AccountType.MS_ADMIN]
