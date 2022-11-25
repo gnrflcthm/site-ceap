@@ -1,7 +1,7 @@
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import { generateAuditReport } from "@util/reports";
 
-import { createReadStream } from "fs";
+import { createReadStream, rmSync } from "fs";
 import path from "path";
 
 export default authenticatedHandler().post(async (req, res) => {
@@ -17,10 +17,13 @@ export default authenticatedHandler().post(async (req, res) => {
             path.join(process.cwd(), "/temp", fileName)
         );
         file.pipe(res);
+        file.on("close", () => rmSync(path.join(process.cwd(), "/temp", fileName)))
+        file.on("error", () => rmSync(path.join(process.cwd(), "/temp", fileName)))
         res.setHeader("Content-Type", "application/pdf");
         res.statusMessage = fileName;
         res.status(200);
     } catch (err) {
+        console.log(err);
         res.statusMessage =
             err instanceof Error ? err.message : "Error in Generating Report";
         res.status(400);
