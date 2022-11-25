@@ -1,7 +1,7 @@
 import { connectDB, MemberSchool, User } from "@db/index";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import { AccountType } from "@util/Enums";
-import { Query } from "mongoose";
+import { SortOrder } from "mongoose";
 
 export default authenticatedHandler([
     AccountType.MS_ADMIN,
@@ -21,6 +21,25 @@ export default authenticatedHandler([
 
             if (Array.isArray(query)) {
                 query = query[0];
+            }
+
+            let page: number = 0;
+
+            if (req.query.p && !Array.isArray(req.query.p)) {
+                try {
+                    let temp = parseInt(req.query.p) - 1;
+                    page = temp < 0 ? 0 : temp;
+                } catch (err) {}
+            }
+
+            let sortKey: string = "_id";
+            let sortDir: string = "desc";
+
+            if (req.query.sortBy && !Array.isArray(req.query.sortBy)) {
+                sortKey = req.query.sortBy;
+                if (req.query.sortDir && !Array.isArray(req.query.sortDir)) {
+                    sortDir = req.query.sortDir;
+                }
             }
 
             await connectDB();
@@ -49,7 +68,10 @@ export default authenticatedHandler([
                             authId: {
                                 $ne: req.uid,
                             },
-                        });
+                        })
+                            .skip(30 * page)
+                            .limit(30)
+                            .sort({[sortKey]: sortDir as SortOrder});
                         break;
                     default:
                         users = await User.find({
@@ -61,7 +83,10 @@ export default authenticatedHandler([
                             authId: {
                                 $ne: req.uid,
                             },
-                        });
+                        })
+                            .skip(30 * page)
+                            .limit(30)
+                            .sort({[sortKey]: sortDir as SortOrder});
                 }
                 res.status(200).json(users);
             } else {
@@ -91,7 +116,11 @@ export default authenticatedHandler([
                             authId: {
                                 $ne: req.uid,
                             },
-                        }).populate("memberSchool");
+                        })
+                            .populate("memberSchool")
+                            .skip(30 * page)
+                            .limit(30)
+                            .sort({[sortKey]: sortDir as SortOrder});
                         break;
                     case "accountType":
                         users = await User.find({
@@ -99,7 +128,11 @@ export default authenticatedHandler([
                                 $ne: req.uid,
                             },
                             accountType: query,
-                        }).populate("memberSchool");
+                        })
+                            .populate("memberSchool")
+                            .skip(30 * page)
+                            .limit(30)
+                            .sort({[sortKey]: sortDir as SortOrder});
                         break;
                     case "school":
                         const ms = await MemberSchool.find({
@@ -116,7 +149,11 @@ export default authenticatedHandler([
                                 AccountType.CEAP_SUPER_ADMIN,
                                 AccountType.MS_ADMIN,
                             ],
-                        }).populate("memberSchool");
+                        })
+                            .populate("memberSchool")
+                            .skip(30 * page)
+                            .limit(30)
+                            .sort({[sortKey]: sortDir as SortOrder});
                         break;
                     default:
                         users = await User.find({
@@ -129,7 +166,11 @@ export default authenticatedHandler([
                                 AccountType.CEAP_SUPER_ADMIN,
                                 AccountType.MS_ADMIN,
                             ],
-                        }).populate("memberSchool");
+                        })
+                            .populate("memberSchool")
+                            .skip(30 * page)
+                            .limit(30)
+                            .sort({[sortKey]: sortDir as SortOrder});
                 }
 
                 res.status(200).json(users);

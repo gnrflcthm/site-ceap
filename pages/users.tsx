@@ -1,4 +1,4 @@
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, useContext, useState, useEffect } from "react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import AuthGetServerSideProps, {
@@ -21,6 +21,7 @@ import {
     useDisclosure,
     useToast,
     Select,
+    Text,
 } from "@chakra-ui/react";
 
 import { PageWithLayout } from "./_app";
@@ -34,7 +35,7 @@ import UserData from "@components/Accounts/UserData";
 import TabButton from "@components/Accounts/TabButton";
 
 import { useData } from "@util/hooks/useData";
-import { FaSearch } from "react-icons/fa";
+import { FaCaretLeft, FaCaretRight, FaSearch } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
 import axios from "axios";
@@ -56,6 +57,12 @@ const ManageAccounts: PageWithLayout<
 
     const [query, setQuery] = useState<string>("");
     const [criteria, setCriteria] = useState<string>("name");
+
+    const [page, setPage] = useState<number>(1);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+
+    const [sortKey, setSortKey] = useState<string>("lastName");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     const {
         isOpen: openEditUser,
@@ -102,9 +109,33 @@ const ManageAccounts: PageWithLayout<
 
     const searchUsers = (e: FormEvent) => {
         e.preventDefault();
+        setIsSearching(true);
+        setPage(1);
         setCurrent("none");
         refetch(`/api/admin/users?${criteria}=${query}`);
     };
+
+    const sortData = (key: string) => {
+        setPage(1);
+        if (sortKey === key) {
+            setSortDir((dir) =>
+                dir === "asc"
+                    ? "desc"
+                    : "asc"
+            );
+        } else {
+            setSortKey(key);
+        }
+        if (isSearching) {
+            refetch(
+                `/api/admin/users?${criteria}=${query}&p=${page}&sortBy=${sortKey}&sortDir=${sortDir}`
+            );
+        } else {
+            refetch(
+                `/api/member/${current}?p=${page}&sortBy=${sortKey}&sortDir=${sortDir}`
+            );
+        }
+    }
 
     return (
         <>
@@ -129,6 +160,9 @@ const ManageAccounts: PageWithLayout<
                                 onClick={() => {
                                     setCurrent("admin");
                                     refetch("/api/member/admin");
+                                    setPage(1);
+                                    setQuery("");
+                                    setIsSearching(false);
                                 }}
                                 isActive={current === "admin"}
                             >
@@ -138,6 +172,9 @@ const ManageAccounts: PageWithLayout<
                                 onClick={() => {
                                     setCurrent("users");
                                     refetch("/api/member/users");
+                                    setPage(1);
+                                    setQuery("");
+                                    setIsSearching(false);
                                 }}
                                 isActive={current === "users"}
                             >
@@ -200,6 +237,45 @@ const ManageAccounts: PageWithLayout<
                             </Tooltip>
                         </Flex>
                     </Flex>
+                    <Flex align={"center"} justify={"end"}>
+                        <Button
+                            variant={"transparent"}
+                            onClick={() => {
+                                if (isSearching) {
+                                    refetch(
+                                        `/api/admin/users?${criteria}=${query}&p=${page - 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                } else {
+                                    refetch(
+                                        `/api/member/${current}?p=${page - 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                }
+                                setPage((p) => p - 1);
+                            }}
+                            disabled={page - 1 <= 0 || isLoading}
+                        >
+                            <Box as={FaCaretLeft} color={"primary"} />
+                        </Button>
+                        <Text>{page}</Text>
+                        <Button
+                            variant={"transparent"}
+                            onClick={() => {
+                                if (isSearching) {
+                                    refetch(
+                                        `/api/admin/users?${criteria}=${query}&p=${page + 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                } else {
+                                    refetch(
+                                        `/api/member/${current}?p=${page + 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                }
+                                setPage((p) => p + 1);
+                            }}
+                            disabled={isLoading || (data && data?.length < 30)}
+                        >
+                            <Box as={FaCaretRight} color={"primary"} />
+                        </Button>
+                    </Flex>
                     <TableContainer maxH={"inherit"} overflowY={"auto"}>
                         <Table>
                             <Thead
@@ -212,6 +288,7 @@ const ManageAccounts: PageWithLayout<
                                         heading={"full name"}
                                         subheading={"email address"}
                                         sortable
+                                        onClick={() => sortData("lastName")}
                                     />
                                     <TableHeader heading={"mobile #"} />
                                     <TableHeader heading={"school id"} />

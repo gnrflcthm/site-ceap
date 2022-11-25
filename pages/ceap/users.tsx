@@ -22,6 +22,7 @@ import {
     useDisclosure,
     useToast,
     Select,
+    Text,
 } from "@chakra-ui/react";
 
 import { PageWithLayout } from "../_app";
@@ -34,7 +35,13 @@ import UserData from "@components/Accounts/UserData";
 import TabButton from "@components/Accounts/TabButton";
 
 import { useData } from "@util/hooks/useData";
-import { FaPlus, FaSearch, FaTimes } from "react-icons/fa";
+import {
+    FaCaretLeft,
+    FaCaretRight,
+    FaPlus,
+    FaSearch,
+    FaTimes,
+} from "react-icons/fa";
 import SearchBar from "@components/SearchBar";
 import AddAdminPopup from "@components/Accounts/AddAdminPopup";
 import { AnimatePresence, motion } from "framer-motion";
@@ -52,6 +59,12 @@ const CEAPUsers: PageWithLayout<
 
     const [query, setQuery] = useState<string>("");
     const [criteria, setCriteria] = useState<string>("name");
+
+    const [page, setPage] = useState<number>(1);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+
+    const [sortKey, setSortKey] = useState<string>("lastName");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     const {
         isOpen: openCreateAdmin,
@@ -72,7 +85,8 @@ const CEAPUsers: PageWithLayout<
     } = useDisclosure();
 
     const { user, loading } = useContext(AuthContext);
-    const { data, isLoading, refetch } = useData("", accounts);
+    const { data, isLoading, refetch } =
+        useData<IAdminInfo[]>("/api/member/ceap");
     const [currentUser, setCurrentUser] = useState<
         | (IUserSchema & {
               id: string;
@@ -104,9 +118,33 @@ const CEAPUsers: PageWithLayout<
 
     const searchUsers = (e: FormEvent) => {
         e.preventDefault();
+        setIsSearching(true);
+        setPage(1);
         setCurrent("none");
         refetch(`/api/admin/users?${criteria}=${query}`);
     };
+
+    const sortData = (key: string) => {
+        setPage(1);
+        if (sortKey === key) {
+            setSortDir((dir) =>
+                dir === "asc"
+                    ? "desc"
+                    : "asc"
+            );
+        } else {
+            setSortKey(key);
+        }
+        if (isSearching) {
+            refetch(
+                `/api/admin/users?${criteria}=${query}&p=${page}&sortBy=${key}&sortDir=${sortDir}`
+            );
+        } else {
+            refetch(
+                `/api/member/${current}?p=${page}&sortBy=${key}&sortDir=${sortDir}`
+            );
+        }
+    }
 
     return (
         <>
@@ -132,6 +170,9 @@ const CEAPUsers: PageWithLayout<
                                 onClick={() => {
                                     setCurrent("ceap");
                                     refetch("/api/member/ceap");
+                                    setPage(1);
+                                    setIsSearching(false);
+                                    setQuery("");
                                 }}
                                 isActive={current === "ceap"}
                             >
@@ -141,6 +182,9 @@ const CEAPUsers: PageWithLayout<
                                 onClick={() => {
                                     setCurrent("admin");
                                     refetch("/api/member/admin");
+                                    setPage(1);
+                                    setIsSearching(false);
+                                    setQuery("");
                                     closeCreateAdmin();
                                 }}
                                 isActive={current === "admin"}
@@ -198,7 +242,9 @@ const CEAPUsers: PageWithLayout<
                                         setQuery("");
                                     }}
                                 >
-                                    <option value="name" selected>Name</option>
+                                    <option value="name" selected>
+                                        Name
+                                    </option>
                                     <option value="mobileNumber">
                                         Mobile Number
                                     </option>
@@ -261,6 +307,53 @@ const CEAPUsers: PageWithLayout<
                             </Flex>
                         </Flex>
                     </Flex>
+                    <Flex align={"center"} justify={"end"}>
+                        <Button
+                            variant={"transparent"}
+                            onClick={() => {
+                                if (isSearching) {
+                                    refetch(
+                                        `/api/admin/users?${criteria}=${query}&p=${
+                                            page - 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                } else {
+                                    refetch(
+                                        `/api/member/${current}?p=${
+                                            page - 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                }
+                                setPage((p) => p - 1);
+                            }}
+                            disabled={page - 1 <= 0 || isLoading}
+                        >
+                            <Box as={FaCaretLeft} color={"primary"} />
+                        </Button>
+                        <Text>{page}</Text>
+                        <Button
+                            variant={"transparent"}
+                            onClick={() => {
+                                if (isSearching) {
+                                    refetch(
+                                        `/api/admin/users?${criteria}=${query}&p=${
+                                            page + 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                } else {
+                                    refetch(
+                                        `/api/member/${current}?p=${
+                                            page + 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                }
+                                setPage((p) => p + 1);
+                            }}
+                            disabled={isLoading || (data && data?.length < 30)}
+                        >
+                            <Box as={FaCaretRight} color={"primary"} />
+                        </Button>
+                    </Flex>
                     <TableContainer maxH={"inherit"} overflowY={"auto"}>
                         <Table>
                             <Thead
@@ -273,9 +366,10 @@ const CEAPUsers: PageWithLayout<
                                         heading={"full name"}
                                         subheading={"email address"}
                                         sortable
+                                        onClick={() => sortData("lastName")}
                                     />
                                     <TableHeader heading={"mobile #"} />
-                                    <TableHeader heading={"account type"} />
+                                    <TableHeader heading={"account type"} sortable onClick={() => sortData("accountType")} />
                                     <TableHeader heading={"member school"} />
                                     <TableHeader heading="" />
                                 </Tr>
@@ -398,48 +492,60 @@ const CEAPUsers: PageWithLayout<
     );
 };
 
-export const getServerSideProps: GetServerSideProps<{
-    accounts?: (IUserSchema & {
-        id: string;
-        memberSchool?: { id: string; name: string };
-    })[];
-}> = AuthGetServerSideProps(
-    async ({ uid }: GetServerSidePropsContextWithUser) => {
-        await connectDB();
+export type IAdminInfo = IUserSchema & {
+    id: string;
+    memberSchool?: { id: string; name: string };
+};
 
-        const accounts = await User.find(
-            {
-                accountType: [
-                    AccountType.CEAP_ADMIN,
-                    AccountType.CEAP_SUPER_ADMIN,
-                ],
-                authId: {
-                    $ne: uid,
-                },
-            },
-            {},
-            {
-                fields: [
-                    "id",
-                    "firstName",
-                    "lastName",
-                    "middleName",
-                    "email",
-                    "mobileNumber",
-                    "accountType",
-                ],
-            }
-        )
-            .populate("memberSchool", ["id", "name"])
-            .exec();
+export const getServerSideProps: GetServerSideProps =
+    // <
+    // {
+    //     accounts?: (IUserSchema & {
+    //         id: string;
+    //         memberSchool?: { id: string; name: string };
+    //     })[];
+    // }
+    // >
+    AuthGetServerSideProps(
+        async ({ uid }: GetServerSidePropsContextWithUser) => {
+            // await connectDB();
 
-        return {
-            props: {
-                accounts: accounts.map((account) => account.toJSON()),
-            },
-        };
-    }
-);
+            // const accounts = await User.find(
+            //     {
+            //         accountType: [
+            //             AccountType.CEAP_ADMIN,
+            //             AccountType.CEAP_SUPER_ADMIN,
+            //         ],
+            //         authId: {
+            //             $ne: uid,
+            //         },
+            //     },
+            //     {},
+            //     {
+            //         fields: [
+            //             "id",
+            //             "firstName",
+            //             "lastName",
+            //             "middleName",
+            //             "email",
+            //             "mobileNumber",
+            //             "accountType",
+            //         ],
+            //     }
+            // )
+            //     .populate("memberSchool", ["id", "name"])
+            //     .exec();
+
+            // return {
+            //     props: {
+            //         accounts: accounts.map((account) => account.toJSON()),
+            //     },
+            // };
+            return {
+                props: {},
+            };
+        }
+    );
 
 CEAPUsers.PageLayout = Layout;
 

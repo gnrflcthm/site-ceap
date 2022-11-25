@@ -155,7 +155,7 @@ const Logs: PageWithLayout<
                         }
                         setPage((p) => p + 1);
                     }}
-                    disabled={isLoading || data?.length === 0}
+                    disabled={isLoading || (data && data?.length < 30)}
                 >
                     <Box as={FaCaretRight} color={"primary"} />
                 </Button>

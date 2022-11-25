@@ -8,15 +8,15 @@ const TableHeader: FC<{
     heading: string;
     subheading?: string;
     sortable?: boolean;
-    onClick?: () => {};
-}> = ({ heading, subheading, sortable, onClick }) => {
+    onClick?: Function;
+}> = ({ heading, subheading, sortable, onClick = () => {} }) => {
     const headingFontSize = { base: "md", lg: "lg" };
     const textFontSize = { base: "sm", md: "md" };
     return (
         <Th
             py={"2"}
             px={"4"}
-            onClick={onClick}
+            onClick={() => onClick()}
             cursor={sortable ? "pointer" : "initial"}
             borderRight={"3px solid"}
             borderRightColor={"white"}
