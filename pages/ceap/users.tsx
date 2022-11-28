@@ -58,7 +58,7 @@ const CEAPUsers: PageWithLayout<
     const [current, setCurrent] = useState<"ceap" | "admin" | "none">("ceap");
 
     const [query, setQuery] = useState<string>("");
-    const [criteria, setCriteria] = useState<string>("name");
+    // const [criteria, setCriteria] = useState<string>("name");
 
     const [page, setPage] = useState<number>(1);
     const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -121,30 +121,27 @@ const CEAPUsers: PageWithLayout<
         setIsSearching(true);
         setPage(1);
         setCurrent("none");
-        refetch(`/api/admin/users?${criteria}=${query}`);
+        refetch(`/api/admin/users?q=${query}`);
     };
 
     const sortData = (key: string) => {
         setPage(1);
-        if (sortKey === key) {
-            setSortDir((dir) =>
-                dir === "asc"
-                    ? "desc"
-                    : "asc"
-            );
-        } else {
-            setSortKey(key);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
         }
+        setSortKey(key);
         if (isSearching) {
             refetch(
-                `/api/admin/users?${criteria}=${query}&p=${page}&sortBy=${key}&sortDir=${sortDir}`
+                `/api/admin/users?q=${query}&p=${page}&sortBy=${key}&sortDir=${currentDir}`
             );
         } else {
             refetch(
-                `/api/member/${current}?p=${page}&sortBy=${key}&sortDir=${sortDir}`
+                `/api/member/${current}?p=${page}&sortBy=${key}&sortDir=${currentDir}`
             );
         }
-    }
+    };
 
     return (
         <>
@@ -235,53 +232,14 @@ const CEAPUsers: PageWithLayout<
                                 onSubmit={searchUsers}
                                 justify={{ base: "center", md: "flex-end" }}
                             >
-                                <Select
-                                    required
-                                    onChange={(e) => {
-                                        setCriteria(e.target.value);
-                                        setQuery("");
-                                    }}
-                                >
-                                    <option value="name" selected>
-                                        Name
-                                    </option>
-                                    <option value="mobileNumber">
-                                        Mobile Number
-                                    </option>
-                                    <option value="email">Email Address</option>
-                                    <option value="accountType">
-                                        Account Type
-                                    </option>
-                                    <option value="school">School</option>
-                                </Select>
-                                {criteria === "accountType" ? (
-                                    <Select
-                                        onChange={(e) =>
-                                            setQuery(e.target.value)
-                                        }
-                                    >
-                                        <option value={AccountType.CEAP_ADMIN}>
-                                            CEAP Admin
-                                        </option>
-                                        <option
-                                            value={AccountType.CEAP_SUPER_ADMIN}
-                                        >
-                                            CEAP Super Admin
-                                        </option>
-                                        <option value={AccountType.MS_ADMIN}>
-                                            Member School Admin
-                                        </option>
-                                    </Select>
-                                ) : (
-                                    <SearchBar
-                                        query={query}
-                                        setQuery={setQuery}
-                                        placeholder={"Search..."}
-                                        inputColor={"neutralizerDark"}
-                                        hasForm={true}
-                                        showIcon={false}
-                                    />
-                                )}
+                                <SearchBar
+                                    query={query}
+                                    setQuery={setQuery}
+                                    placeholder={"Search..."}
+                                    inputColor={"neutralizerDark"}
+                                    hasForm={true}
+                                    showIcon={false}
+                                />
                                 <Tooltip
                                     label={"Search"}
                                     placement={"bottom"}
@@ -313,7 +271,7 @@ const CEAPUsers: PageWithLayout<
                             onClick={() => {
                                 if (isSearching) {
                                     refetch(
-                                        `/api/admin/users?${criteria}=${query}&p=${
+                                        `/api/admin/users?q=${query}&p=${
                                             page - 1
                                         }&sortBy=${sortKey}&sortDir=${sortDir}`
                                     );
@@ -336,7 +294,7 @@ const CEAPUsers: PageWithLayout<
                             onClick={() => {
                                 if (isSearching) {
                                     refetch(
-                                        `/api/admin/users?${criteria}=${query}&p=${
+                                        `/api/admin/users?q=${query}&p=${
                                             page + 1
                                         }&sortBy=${sortKey}&sortDir=${sortDir}`
                                     );
@@ -368,14 +326,100 @@ const CEAPUsers: PageWithLayout<
                                         sortable
                                         onClick={() => sortData("lastName")}
                                     />
-                                    <TableHeader heading={"mobile #"} />
-                                    <TableHeader heading={"account type"} sortable onClick={() => sortData("accountType")} />
-                                    <TableHeader heading={"member school"} />
+                                    <TableHeader
+                                        heading={"mobile #"}
+                                        sortable
+                                        onClick={() => sortData("mobileNumber")}
+                                    />
+                                    <TableHeader
+                                        heading={"account type"}
+                                        sortable
+                                        onClick={() => sortData("accountType")}
+                                    />
+                                    <TableHeader
+                                        heading={"member school"}
+                                        sortable
+                                        onClick={() =>
+                                            sortData("memberSchool.name")
+                                        }
+                                    />
                                     <TableHeader heading="" />
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {data?.map((account) => (
+                                {(() => {
+                                    if (data) {
+                                        if (data.length === 0) {
+                                            return (
+                                                <Tr>
+                                                    <Td colSpan={5}>
+                                                        <Center
+                                                            h={"full"}
+                                                            w={"full"}
+                                                        >
+                                                            <Text>
+                                                                No Users Found
+                                                            </Text>
+                                                        </Center>
+                                                    </Td>
+                                                </Tr>
+                                            );
+                                        }
+                                        return data?.map((account) => (
+                                            <UserData
+                                                user={account}
+                                                key={account.id}
+                                                onDelete={(id: string) => {
+                                                    showDeleteConfirmation();
+                                                    let currentUser = data.find(
+                                                        (u) => u.id === id
+                                                    );
+                                                    setCurrentUser(currentUser);
+                                                }}
+                                                showEdit={(id: string) => {
+                                                    let targetUser = data.find(
+                                                        (u) => u.id === id
+                                                    );
+                                                    setCurrentUser(targetUser);
+                                                    showEditUser();
+                                                }}
+                                            />
+                                        ));
+                                    }
+                                    if (isLoading) {
+                                        return (
+                                            <Tr>
+                                                <Td colSpan={5}>
+                                                    <Center
+                                                        h={"full"}
+                                                        w={"full"}
+                                                    >
+                                                        <CircularProgress
+                                                            isIndeterminate
+                                                            color={"secondary"}
+                                                        />
+                                                    </Center>
+                                                </Td>
+                                            </Tr>
+                                        );
+                                    } else {
+                                        return (
+                                            <Tr>
+                                                <Td colSpan={5}>
+                                                    <Center
+                                                        h={"full"}
+                                                        w={"full"}
+                                                    >
+                                                        <Text>
+                                                            No Users Found
+                                                        </Text>
+                                                    </Center>
+                                                </Td>
+                                            </Tr>
+                                        );
+                                    }
+                                })()}
+                                {/* {data?.map((account) => (
                                     <UserData
                                         user={account}
                                         key={account.id}
@@ -394,8 +438,8 @@ const CEAPUsers: PageWithLayout<
                                             showEditUser();
                                         }}
                                     />
-                                ))}
-                                {isLoading && (
+                                ))} */}
+                                {/* {isLoading && (
                                     <Tr>
                                         <Td colSpan={5}>
                                             <Center h={"full"} w={"full"}>
@@ -406,7 +450,7 @@ const CEAPUsers: PageWithLayout<
                                             </Center>
                                         </Td>
                                     </Tr>
-                                )}
+                                )} */}
                             </Tbody>
                         </Table>
                     </TableContainer>

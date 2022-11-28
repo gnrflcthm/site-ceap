@@ -56,7 +56,7 @@ const ManageAccounts: PageWithLayout<
     const { data, isLoading, refetch } = useData("", accounts);
 
     const [query, setQuery] = useState<string>("");
-    const [criteria, setCriteria] = useState<string>("name");
+    // const [criteria, setCriteria] = useState<string>("name");
 
     const [page, setPage] = useState<number>(1);
     const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -112,30 +112,26 @@ const ManageAccounts: PageWithLayout<
         setIsSearching(true);
         setPage(1);
         setCurrent("none");
-        refetch(`/api/admin/users?${criteria}=${query}`);
+        refetch(`/api/admin/users?q=${query}`);
     };
 
     const sortData = (key: string) => {
         setPage(1);
         if (sortKey === key) {
-            setSortDir((dir) =>
-                dir === "asc"
-                    ? "desc"
-                    : "asc"
-            );
+            setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
         } else {
             setSortKey(key);
         }
         if (isSearching) {
             refetch(
-                `/api/admin/users?${criteria}=${query}&p=${page}&sortBy=${sortKey}&sortDir=${sortDir}`
+                `/api/admin/users?q=${query}&p=${page}&sortBy=${sortKey}&sortDir=${sortDir}`
             );
         } else {
             refetch(
                 `/api/member/${current}?p=${page}&sortBy=${sortKey}&sortDir=${sortDir}`
             );
         }
-    }
+    };
 
     return (
         <>
@@ -188,22 +184,6 @@ const ManageAccounts: PageWithLayout<
                             px={"2"}
                             justify={{ base: "center", md: "flex-end" }}
                         >
-                            <Select
-                                required
-                                onChange={(e) => {
-                                    setCriteria(e.target.value);
-                                    setQuery("");
-                                }}
-                            >
-                                <option value="name" selected>
-                                    Name
-                                </option>
-                                <option value="mobileNumber">
-                                    Mobile Number
-                                </option>
-                                <option value="email">Email Address</option>
-                                <option value="schoolId">School ID</option>
-                            </Select>
                             <SearchBar
                                 query={query}
                                 setQuery={setQuery}
@@ -243,11 +223,15 @@ const ManageAccounts: PageWithLayout<
                             onClick={() => {
                                 if (isSearching) {
                                     refetch(
-                                        `/api/admin/users?${criteria}=${query}&p=${page - 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                        `/api/admin/users?q=${query}&p=${
+                                            page - 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
                                     );
                                 } else {
                                     refetch(
-                                        `/api/member/${current}?p=${page - 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                        `/api/member/${current}?p=${
+                                            page - 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
                                     );
                                 }
                                 setPage((p) => p - 1);
@@ -262,11 +246,15 @@ const ManageAccounts: PageWithLayout<
                             onClick={() => {
                                 if (isSearching) {
                                     refetch(
-                                        `/api/admin/users?${criteria}=${query}&p=${page + 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                        `/api/admin/users?q=${query}&p=${
+                                            page + 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
                                     );
                                 } else {
                                     refetch(
-                                        `/api/member/${current}?p=${page + 1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                        `/api/member/${current}?p=${
+                                            page + 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
                                     );
                                 }
                                 setPage((p) => p + 1);
@@ -290,40 +278,59 @@ const ManageAccounts: PageWithLayout<
                                         sortable
                                         onClick={() => sortData("lastName")}
                                     />
-                                    <TableHeader heading={"mobile #"} />
-                                    <TableHeader heading={"school id"} />
+                                    <TableHeader
+                                        heading={"mobile #"}
+                                        sortable
+                                        onClick={() => sortData("mobileNumber")}
+                                    />
+                                    <TableHeader
+                                        heading={"school id"}
+                                        sortable
+                                        onClick={() => sortData("schoolId")}
+                                    />
                                     <TableHeader heading="" />
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {data?.map((account) => (
-                                    <UserData
-                                        user={account}
-                                        key={account.id}
-                                        onDelete={(id: string) => {
-                                            showDeleteConfirmation();
-                                            let currentUser = data.find(
-                                                (u) => u.id === id
-                                            );
-                                            setCurrentUser(currentUser);
-                                        }}
-                                        showEdit={(id: string) =>
-                                            showEditModal(id)
-                                        }
-                                    />
-                                ))}
-                                {isLoading && (
-                                    <Tr>
-                                        <Td colSpan={5}>
-                                            <Center h={"full"} w={"full"}>
-                                                <CircularProgress
-                                                    isIndeterminate
-                                                    color={"secondary"}
-                                                />
-                                            </Center>
-                                        </Td>
-                                    </Tr>
-                                )}
+                                {(() => {
+                                    if (data && data.length > 0) {
+                                        return data?.map((account) => (
+                                            <UserData
+                                                user={account}
+                                                key={account.id}
+                                                onDelete={(id: string) => {
+                                                    showDeleteConfirmation();
+                                                    let currentUser = data.find(
+                                                        (u) => u.id === id
+                                                    );
+                                                    setCurrentUser(currentUser);
+                                                }}
+                                                showEdit={(id: string) =>
+                                                    showEditModal(id)
+                                                }
+                                            />
+                                        ));
+                                    }
+
+                                    return (
+                                        <Tr>
+                                            <Td colSpan={5}>
+                                                <Center h={"full"} w={"full"}>
+                                                    {isLoading ? (
+                                                        <CircularProgress
+                                                            isIndeterminate
+                                                            color={"secondary"}
+                                                        />
+                                                    ) : (
+                                                        <Text>
+                                                            No Users Found
+                                                        </Text>
+                                                    )}
+                                                </Center>
+                                            </Td>
+                                        </Tr>
+                                    );
+                                })()}
                             </Tbody>
                         </Table>
                     </TableContainer>

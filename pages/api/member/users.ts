@@ -41,7 +41,6 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).get(
                     .skip(page * 30)
                     .limit(30)
                     .sort({ [sortKey]: sortDir as SortOrder });
-
                 res.status(200).json(accounts);
             }
         } catch (error) {
