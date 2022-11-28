@@ -1,6 +1,6 @@
 import { PageWithLayout } from "./_app";
 import Layout from "@components/Layout";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { GetServerSideProps } from "next";
 import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
@@ -13,7 +13,6 @@ import {
     Center,
     CircularProgress,
     Flex,
-    Select,
     Stack,
     Table,
     TableContainer,
@@ -34,7 +33,6 @@ import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
 import SearchBar from "@components/SearchBar";
 import { FormEvent, useState } from "react";
 import { useData } from "@util/hooks/useData";
-import Link from "next/link";
 
 const Logs: PageWithLayout = () => {
     const {
@@ -44,7 +42,6 @@ const Logs: PageWithLayout = () => {
     } = useDisclosure();
 
     const [query, setQuery] = useState<string>("");
-    const [criteria, setCriteria] = useState<string>("name");
 
     const [page, setPage] = useState<number>(1);
     const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -57,13 +54,10 @@ const Logs: PageWithLayout = () => {
     );
 
     const search = (e: FormEvent) => {
-        if (!criteria) {
-            return;
-        }
         e.preventDefault();
         setIsSearching(true);
         setPage(1);
-        refetch(`/api/admin/logs?${criteria}=${query}&p=1`);
+        refetch(`/api/admin/logs?q=${query}&p=1`);
     };
 
     const sortData = (key: string) => {
@@ -75,10 +69,9 @@ const Logs: PageWithLayout = () => {
         }
         setSortKey(key);
 
-        console.log(currentDir);
         if (isSearching) {
             refetch(
-                `/api/admin/logs?${criteria}=${query}&p=${1}&sortBy=${key}&sortDir=${currentDir}`
+                `/api/admin/logs?q=${query}&p=${1}&sortBy=${key}&sortDir=${currentDir}`
             );
         } else {
             refetch(
@@ -126,20 +119,6 @@ const Logs: PageWithLayout = () => {
                     </Center>
                     <Text color={"inherit"}>Refresh</Text>
                 </Button>
-                <Select
-                    w={{ base: "full", md: "30%" }}
-                    onChange={(e) => {
-                        setCriteria(e.target.value);
-                        setQuery("");
-                    }}
-                    required
-                >
-                    <option value={"name"} selected>
-                        User's Name
-                    </option>
-                    <option value={"action"}>Action</option>
-                    <option value={"details"}>Details</option>
-                </Select>
                 <SearchBar
                     query={query}
                     setQuery={setQuery}
@@ -155,7 +134,7 @@ const Logs: PageWithLayout = () => {
                     onClick={() => {
                         if (isSearching) {
                             refetch(
-                                `/api/admin/logs?${criteria}=${query}&p=${
+                                `/api/admin/logs?$q=${query}&p=${
                                     page - 1
                                 }&sortBy=${sortKey}&sortDir=${sortDir}`
                             );
@@ -174,7 +153,7 @@ const Logs: PageWithLayout = () => {
                     onClick={() => {
                         if (isSearching) {
                             refetch(
-                                `/api/admin/logs?${criteria}=${query}&p=${
+                                `/api/admin/logs?q=${query}&p=${
                                     page + 1
                                 }&sortBy=${sortKey}&sortDir=${sortDir}`
                             );

@@ -30,15 +30,18 @@ export default authenticatedHandler([
                 sortDir = req.query.sortDir;
             }
         }
-        const criteria = Object.keys(req.query)[0];
 
-        let query = req.query[criteria];
+        let query: string | undefined = undefined;
+
+        if (req.query.q && !Array.isArray(req.query.q)) {
+            query = req.query.q;
+        }
+
+        query = query && query.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 
         if (Array.isArray(query)) {
             query = query[0];
         }
-
-        let logs: (ILogSchema & { user?: any })[] = [];
 
         const roles: AccountType[] = [AccountType.MS_USER];
 
@@ -51,7 +54,9 @@ export default authenticatedHandler([
                 roles.push(AccountType.MS_ADMIN);
         }
 
-        logs = await Log.aggregate([
+        const fields = ["user.displayName", "action", "details"];
+        
+        const logs = await Log.aggregate([
             {
                 $lookup: {
                     from: "User",
@@ -69,20 +74,15 @@ export default authenticatedHandler([
             },
             {
                 $match: {
-                    ...(["name", "action", "details"].includes(criteria)
-                        ? criteria === "name"
-                            ? {
-                                  "user.displayName": {
+                    ...(query
+                        ? {
+                              $or: fields.map((field) => ({
+                                  [field]: {
                                       $regex: `.*${query}.*`,
                                       $options: "i",
                                   },
-                              }
-                            : {
-                                  [criteria]: {
-                                      $regex: `.*${query}.*`,
-                                      $options: "i",
-                                  },
-                              }
+                              })),
+                          }
                         : {}),
                     ...(!roles.includes(AccountType.CEAP_ADMIN)
                         ? {
