@@ -1,8 +1,6 @@
 import {
     Tr,
     Td,
-    VStack,
-    Heading,
     Text,
     Button,
     useDisclosure,
@@ -53,7 +51,7 @@ const LogData: FC<{
             <AnimatePresence>
                 {isOpen && (
                     <UserInfoModal
-                        userId={log.user.id}
+                        userId={log.user._id}
                         onDismiss={() => onClose()}
                     />
                 )}

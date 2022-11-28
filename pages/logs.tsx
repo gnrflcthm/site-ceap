@@ -25,7 +25,7 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import TableHeader from "@components/TableHeader";
-import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
+import { ILogSchema, IUserSchema } from "@db/index";
 import LogData from "@components/Logs/LogData";
 import { FaFileAlt, FaSync, FaCaretLeft, FaCaretRight } from "react-icons/fa";
 
@@ -35,11 +35,8 @@ import SearchBar from "@components/SearchBar";
 import { FormEvent, useState } from "react";
 import { useData } from "@util/hooks/useData";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
-const Logs: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ logs, page: currentPage }) => {
+const Logs: PageWithLayout = () => {
     const {
         isOpen: showReports,
         onOpen: openReports,
@@ -48,11 +45,16 @@ const Logs: PageWithLayout<
 
     const [query, setQuery] = useState<string>("");
     const [criteria, setCriteria] = useState<string>("name");
-    const [page, setPage] = useState<number>(currentPage || 0);
+
+    const [page, setPage] = useState<number>(1);
     const [isSearching, setIsSearching] = useState<boolean>(false);
 
-    const { data, refetch, isLoading } =
-        useData<LogDataInfo[]>("/api/admin/logs");
+    const [sortKey, setSortKey] = useState<string>("datePerformed");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+    const { data, refetch, isLoading } = useData<LogDataInfo[]>(
+        "/api/admin/logs?p=1&sortBy=datePerformed&sortDir=desc"
+    );
 
     const search = (e: FormEvent) => {
         if (!criteria) {
@@ -62,6 +64,27 @@ const Logs: PageWithLayout<
         setIsSearching(true);
         setPage(1);
         refetch(`/api/admin/logs?${criteria}=${query}&p=1`);
+    };
+
+    const sortData = (key: string) => {
+        setPage(1);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
+        }
+        setSortKey(key);
+
+        console.log(currentDir);
+        if (isSearching) {
+            refetch(
+                `/api/admin/logs?${criteria}=${query}&p=${1}&sortBy=${key}&sortDir=${currentDir}`
+            );
+        } else {
+            refetch(
+                `/api/admin/logs?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+            );
+        }
     };
 
     return (
@@ -86,8 +109,13 @@ const Logs: PageWithLayout<
             >
                 <Button
                     onClick={() => {
-                        refetch(`/api/admin/logs`);
+                        refetch(
+                            `/api/admin/logs?p=1&sortBy=datePerformed&sortDir=desc`
+                        );
                         setQuery("");
+                        setIsSearching(false);
+                        setSortDir("desc");
+                        setSortKey("datePerformed");
                         setPage(1);
                     }}
                     px={"8"}
@@ -129,10 +157,10 @@ const Logs: PageWithLayout<
                             refetch(
                                 `/api/admin/logs?${criteria}=${query}&p=${
                                     page - 1
-                                }`
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
                             );
                         } else {
-                            refetch(`/api/admin/logs?p=${page - 1}`);
+                            refetch(`/api/admin/logs?p=${page - 1}&sortBy=${sortKey}&sortDir=${sortDir}`);
                         }
                         setPage((p) => p - 1);
                     }}
@@ -148,10 +176,10 @@ const Logs: PageWithLayout<
                             refetch(
                                 `/api/admin/logs?${criteria}=${query}&p=${
                                     page + 1
-                                }`
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
                             );
                         } else {
-                            refetch(`/api/admin/logs?p=${page + 1}`);
+                            refetch(`/api/admin/logs?p=${page + 1}&sortBy=${sortKey}&sortDir=${sortDir}`);
                         }
                         setPage((p) => p + 1);
                     }}
@@ -173,10 +201,26 @@ const Logs: PageWithLayout<
                         }}
                     >
                         <Tr>
-                            <TableHeader heading={"Date Performed"} />
-                            <TableHeader heading={"User"} />
-                            <TableHeader heading={"Action"} />
-                            <TableHeader heading={"Details"} />
+                            <TableHeader
+                                heading={"Date Performed"}
+                                sortable
+                                onClick={() => sortData("datePerformed")}
+                            />
+                            <TableHeader
+                                heading={"User"}
+                                sortable
+                                onClick={() => sortData("user.displayName")}
+                            />
+                            <TableHeader
+                                heading={"Action"}
+                                sortable
+                                onClick={() => sortData("action")}
+                            />
+                            <TableHeader
+                                heading={"Details"}
+                                sortable
+                                onClick={() => sortData("details")}
+                            />
                         </Tr>
                     </Thead>
                     <Tbody>

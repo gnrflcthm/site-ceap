@@ -6,8 +6,9 @@ import { VStack, Text, Center, CircularProgress } from "@chakra-ui/react";
 import { useData } from "@util/hooks/useData";
 import { IUserSchema } from "@db/models";
 import { getAccountType } from "@util/functions";
+import { ObjectId } from "mongodb";
 
-const UserInfoModal: FC<{ userId: string; onDismiss: Function }> = ({
+const UserInfoModal: FC<{ userId: string | ObjectId; onDismiss: Function }> = ({
     userId,
     onDismiss,
 }) => {
