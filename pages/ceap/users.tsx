@@ -2,9 +2,7 @@ import { FormEvent, useContext, useState } from "react";
 
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
-import AuthGetServerSideProps, {
-    GetServerSidePropsContextWithUser,
-} from "@util/api/authGSSP";
+import AuthGetServerSideProps from "@util/api/authGSSP";
 
 import {
     CircularProgress,
@@ -419,38 +417,6 @@ const CEAPUsers: PageWithLayout<
                                         );
                                     }
                                 })()}
-                                {/* {data?.map((account) => (
-                                    <UserData
-                                        user={account}
-                                        key={account.id}
-                                        onDelete={(id: string) => {
-                                            showDeleteConfirmation();
-                                            let currentUser = data.find(
-                                                (u) => u.id === id
-                                            );
-                                            setCurrentUser(currentUser);
-                                        }}
-                                        showEdit={(id: string) => {
-                                            let targetUser = data.find(
-                                                (u) => u.id === id
-                                            );
-                                            setCurrentUser(targetUser);
-                                            showEditUser();
-                                        }}
-                                    />
-                                ))} */}
-                                {/* {isLoading && (
-                                    <Tr>
-                                        <Td colSpan={5}>
-                                            <Center h={"full"} w={"full"}>
-                                                <CircularProgress
-                                                    isIndeterminate
-                                                    color={"secondary"}
-                                                />
-                                            </Center>
-                                        </Td>
-                                    </Tr>
-                                )} */}
                             </Tbody>
                         </Table>
                     </TableContainer>
@@ -542,54 +508,11 @@ export type IAdminInfo = IUserSchema & {
 };
 
 export const getServerSideProps: GetServerSideProps =
-    // <
-    // {
-    //     accounts?: (IUserSchema & {
-    //         id: string;
-    //         memberSchool?: { id: string; name: string };
-    //     })[];
-    // }
-    // >
-    AuthGetServerSideProps(
-        async ({ uid }: GetServerSidePropsContextWithUser) => {
-            // await connectDB();
-
-            // const accounts = await User.find(
-            //     {
-            //         accountType: [
-            //             AccountType.CEAP_ADMIN,
-            //             AccountType.CEAP_SUPER_ADMIN,
-            //         ],
-            //         authId: {
-            //             $ne: uid,
-            //         },
-            //     },
-            //     {},
-            //     {
-            //         fields: [
-            //             "id",
-            //             "firstName",
-            //             "lastName",
-            //             "middleName",
-            //             "email",
-            //             "mobileNumber",
-            //             "accountType",
-            //         ],
-            //     }
-            // )
-            //     .populate("memberSchool", ["id", "name"])
-            //     .exec();
-
-            // return {
-            //     props: {
-            //         accounts: accounts.map((account) => account.toJSON()),
-            //     },
-            // };
-            return {
-                props: {},
-            };
-        }
-    );
+    AuthGetServerSideProps(async () => {
+        return {
+            props: {},
+        };
+    }, [AccountType.CEAP_SUPER_ADMIN]);
 
 CEAPUsers.PageLayout = Layout;
 
