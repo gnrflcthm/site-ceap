@@ -34,14 +34,7 @@ import TopPanel from "@components/TopPanel";
 
 import { useData } from "@util/hooks/useData";
 
-import {
-    connectDB,
-    IUserRegistrationSchema,
-    IMSAdminRegistrationSchema,
-    User,
-    MSAdminRegistration,
-    UserRegistration,
-} from "@db/index";
+import { IUserRegistrationSchema, IMSAdminRegistrationSchema } from "@db/index";
 
 const AdminRegistrationData = dynamic(
     () => import("@components/Registrations/AdminRegistrationData")
@@ -54,18 +47,36 @@ import { AccountType } from "@util/Enums";
 
 const UserRegistrations: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ registrations }) => {
+> = () => {
     const { user, loading } = useContext(AuthContext);
     const [page, setPage] = useState<number>(1);
     const { data, isLoading, error, refetch } = useData<IRegistrationInfo[]>(
         `/api/member/registrations?p=${page}`
     );
 
+    const [sortKey, setSortKey] = useState<string>("datePerformed");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+    const sortData = (key: string) => {
+        setPage(1);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
+        }
+        setSortKey(key);
+
+        refetch(
+            `/api/member/registrations?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+        );
+    };
+
     return (
         <>
             <Head>
                 <title>Registrations</title>
             </Head>
+
             <TopPanel
                 title={"User Registrations"}
                 actionIcon={FaSync}
@@ -107,13 +118,22 @@ const UserRegistrations: PageWithLayout<
                     <Table>
                         <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
                             <Tr>
-                                <TableHeader heading={"date registered"} />
+                                <TableHeader
+                                    heading={"date registered"}
+                                    sortable
+                                    onClick={() => sortData("registeredAt")}
+                                />
                                 <TableHeader
                                     heading={"full name"}
                                     subheading={"email address"}
                                     sortable
+                                    onClick={() => sortData("lastName")}
                                 />
-                                <TableHeader heading={"mobile #"} />
+                                <TableHeader
+                                    heading={"mobile #"}
+                                    sortable
+                                    onClick={() => sortData("mobileNumber")}
+                                />
                                 <TableHeader
                                     heading={
                                         [
@@ -123,6 +143,19 @@ const UserRegistrations: PageWithLayout<
                                             ? "member school"
                                             : "school id"
                                     }
+                                    sortable
+                                    onClick={() => {
+                                        if (
+                                            [
+                                                "CEAP_ADMIN",
+                                                "CEAP_SUPER_ADMIN",
+                                            ].includes(user.role)
+                                        ) {
+                                            sortData("memberSchool.name");
+                                        } else {
+                                            sortData("schoolId");
+                                        }
+                                    }}
                                 />
                                 <TableHeader heading={""} />
                             </Tr>
@@ -192,77 +225,16 @@ export type IRegistrationInfo =
           memberSchool: { id: string; name: string };
       });
 
-export const getServerSideProps: GetServerSideProps<{
-    registrations?:
-        | (IUserRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              birthday?: string;
-          })[]
-        | (IMSAdminRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              memberSchool: { id: string; name: string };
-          })[];
-}> = AuthGetServerSideProps(
-    async ({ uid }: GetServerSidePropsContextWithUser) => {
-        // await connectDB();
-
-        // const user = await User.findOne({ authId: uid });
-
-        // if (!user) {
-        //     return {
-        //         redirect: {
-        //             destination: "/",
-        //             statusCode: 301,
-        //         },
-        //     };
-        // }
-
-        // let registrations = [];
-
-        // switch (user.accountType) {
-        //     case AccountType.CEAP_ADMIN:
-        //     case AccountType.CEAP_SUPER_ADMIN:
-        //         registrations = await MSAdminRegistration.find()
-        //             .populate("memberSchool", ["id", "name"])
-        //             .exec();
-
-        //         return {
-        //             props: {
-        //                 registrations: registrations.map((reg) => ({
-        //                     ...reg.toJSON(),
-        //                     registeredAt: reg.registeredAt.toDateString(),
-        //                 })),
-        //             },
-        //         };
-        //     case AccountType.MS_ADMIN:
-        //         registrations = await UserRegistration.find({
-        //             memberSchool: user?.memberSchool,
-        //         })
-        //             .populate("memberSchool", ["id", "name"])
-        //             .exec();
-
-        //         return {
-        //             props: {
-        //                 registrations: registrations.map((reg) => ({
-        //                     ...reg.toJSON(),
-        //                     birthday: reg.birthday?.toDateString(),
-        //                     registeredAt: reg.registeredAt.toDateString(),
-        //                 })),
-        //             },
-        //         };
-        //     default:
+export const getServerSideProps: GetServerSideProps =
+    AuthGetServerSideProps(async () => {
         return {
-            // redirect: {
-            //     destination: "/",
-            //     statusCode: 301,
-            // },
             props: {},
         };
-        // }
-    }
-);
+    }, [
+        AccountType.MS_ADMIN,
+        AccountType.CEAP_ADMIN,
+        AccountType.CEAP_SUPER_ADMIN,
+    ]);
 
 UserRegistrations.PageLayout = Layout;
 
