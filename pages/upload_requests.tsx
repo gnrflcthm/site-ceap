@@ -12,6 +12,7 @@ import { AccountType, ResourceStatus } from "@util/Enums";
 import {
     connectDB,
     IResourceSchema,
+    IUserSchema,
     MemberSchool,
     Resource,
     User,
@@ -27,16 +28,22 @@ import {
     TableContainer,
     Tbody,
     Td,
+    Text,
     Thead,
-    Tooltip,
     Tr,
     useDisclosure,
 } from "@chakra-ui/react";
 import TableHeader from "@components/TableHeader";
 import { useData } from "@util/hooks/useData";
 import TabButton from "@components/Accounts/TabButton";
-import { FaCloudUploadAlt, FaSearch } from "react-icons/fa";
+import {
+    FaCaretLeft,
+    FaCaretRight,
+    FaCloudUploadAlt,
+    FaSearch,
+} from "react-icons/fa";
 import { useState } from "react";
+import { IResourceDataType } from "@components/Uploads/ResourceData";
 
 const RequestUploadModal = dynamic(
     () => import("@components/Uploads/RequestUploadModal")
@@ -46,16 +53,44 @@ const ResourceData = dynamic(() => import("@components/Uploads/ResourceData"));
 
 const UploadRequests: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ uploadRequests }) => {
-    const { data, isLoading, refetch } = useData("", uploadRequests);
+> = () => {
+    const { data, isLoading, refetch } = useData<IResourceDataType[]>(
+        "/api/resource/a/requests"
+    );
 
     const [current, setCurrent] = useState<"requests" | "uploads">("requests");
+    console.log(data);
+    const [page, setPage] = useState<number>(1);
+
+    const [sortKey, setSortKey] = useState<string>("datePerformed");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     const {
         isOpen: showUploadModal,
         onClose: closeUploadModal,
         onOpen: openUploadModal,
     } = useDisclosure();
+
+    const sortData = (key: string) => {
+        setPage(1);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
+        }
+        setSortKey(key);
+
+        refetch(
+            `/api/resource/a${
+                current === "requests" ? "/requests" : ""
+            }?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+        );
+        console.log(
+            `/api/resource/a${
+                current === "requests" ? "/requests" : ""
+            }?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+        );
+    };
 
     return (
         <>
@@ -101,18 +136,75 @@ const UploadRequests: PageWithLayout<
                     </Button>
                 </Flex>
             </Flex>
+            <Flex align={"center"} justify={"end"}>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(
+                            `/api/resource/a${
+                                current === "requests" ? "/requests" : ""
+                            }?p=${
+                                page - 1
+                            }&sortBy=${sortKey}&sortDir=${sortDir}`
+                        );
+
+                        setPage((p) => p - 1);
+                    }}
+                    disabled={page - 1 <= 0 || isLoading}
+                >
+                    <Box as={FaCaretLeft} color={"primary"} />
+                </Button>
+                <Text>{page}</Text>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(
+                            `/api/resource/a${
+                                current === "requests" ? "/requests" : ""
+                            }?p=${
+                                page + 1
+                            }&sortBy=${sortKey}&sortDir=${sortDir}`
+                        );
+
+                        setPage((p) => p + 1);
+                    }}
+                    disabled={isLoading || (data && data?.length < 30)}
+                >
+                    <Box as={FaCaretRight} color={"primary"} />
+                </Button>
+            </Flex>
             <TableContainer maxH={"inherit"} overflowY={"auto"}>
                 <Table>
                     <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
                         <Tr>
-                            <TableHeader heading={"Date Uploaded"} sortable />
-                            <TableHeader heading={"File Name"} />
-                            <TableHeader heading={"file type"} />
+                            <TableHeader
+                                heading={"Date Uploaded"}
+                                sortable
+                                onClick={() => sortData("dateAdded")}
+                            />
+                            <TableHeader
+                                heading={"File Name"}
+                                sortable
+                                onClick={() => sortData("filename")}
+                            />
+                            <TableHeader
+                                heading={"file type"}
+                                sortable
+                                onClick={() => sortData("fileType")}
+                            />
                             <TableHeader
                                 heading={
                                     current === "requests"
                                         ? "uploader"
                                         : "upload status"
+                                }
+                                sortable
+                                onClick={() =>
+                                    sortData(
+                                        current === "requests"
+                                            ? "uploadedBy.displayName"
+                                            : "status"
+                                    )
                                 }
                             />
                             <TableHeader heading="" />
@@ -124,7 +216,7 @@ const UploadRequests: PageWithLayout<
                             data.map((resource) => (
                                 <ResourceData
                                     showStatus={current === "uploads"}
-                                    key={resource.id}
+                                    key={resource._id}
                                     resource={resource}
                                     refetch={() => {
                                         if (current === "requests") {
