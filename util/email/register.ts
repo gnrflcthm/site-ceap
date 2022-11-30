@@ -57,7 +57,8 @@ export async function sendAcceptEmail(
 
 export async function sendUserRejectEmail(
     user: IUserRegistrationSchema,
-    memberSchool: string
+    memberSchool: string,
+    reason?: string
 ) {
     const { email, firstName, lastName, schoolId, mobileNumber } = user;
     await transport.sendMail({
@@ -69,7 +70,10 @@ export async function sendUserRejectEmail(
         <br /><br />
         Greetings of Peace!
         <br /><br />
-        Upon reviewing your C.O.R.E. account registration details, we regret to inform you that your registration for a Member School User account registered under ${memberSchool} has been REJECTED.
+        Upon reviewing your C.O.R.E. account registration details, we regret to inform you that your registration for a Member School User account registered under ${memberSchool} has been REJECTED ${
+            reason ? "for the following reason:" : "."
+        }
+        ${reason && `<br /><br /><em>${reason}</em>`}
         <br /><br />
         Here are the details of your account registration request: <br />
         <b>Name</b>: ${firstName} ${lastName} <br />
@@ -235,7 +239,8 @@ export async function sendNewCEAPUserEmail(
 export async function sendDeletedAccountNotif(
     receiver: IUserSchema,
     memberSchool?: string,
-    isCeap: boolean = false
+    isCeap: boolean = false,
+    reason?: string
 ) {
     const { email, firstName, lastName, accountType, schoolId, mobileNumber } =
         receiver;
@@ -249,7 +254,11 @@ export async function sendDeletedAccountNotif(
         <br /><br />
         Greetings of Peace!
         <br /><br />
-        We would like to inform you that your C.O.R.E. ${accountType} account has been DELETED from the system.
+        We would like to inform you that your C.O.R.E. ${accountType} account has been DELETED from the system ${
+                reason ? "for the following reason:" : "."
+            }
+        
+        ${reason && `<br /><br /><em>${reason}</em>`}
         <br /><br />
         Here are the details of your account:<br />
         <b>Name</b>: ${firstName} ${lastName}<br />` +

@@ -60,8 +60,7 @@ export default authenticatedHandler([
                     },
                     {
                         $sort: {
-                            [sortKey]:
-                                sortDir === "desc" ? -1 : 1,
+                            [sortKey]: sortDir === "desc" ? -1 : 1,
                         },
                     },
                     {
@@ -81,8 +80,7 @@ export default authenticatedHandler([
                     },
                     {
                         $sort: {
-                            [sortKey]:
-                                sortDir === "desc" ? -1 : 1,
+                            [sortKey]: sortDir === "desc" ? -1 : 1,
                         },
                     },
                     {
@@ -93,7 +91,6 @@ export default authenticatedHandler([
                     },
                 ]);
         }
-
         res.status(200).json(registrations || []);
     } catch (err) {
         res.statusMessage = "An Error has occured fetching the registrations.";

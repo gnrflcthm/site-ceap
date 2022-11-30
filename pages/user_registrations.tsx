@@ -24,6 +24,7 @@ import {
     Button,
     Text,
     Box,
+    useDisclosure,
 } from "@chakra-ui/react";
 
 import { FaCaretLeft, FaCaretRight, FaSync } from "react-icons/fa";
@@ -111,7 +112,7 @@ const UserRegistrations: PageWithLayout<
             </Flex>
             {loading || !user ? (
                 <Center w={"full"} h={"full"}>
-                    <CircularProgress isIndeterminate />
+                    <CircularProgress isIndeterminate color={"secondary"} />
                 </Center>
             ) : (
                 <TableContainer maxH={"inherit"} overflowY={"auto"}>
@@ -182,7 +183,7 @@ const UserRegistrations: PageWithLayout<
                                                 <AdminRegistrationData
                                                     data={
                                                         reg as IMSAdminRegistrationSchema & {
-                                                            id: string;
+                                                            _id: string;
                                                             registeredAt: string;
                                                             memberSchool: {
                                                                 id: string;
@@ -190,7 +191,7 @@ const UserRegistrations: PageWithLayout<
                                                             };
                                                         }
                                                     }
-                                                    key={reg.id}
+                                                    key={reg._id}
                                                     refresh={refetch}
                                                 />
                                             );
@@ -198,7 +199,7 @@ const UserRegistrations: PageWithLayout<
                                             return (
                                                 <UserRegistrationData
                                                     data={reg}
-                                                    key={reg.id}
+                                                    key={reg._id}
                                                     refresh={refetch}
                                                 />
                                             );
@@ -215,12 +216,12 @@ const UserRegistrations: PageWithLayout<
 
 export type IRegistrationInfo =
     | (IUserRegistrationSchema & {
-          id: string;
+          _id: string;
           registeredAt: string;
           birthday?: string;
       })
     | (IMSAdminRegistrationSchema & {
-          id: string;
+          _id: string;
           registeredAt: string;
           memberSchool: { id: string; name: string };
       });

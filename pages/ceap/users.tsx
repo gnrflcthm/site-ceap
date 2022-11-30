@@ -48,6 +48,7 @@ import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@components/ConfirmationModal";
 import { connectDB, IMemberSchoolSchema, IUserSchema, User } from "@db/index";
 import { AccountType } from "@util/Enums";
+import DeleteRejectPrompt from "@components/Accounts/DeleteRejectPrompt";
 
 const CEAPUsers: PageWithLayout = () => {
     const toast = useToast();
@@ -95,9 +96,9 @@ const CEAPUsers: PageWithLayout = () => {
         | undefined
     >(undefined);
 
-    const deleteUser = () => {
+    const deleteUser = (reason: string) => {
         axios
-            .post("/api/member/delete", { id: currentUser?._id })
+            .post("/api/member/delete", { id: currentUser?._id, reason })
             .then(() => {
                 toast({
                     title: "User Deleted Successfully.",
@@ -518,17 +519,28 @@ const CEAPUsers: PageWithLayout = () => {
                     />
                 )}
                 {openDeleteConfirmation && currentUser && (
-                    <ConfirmationModal
-                        title={"Delete User"}
+                    // <ConfirmationModal
+                    //     title={"Delete User"}
+                    //     prompt={`Are you sure you want to delete ${currentUser.displayName}'s account?`}
+                    //     rejectText={"Cancel"}
+                    //     acceptText={"Confirm"}
+                    //     onReject={() => {
+                    //         setCurrentUser(undefined);
+                    //         hideDeleteConfirmation();
+                    //     }}
+                    //     onAccept={() => deleteUser()}
+                    //     willProcessOnAccept
+                    // />
+                    <DeleteRejectPrompt
+                        action="delete"
+                        confirmText="Delete"
+                        title="Delete User"
                         prompt={`Are you sure you want to delete ${currentUser.displayName}'s account?`}
-                        rejectText={"Cancel"}
-                        acceptText={"Confirm"}
-                        onReject={() => {
+                        onDismiss={() => {
                             setCurrentUser(undefined);
                             hideDeleteConfirmation();
                         }}
-                        onAccept={() => deleteUser()}
-                        willProcessOnAccept
+                        onConfirm={deleteUser}
                     />
                 )}
             </AnimatePresence>

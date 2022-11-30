@@ -44,6 +44,7 @@ import ConfirmationModal from "@components/ConfirmationModal";
 import { AccountType } from "@util/Enums";
 import { IUserSchema, connectDB, User, IMemberSchoolSchema } from "@db/index";
 import SearchBar from "@components/SearchBar";
+import DeleteRejectPrompt from "@components/Accounts/DeleteRejectPrompt";
 
 // TODO: Add accepted roles for every GetServersideProps page if applicable
 
@@ -86,9 +87,9 @@ const ManageAccounts: PageWithLayout = () => {
         | undefined
     >(undefined);
 
-    const deleteUser = () => {
+    const deleteUser = (reason: string) => {
         axios
-            .post("/api/member/delete", { id: currentUser?._id })
+            .post("/api/member/delete", { id: currentUser?._id, reason })
             .then(() => {
                 toast({
                     title: "User Deleted Successfully.",
@@ -423,17 +424,16 @@ const ManageAccounts: PageWithLayout = () => {
                     />
                 )}
                 {openDeleteConfirmation && currentUser && (
-                    <ConfirmationModal
-                        title={"Delete User"}
+                    <DeleteRejectPrompt
+                        action="delete"
+                        confirmText="Delete"
+                        title="Delete User"
                         prompt={`Are you sure you want to delete ${currentUser.displayName}'s account?`}
-                        rejectText={"Cancel"}
-                        acceptText={"Confirm"}
-                        onReject={() => {
+                        onDismiss={() => {
                             setCurrentUser(undefined);
                             hideDeleteConfirmation();
                         }}
-                        onAccept={() => deleteUser()}
-                        willProcessOnAccept
+                        onConfirm={deleteUser}
                     />
                 )}
             </AnimatePresence>

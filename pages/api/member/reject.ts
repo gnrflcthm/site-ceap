@@ -7,7 +7,7 @@ import { logAction, Action } from "@util/logging";
 
 export default authenticatedHandler([AccountType.MS_ADMIN]).post(
     async (req, res) => {
-        const { id } = req.body;
+        const { id, reason } = req.body;
 
         try {
             await connectDB();
@@ -16,9 +16,7 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(
 
             if (!user) {
                 res.statusMessage = "User Does Not Exist";
-                res.status(418);
-                res.end();
-                return;
+                throw new Error("User Does Not Exist");
             }
 
             const a = await User.findOne({ authId: req.uid });
@@ -29,10 +27,13 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).post(
                     Action.REJECT_USER_REGISTRATION,
                     `Rejected User Registration From ${ms.name}`
                 );
-                await sendUserRejectEmail(user, ms.name);
+                await sendUserRejectEmail(user, ms.name, reason);
             }
         } catch (err) {
             console.log(err);
+            res.statusMessage =
+                res.statusMessage || "Error in rejecting registration request";
+            res.status(400);
         }
         res.end();
     }
