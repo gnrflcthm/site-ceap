@@ -172,7 +172,7 @@ const Logs: PageWithLayout = () => {
                     <Thead
                         bg={"gray.100"}
                         position={"sticky"}
-                        top={"1"}
+                        top={"0"}
                         zIndex={"2"}
                         maxH={{
                             base: "calc(85vh-11rem)",

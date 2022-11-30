@@ -1,4 +1,4 @@
-import { FC, useContext, useMemo, useState } from "react";
+import { FC, useContext, useState } from "react";
 import dynamic from "next/dynamic";
 
 import {
@@ -96,20 +96,6 @@ const ResourceData: FC<{
     };
 
     const { user } = useContext(AuthContext);
-
-    const uploaderOrStatus = useMemo<string | undefined | null>(() => {
-        if (!user) {
-            return undefined;
-        }
-
-        if (showStatus) return resource.status;
-
-        if (user.role === AccountType.MS_USER) {
-            return resource.status;
-        } else {
-            return resource.uploadedBy?.displayName;
-        }
-    }, [user]);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
