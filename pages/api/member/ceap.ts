@@ -27,15 +27,38 @@ export default authenticatedHandler([AccountType.CEAP_SUPER_ADMIN]).get(
         }
 
         try {
-            const accounts = await User.find({
-                accountType: [
-                    AccountType.CEAP_ADMIN,
-                    AccountType.CEAP_SUPER_ADMIN,
-                ],
-                authId: {
-                    $ne: req.uid,
+            // const accounts = await User.find({
+            //     accountType: [
+            //         AccountType.CEAP_ADMIN,
+            //         AccountType.CEAP_SUPER_ADMIN,
+            //     ],
+            //     authId: {
+            //         $ne: req.uid,
+            //     },
+            // }).skip(page * 30).limit(30).sort({[sortKey]: sortDir as SortOrder});
+
+            const accounts = await User.aggregate([
+                {
+                    $match: {
+                        accountType: {
+                            $in: [
+                                AccountType.CEAP_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ],
+                        },
+                        authId: { $ne: req.uid },
+                    },
                 },
-            }).skip(page * 30).limit(30).sort({[sortKey]: sortDir as SortOrder});
+                {
+                    $skip: page * 30,
+                },
+                {
+                    $limit: 30,
+                },
+                {
+                    $sort: { [sortKey]: sortDir === "desc" ? -1 : 1 },
+                },
+            ]);
             res.status(200).json(accounts);
         } catch (err) {
             console.log(err);

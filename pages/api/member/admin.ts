@@ -59,7 +59,7 @@ export default authenticatedHandler([
                             accountType: AccountType.MS_ADMIN,
                         },
                         ...(user.accountType === AccountType.MS_ADMIN
-                            ? [{ "memberSchool._id": user.memberSchool }]
+                            ? [{ memberSchool: user.memberSchool }]
                             : []),
                     ],
                     _id: { $ne: user._id },

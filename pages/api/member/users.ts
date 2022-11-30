@@ -31,18 +31,27 @@ export default authenticatedHandler([AccountType.MS_ADMIN]).get(
             await connectDB();
             const admin = await User.findOne({
                 authId: uid,
-            }).populate("memberSchool", ["id"]);
+            }).orFail();
+            
+            const users = await User.aggregate([
+                {
+                    $match: {
+                        memberSchool: admin?.memberSchool,
+                        accountType: AccountType.MS_USER,
+                    },
+                },
+                {
+                    $sort: { [sortKey]: sortDir === "desc" ? -1 : 1 },
+                },
+                {
+                    $skip: page * 30,
+                },
+                {
+                    $limit: 30,
+                },
+            ]);
 
-            if (admin) {
-                const accounts = await User.find({
-                    memberSchool: admin.memberSchool,
-                    accountType: AccountType.MS_USER,
-                })
-                    .skip(page * 30)
-                    .limit(30)
-                    .sort({ [sortKey]: sortDir as SortOrder });
-                res.status(200).json(accounts);
-            }
+            res.status(200).json(users);
         } catch (error) {
             console.log(error);
             res.statusMessage =

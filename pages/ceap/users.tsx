@@ -46,17 +46,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
 import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@components/ConfirmationModal";
-import { connectDB, IUserSchema, User } from "@db/index";
+import { connectDB, IMemberSchoolSchema, IUserSchema, User } from "@db/index";
 import { AccountType } from "@util/Enums";
 
-const CEAPUsers: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ accounts }) => {
+const CEAPUsers: PageWithLayout = () => {
     const toast = useToast();
     const [current, setCurrent] = useState<"ceap" | "admin" | "none">("ceap");
 
     const [query, setQuery] = useState<string>("");
-    // const [criteria, setCriteria] = useState<string>("name");
 
     const [page, setPage] = useState<number>(1);
     const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -71,31 +68,36 @@ const CEAPUsers: PageWithLayout<
     } = useDisclosure();
 
     const {
-        isOpen: openEditUser,
-        onClose: closeEditUser,
-        onOpen: showEditUser,
-    } = useDisclosure();
-
-    const {
         isOpen: openDeleteConfirmation,
         onClose: hideDeleteConfirmation,
         onOpen: showDeleteConfirmation,
     } = useDisclosure();
 
+    const {
+        isOpen: openRoleConfirmation,
+        onClose: closeRoleConfirmation,
+        onOpen: showRoleConfirmation,
+    } = useDisclosure();
+
     const { user, loading } = useContext(AuthContext);
-    const { data, isLoading, refetch } =
-        useData<IAdminInfo[]>("/api/member/ceap");
+    const { data, isLoading, refetch } = useData<
+        (IUserSchema & {
+            _id: string;
+            memberSchool: IMemberSchoolSchema & { _id: string };
+        })[]
+    >("/api/member/ceap");
+
     const [currentUser, setCurrentUser] = useState<
         | (IUserSchema & {
-              id: string;
-              memberSchool?: { id: string; name: string };
+              _id: string;
+              memberSchool: IMemberSchoolSchema & { _id: string };
           })
         | undefined
     >(undefined);
 
     const deleteUser = () => {
         axios
-            .post("/api/member/delete", { id: currentUser?.id })
+            .post("/api/member/delete", { id: currentUser?._id })
             .then(() => {
                 toast({
                     title: "User Deleted Successfully.",
@@ -111,6 +113,30 @@ const CEAPUsers: PageWithLayout<
                     status: "error",
                 });
                 hideDeleteConfirmation();
+            });
+    };
+
+    const updateRole = (id: string) => {
+        axios
+            .post("/api/member/updaterole", { id })
+            .then((res) => {
+                toast({
+                    title: `Sucessfully ${res.data.action} User.`,
+                    status: "success",
+                });
+                refetch(`/api/member/${current}`);
+            })
+            .catch((err: AxiosError) => {
+                toast({
+                    title:
+                        err.response?.statusText ||
+                        "Error In Updating User Account Type.",
+                    status: "error",
+                });
+            })
+            .finally(() => {
+                closeRoleConfirmation();
+                setCurrentUser(undefined);
             });
     };
 
@@ -366,20 +392,22 @@ const CEAPUsers: PageWithLayout<
                                         return data?.map((account) => (
                                             <UserData
                                                 user={account}
-                                                key={account.id}
+                                                key={account._id}
                                                 onDelete={(id: string) => {
                                                     showDeleteConfirmation();
                                                     let currentUser = data.find(
-                                                        (u) => u.id === id
+                                                        (u) => u._id === id
                                                     );
                                                     setCurrentUser(currentUser);
                                                 }}
-                                                showEdit={(id: string) => {
+                                                onChangeAccountType={(
+                                                    id: string
+                                                ) => {
                                                     let targetUser = data.find(
-                                                        (u) => u.id === id
+                                                        (u) => u._id === id
                                                     );
                                                     setCurrentUser(targetUser);
-                                                    showEditUser();
+                                                    showRoleConfirmation();
                                                 }}
                                             />
                                         ));
@@ -461,26 +489,32 @@ const CEAPUsers: PageWithLayout<
                         />
                     </Box>
                 )}
-                {openEditUser && currentUser && (
-                    <EditUserModal
-                        user={currentUser}
-                        accountTypes={
-                            current === "ceap"
-                                ? [
-                                      AccountType.CEAP_ADMIN,
-                                      AccountType.CEAP_SUPER_ADMIN,
-                                  ]
-                                : [AccountType.MS_ADMIN, AccountType.MS_USER]
-                        }
-                        onSave={() => {
+                {openRoleConfirmation && currentUser && (
+                    <ConfirmationModal
+                        title={`${
+                            [
+                                AccountType.MS_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(currentUser.accountType)
+                                ? "Demote"
+                                : "Promote"
+                        } User`}
+                        prompt={`Are you sure you want to ${
+                            [
+                                AccountType.MS_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(currentUser.accountType)
+                                ? "Demote"
+                                : "Promote"
+                        } ${currentUser.displayName}'s account?`}
+                        rejectText={"Cancel"}
+                        acceptText={"Confirm"}
+                        onReject={() => {
                             setCurrentUser(undefined);
-                            closeEditUser();
-                            refetch(`/api/member/${current}`);
+                            closeRoleConfirmation();
                         }}
-                        onCancel={() => {
-                            setCurrentUser(undefined);
-                            closeEditUser();
-                        }}
+                        onAccept={() => updateRole(currentUser._id)}
+                        willProcessOnAccept
                     />
                 )}
                 {openDeleteConfirmation && currentUser && (
@@ -503,8 +537,8 @@ const CEAPUsers: PageWithLayout<
 };
 
 export type IAdminInfo = IUserSchema & {
-    id: string;
-    memberSchool?: { id: string; name: string };
+    _id: string;
+    memberSchool?: { _id: string; name: string };
 };
 
 export const getServerSideProps: GetServerSideProps =

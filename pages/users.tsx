@@ -38,25 +38,27 @@ import { useData } from "@util/hooks/useData";
 import { FaCaretLeft, FaCaretRight, FaSearch } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@components/ConfirmationModal";
 
 import { AccountType } from "@util/Enums";
-import { IUserSchema, connectDB, User } from "@db/index";
+import { IUserSchema, connectDB, User, IMemberSchoolSchema } from "@db/index";
 import SearchBar from "@components/SearchBar";
 
 // TODO: Add accepted roles for every GetServersideProps page if applicable
 
-const ManageAccounts: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ accounts }) => {
+const ManageAccounts: PageWithLayout = () => {
     const toast = useToast();
     const [current, setCurrent] = useState<"admin" | "users" | "none">("admin");
     const { user, loading } = useContext(AuthContext);
-    const { data, isLoading, refetch } = useData("", accounts);
+    const { data, isLoading, refetch } = useData<
+        (IUserSchema & {
+            _id: string;
+            memberSchool: IMemberSchoolSchema & { _id: string };
+        })[]
+    >("/api/member/admin");
 
     const [query, setQuery] = useState<string>("");
-    // const [criteria, setCriteria] = useState<string>("name");
 
     const [page, setPage] = useState<number>(1);
     const [isSearching, setIsSearching] = useState<boolean>(false);
@@ -65,9 +67,9 @@ const ManageAccounts: PageWithLayout<
     const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     const {
-        isOpen: openEditUser,
-        onClose: closeEditUser,
-        onOpen: showEditUserModal,
+        isOpen: openRoleConfirmation,
+        onClose: closeRoleConfirmation,
+        onOpen: showRoleConfirmation,
     } = useDisclosure();
 
     const {
@@ -78,15 +80,15 @@ const ManageAccounts: PageWithLayout<
 
     const [currentUser, setCurrentUser] = useState<
         | (IUserSchema & {
-              id: string;
-              memberSchool?: { id: string; name: string };
+              _id: string;
+              memberSchool: IMemberSchoolSchema & { _id: string };
           })
         | undefined
     >(undefined);
 
     const deleteUser = () => {
         axios
-            .post("/api/member/delete", { id: currentUser?.id })
+            .post("/api/member/delete", { id: currentUser?._id })
             .then(() => {
                 toast({
                     title: "User Deleted Successfully.",
@@ -98,13 +100,59 @@ const ManageAccounts: PageWithLayout<
             .catch(() => {
                 toast({ title: "Error In Deleting User.", status: "error" });
                 hideDeleteConfirmation();
+            })
+            .finally(() => {
+                setCurrentUser(undefined);
             });
     };
 
-    const showEditModal = (id: string) => {
-        let targetUser = data?.find((u) => u.id === id);
+    const updateRole = (id: string) => {
+        axios
+            .post("/api/member/updaterole", { id })
+            .then((res) => {
+                toast({
+                    title: `Sucessfully ${res.data.action} User.`,
+                    status: "success",
+                });
+                refetch(
+                    `/api/member/${
+                        currentUser &&
+                        [
+                            AccountType.MS_ADMIN,
+                            AccountType.CEAP_SUPER_ADMIN,
+                        ].includes(currentUser.accountType)
+                            ? "users"
+                            : "admin"
+                    }`
+                );
+                setCurrent(
+                    currentUser &&
+                        [
+                            AccountType.MS_ADMIN,
+                            AccountType.CEAP_SUPER_ADMIN,
+                        ].includes(currentUser.accountType)
+                        ? "users"
+                        : "admin"
+                );
+            })
+            .catch((err: AxiosError) => {
+                toast({
+                    title:
+                        err.response?.statusText ||
+                        "Error In Updating User Account Type.",
+                    status: "error",
+                });
+            })
+            .finally(() => {
+                closeRoleConfirmation();
+                setCurrentUser(undefined);
+            });
+    };
+
+    const showRoleConfirmationModal = (id: string) => {
+        let targetUser = data?.find((u) => u._id === id);
         setCurrentUser(targetUser);
-        showEditUserModal();
+        showRoleConfirmation();
     };
 
     const searchUsers = (e: FormEvent) => {
@@ -270,6 +318,7 @@ const ManageAccounts: PageWithLayout<
                                 bg={"gray.100"}
                                 position={"sticky"}
                                 top={"0"}
+                                zIndex={"2"}
                             >
                                 <Tr>
                                     <TableHeader
@@ -297,16 +346,20 @@ const ManageAccounts: PageWithLayout<
                                         return data?.map((account) => (
                                             <UserData
                                                 user={account}
-                                                key={account.id}
+                                                key={account._id}
                                                 onDelete={(id: string) => {
-                                                    showDeleteConfirmation();
                                                     let currentUser = data.find(
-                                                        (u) => u.id === id
+                                                        (u) => u._id === id
                                                     );
                                                     setCurrentUser(currentUser);
+                                                    showDeleteConfirmation();
                                                 }}
-                                                showEdit={(id: string) =>
-                                                    showEditModal(id)
+                                                onChangeAccountType={(
+                                                    id: string
+                                                ) =>
+                                                    showRoleConfirmationModal(
+                                                        id
+                                                    )
                                                 }
                                             />
                                         ));
@@ -341,23 +394,32 @@ const ManageAccounts: PageWithLayout<
                 </Center>
             )}
             <AnimatePresence>
-                {openEditUser && currentUser && (
-                    <EditUserModal
-                        user={currentUser}
-                        accountTypes={[
-                            AccountType.MS_ADMIN,
-                            AccountType.MS_USER,
-                        ]}
-                        onSave={() => {
+                {openRoleConfirmation && currentUser && (
+                    <ConfirmationModal
+                        title={`${
+                            [
+                                AccountType.MS_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(currentUser.accountType)
+                                ? "Demote"
+                                : "Promote"
+                        } User`}
+                        prompt={`Are you sure you want to ${
+                            [
+                                AccountType.MS_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(currentUser.accountType)
+                                ? "Demote"
+                                : "Promote"
+                        } ${currentUser.displayName}'s account?`}
+                        rejectText={"Cancel"}
+                        acceptText={"Confirm"}
+                        onReject={() => {
                             setCurrentUser(undefined);
-                            closeEditUser();
-                            refetch(`/api/member/${current}`);
+                            closeRoleConfirmation();
                         }}
-                        onCancel={() => {
-                            setCurrentUser(undefined);
-                            closeEditUser();
-                        }}
-                        hasSchoolId
+                        onAccept={() => updateRole(currentUser._id)}
+                        willProcessOnAccept
                     />
                 )}
                 {openDeleteConfirmation && currentUser && (
@@ -379,43 +441,11 @@ const ManageAccounts: PageWithLayout<
     );
 };
 
-export const getServerSideProps: GetServerSideProps<{
-    accounts?: (IUserSchema & {
-        id: string;
-        memberSchool: { id: string; name: string };
-    })[];
-}> = AuthGetServerSideProps(
+export const getServerSideProps: GetServerSideProps = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        await connectDB();
-
-        const admin = await User.findOne({ authId: uid });
-
-        if (!admin) {
-            return {
-                redirect: {
-                    destination: "/",
-                    statusCode: 301,
-                    permanent: false,
-                },
-            };
-        }
-
-        const accounts = await User.find({
-            accountType: AccountType.MS_ADMIN,
-            memberSchool: admin.memberSchool,
-            authId: {
-                $ne: uid,
-            },
-        })
-            .populate("memberSchool", ["id", "name"])
-            .exec();
-
-        return {
-            props: {
-                accounts: accounts.map((account) => account.toJSON()),
-            },
-        };
-    }
+        return { props: {} };
+    },
+    [AccountType.MS_ADMIN]
 );
 
 ManageAccounts.PageLayout = Layout;
