@@ -75,9 +75,9 @@ const AdminRegistrationData: FC<{
             });
     };
 
-    const reject = () => {
+    const reject = (reason: string) => {
         axios
-            .post("/api/admin/reject", { id: _id })
+            .post("/api/admin/reject", { id: _id, reason })
             .then((res) => {
                 if (res.status === 200) {
                     console.log("Reject Status:", res.status);

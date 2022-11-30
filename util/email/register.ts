@@ -96,7 +96,8 @@ export async function sendUserRejectEmail(
 
 export async function sendAdminRejectEmail(
     user: IUserRegistrationSchema,
-    memberSchool: string
+    memberSchool: string,
+    reason?: string
 ) {
     const { email, firstName, lastName, mobileNumber } = user;
 
@@ -109,7 +110,10 @@ export async function sendAdminRejectEmail(
         <br /><br />
         Greetings of Peace!
         <br /><br />
-        Upon reviewing your C.O.R.E. account registration details, we regret to inform you that your registration for a Member School Admin account registered under ${memberSchool} has been REJECTED.
+        Upon reviewing your C.O.R.E. account registration details, we regret to inform you that your registration for a Member School Admin account registered under ${memberSchool} has been REJECTED ${
+            reason ? "for the following reason:" : "."
+        }
+        ${reason && `<br /><br /><em>${reason}</em>`}
         <br /><br />
         Here are the details of your account registration request: <br />
         <b>Name</b>: ${firstName} ${lastName} <br />

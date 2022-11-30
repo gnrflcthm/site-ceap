@@ -9,7 +9,7 @@ export default authenticatedHandler([
     AccountType.CEAP_ADMIN,
     AccountType.CEAP_SUPER_ADMIN,
 ]).post(async (req, res) => {
-    const { id } = req.body;
+    const { id, reason } = req.body;
 
     try {
         await connectDB();
@@ -23,7 +23,7 @@ export default authenticatedHandler([
         const ms = await MemberSchool.findById(rejectedUser?.memberSchool);
         if (user && ms) {
             if (rejectedUser) {
-                await sendAdminRejectEmail(rejectedUser, ms.name);
+                await sendAdminRejectEmail(rejectedUser, ms.name, reason);
             }
             await logAction(
                 user,
