@@ -10,86 +10,77 @@ export default authenticatedHandler([
 ]).get(async (req, res) => {
     await connectDB();
 
-    const user = await User.findOne({ authId: req.uid });
+    let page: number = 0;
 
-    if (!user) {
-        res.statusMessage = "User does not exist";
-        res.status(401);
-        res.end();
-        return;
+    if (req.query.p && !Array.isArray(req.query.p)) {
+        try {
+            let temp = parseInt(req.query.p) - 1;
+            page = temp < 0 ? 0 : temp;
+        } catch (err) {}
     }
 
-    // const temp = [
-    //     "Christian Formation",
-    //     "Basic Education",
-    //     "Higher Education",
-    //     "Techinical Vocation Education",
-    //     "ALS & SPED",
-    //     "Programs",
-    //     "National Convention",
-    //     "Advocacy",
-    //     "Research",
-    //     "General CEAP",
-    //     "COCOPEA & PEAC",
-    //     "International Linkages",
-    //     "Others",
-    // ];
+    let sortKey: string = "_id";
+    let sortDir: string = "desc";
 
-    // const tempData = temp.map((name) => ({ name, fullPath: `/${name}` }));
-    // await Folder.insertMany(tempData);
-
-    let uploads = [];
+    if (req.query.sortBy && !Array.isArray(req.query.sortBy)) {
+        sortKey = req.query.sortBy;
+        if (req.query.sortDir && !Array.isArray(req.query.sortDir)) {
+            sortDir = req.query.sortDir;
+        }
+    }
 
     try {
-        switch (user.accountType) {
-            case AccountType.CEAP_SUPER_ADMIN:
-            case AccountType.CEAP_ADMIN:
-                uploads = await Resource.find({
-                    status: ResourceStatus.FOR_CEAP_REVIEW,
-                })
-                    .populate({
-                        path: "uploadedBy",
-                        select: "id displayName memberSchool",
-                        populate: {
-                            path: "memberSchool",
-                            select: "id",
-                        },
-                    })
-                    .exec();
-                res.status(200);
-                res.json(
-                    uploads.map((ur) => ({
-                        ...ur.toJSON(),
-                        dateAdded: ur.dateAdded.toDateString(),
-                    }))
-                );
-                return;
-            case AccountType.MS_ADMIN:
-                uploads = await Resource.find({
-                    status: ResourceStatus.FOR_ADMIN_REVIEW,
-                })
-                    .populate({
-                        path: "uploadedBy",
-                        select: "id displayName memberSchool",
-                        populate: {
-                            path: "memberSchool",
-                            select: "id",
-                        },
-                    })
-                    .exec();
+        const user = await User.findOne({ authId: req.uid }).orFail();
 
-                uploads = uploads.filter((ur) =>
-                    // @ts-ignore
-                    ur.uploadedBy?.memberSchool.equals(user.memberSchool)
-                );
-                res.json(
-                    uploads.map((ur) => ({
-                        ...ur.toJSON(),
-                        dateAdded: ur.dateAdded.toDateString(),
-                    }))
-                );
-        }
-        res.status(200);
+        const uploads = await Resource.aggregate([
+            {
+                $lookup: {
+                    from: "User",
+                    localField: "uploadedBy",
+                    foreignField: "_id",
+                    as: "uploadedBy",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$uploadedBy",
+                    includeArrayIndex: "0",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $match: {
+                    ...([
+                        AccountType.CEAP_ADMIN,
+                        AccountType.CEAP_SUPER_ADMIN,
+                    ].includes(user.accountType)
+                        ? { status: ResourceStatus.FOR_CEAP_REVIEW }
+                        : {
+                              status: ResourceStatus.FOR_ADMIN_REVIEW,
+                              "uploadedBy.memberSchool": user.memberSchool,
+                          }),
+                },
+            },
+            {
+                $addFields: {
+                    fname: { $toLower: "$filename" },
+                },
+            },
+            {
+                $sort: {
+                    [sortKey === "filename" ? "fname" : sortKey]:
+                        sortDir === "desc" ? -1 : 1,
+                },
+            },
+            {
+                $skip: 30 * page,
+            },
+            {
+                $limit: 30,
+            },
+        ]);
+
+        res.status(200).json(uploads);
     } catch (error) {
         console.log(error);
         res.statusMessage = "Error in retrieving Upload Requests.";

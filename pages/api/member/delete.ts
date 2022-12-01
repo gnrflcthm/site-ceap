@@ -13,7 +13,7 @@ export default authenticatedHandler([
     AccountType.CEAP_SUPER_ADMIN,
     AccountType.MS_ADMIN,
 ]).post(async (req, res) => {
-    const { id } = req.body;
+    const { id, reason } = req.body;
     const auth = getAuth();
 
     await connectDB();
@@ -54,7 +54,8 @@ export default authenticatedHandler([
                     [
                         AccountType.CEAP_ADMIN,
                         AccountType.CEAP_SUPER_ADMIN,
-                    ].includes(findUser.accountType)
+                    ].includes(findUser.accountType),
+                    reason
                 );
             }
         }

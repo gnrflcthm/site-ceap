@@ -1,4 +1,4 @@
-import { FC, useContext, useMemo, useState } from "react";
+import { FC, useContext, useState } from "react";
 import dynamic from "next/dynamic";
 
 import {
@@ -17,7 +17,7 @@ import axios from "axios";
 
 import { AuthContext } from "@context/AuthContext";
 
-import { IResourceSchema } from "@db/models";
+import { IResourceSchema, IUserSchema } from "@db/models";
 import { AccountType } from "@util/Enums";
 
 const ResourceDataAdminOptions = dynamic(
@@ -34,12 +34,13 @@ const ResourceDataUserOptions = dynamic(
 
 const UserInfoModal = dynamic(() => import("@components/Modal/UserInfoModal"));
 
+export type IResourceDataType = IResourceSchema & {
+    _id: string;
+    uploadedBy: IUserSchema & { _id: string };
+};
+
 const ResourceData: FC<{
-    resource: IResourceSchema & {
-        id: string;
-        dateAdded: string;
-        uploadedBy?: { id: string; displayName?: string };
-    };
+    resource: IResourceDataType;
     onAccept?: (id: string) => void;
     showStatus?: boolean;
     refetch: Function;
@@ -51,7 +52,7 @@ const ResourceData: FC<{
         try {
             setProcessing(true);
             const { data } = await axios.get<{ downloadLink: string }>(
-                `/api/resource/a/download/${resource.id}`
+                `/api/resource/a/download/${resource._id}`
             );
 
             const anchor = document.createElement("a");
@@ -73,11 +74,7 @@ const ResourceData: FC<{
     const reject = async (isReject: boolean = false, refetchLink?: string) => {
         setProcessing(true);
         try {
-            await axios.delete(
-                `/api/resource/a/cancel/${resource.id}?action=${
-                    isReject ? "reject" : "cancel"
-                }`
-            );
+            await axios.delete(`/api/resource/a/cancel/${resource._id}`);
             toast({
                 status: "success",
                 title: "Successfully Removed Resource.",
@@ -100,20 +97,6 @@ const ResourceData: FC<{
 
     const { user } = useContext(AuthContext);
 
-    const uploaderOrStatus = useMemo<string | undefined | null>(() => {
-        if (!user) {
-            return undefined;
-        }
-
-        if (showStatus) return resource.status;
-
-        if (user.role === AccountType.MS_USER) {
-            return resource.status;
-        } else {
-            return resource.uploadedBy?.displayName;
-        }
-    }, [user]);
-
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const textFontSize = { base: "sm", md: "md" };
@@ -127,7 +110,9 @@ const ResourceData: FC<{
                 }}
             >
                 <Td px={"4"} py={"2"}>
-                    <Text fontSize={textFontSize}>{resource.dateAdded}</Text>
+                    <Text fontSize={textFontSize}>
+                        {new Date(resource.dateAdded).toLocaleString()}
+                    </Text>
                 </Td>
                 <Td px={"4"} py={"2"}>
                     <Button
@@ -137,6 +122,10 @@ const ResourceData: FC<{
                         textDecor={"underline"}
                         color={"primary"}
                         fontSize={textFontSize}
+                        textOverflow={"ellipsis"}
+                        overflow={"hidden"}
+                        whiteSpace={"nowrap"}
+                        maxW={"30vw"}
                     >
                         {resource.filename}
                     </Button>
@@ -185,10 +174,10 @@ const ResourceData: FC<{
                                     return (
                                         <ResourceDataCEAPOptions
                                             isCurrent={showStatus}
-                                            resourceId={resource.id}
+                                            resourceId={resource._id}
                                             onDownload={() => download()}
                                             onAccept={() =>
-                                                onAccept(resource.id)
+                                                onAccept(resource._id)
                                             }
                                             onReject={reject}
                                         />
@@ -199,7 +188,7 @@ const ResourceData: FC<{
                                         <ResourceDataAdminOptions
                                             setProcessing={setProcessing}
                                             isCurrent={showStatus}
-                                            resourceId={resource.id}
+                                            resourceId={resource._id}
                                             onDownload={() => download()}
                                             onForward={() => refetch()}
                                             onReject={reject}

@@ -4,6 +4,7 @@ import axios, { AxiosError } from "axios";
 import {
     Box,
     Button,
+    Checkbox,
     Flex,
     Progress,
     Text,
@@ -19,6 +20,7 @@ import AddFileModal from "./AddFileModal";
 import { FaFile } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import FileUploadItem from "./FileUploadItem";
+import UploadTermsModal from "@components/Modal/UploadTermsModal";
 
 export interface FileUpload {
     file: File;
@@ -35,6 +37,8 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
     const [error, setError] = useState<string | undefined>(undefined);
     const toast = useToast();
 
+    const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
+
     const [current, setCurrent] = useState<number>(-1);
 
     const [progress, setProgress] = useState<number>(0);
@@ -43,6 +47,12 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
         isOpen: showAddFile,
         onOpen: openAddFile,
         onClose: closeAddFile,
+    } = useDisclosure();
+
+    const {
+        isOpen: showTerms,
+        onClose: closeTerms,
+        onOpen: openTerms,
     } = useDisclosure();
 
     const upload = async (e: FormEvent) => {
@@ -156,11 +166,21 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                             <Text>No Files Selected</Text>
                         )}
                     </VStack>
-                    <Text fontSize={"sm"} color={"gray.500"} mt={"2"}>
-                        *Upon requesting for upload, the uploaded files will
-                        initially be under review for approval by CEAP
-                        Super-admins and Admins.
-                    </Text>
+                    <Checkbox
+                        mt={"4"}
+                        isChecked={termsAgreed}
+                        onChange={(e) => setTermsAgreed(e.target.checked)}
+                    >
+                        I agree to the{" "}
+                        <Button
+                            variant={"link"}
+                            display={"inline"}
+                            onClick={() => openTerms()}
+                        >
+                            Terms and Conditions
+                        </Button>{" "}
+                        when uploading resources
+                    </Checkbox>
                     {error && (
                         <Text color={"red"} fontWeight={"normal"} mt={"2"}>
                             {error}
@@ -173,6 +193,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                             variant={"secondary"}
                             mt={error ? "2" : "4"}
                             type={"submit"}
+                            disabled={files.length < 1 || !termsAgreed}
                         >
                             Upload
                         </Button>
@@ -197,6 +218,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                         onUpdate={current !== -1 ? updateFile : () => {}}
                     />
                 )}
+                {showTerms && <UploadTermsModal onDismiss={closeTerms} />}
             </AnimatePresence>
         </Overlay>
     );

@@ -1,6 +1,6 @@
 import { PageWithLayout } from "./_app";
 import Layout from "@components/Layout";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { GetServerSideProps } from "next";
 import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
@@ -12,7 +12,7 @@ import {
     Button,
     Center,
     CircularProgress,
-    Select,
+    Flex,
     Stack,
     Table,
     TableContainer,
@@ -24,9 +24,9 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import TableHeader from "@components/TableHeader";
-import { connectDB, ILogSchema, IUserSchema, Log, User } from "@db/index";
+import { ILogSchema, IUserSchema } from "@db/index";
 import LogData from "@components/Logs/LogData";
-import { FaDownload, FaFileAlt, FaSync } from "react-icons/fa";
+import { FaDownload, FaSync, FaCaretLeft, FaCaretRight } from "react-icons/fa";
 
 import { AnimatePresence } from "framer-motion";
 import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
@@ -34,9 +34,7 @@ import SearchBar from "@components/SearchBar";
 import { FormEvent, useState } from "react";
 import { useData } from "@util/hooks/useData";
 
-const Logs: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ logs }) => {
+const Logs: PageWithLayout = () => {
     const {
         isOpen: showReports,
         onOpen: openReports,
@@ -44,16 +42,42 @@ const Logs: PageWithLayout<
     } = useDisclosure();
 
     const [query, setQuery] = useState<string>("");
-    const [criteria, setCriteria] = useState<string>("name");
 
-    const { data, refetch, isLoading } = useData("", logs);
+    const [page, setPage] = useState<number>(1);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+
+    const [sortKey, setSortKey] = useState<string>("datePerformed");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+    const { data, refetch, isLoading } = useData<LogDataInfo[]>(
+        "/api/admin/logs?p=1&sortBy=datePerformed&sortDir=desc"
+    );
 
     const search = (e: FormEvent) => {
-        if (!criteria) {
-            return;
-        }
         e.preventDefault();
-        refetch(`/api/admin/logs?${criteria}=${query}`);
+        setIsSearching(true);
+        setPage(1);
+        refetch(`/api/admin/logs?q=${query}&p=1`);
+    };
+
+    const sortData = (key: string) => {
+        setPage(1);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
+        }
+        setSortKey(key);
+
+        if (isSearching) {
+            refetch(
+                `/api/admin/logs?q=${query}&p=${1}&sortBy=${key}&sortDir=${currentDir}`
+            );
+        } else {
+            refetch(
+                `/api/admin/logs?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+            );
+        }
     };
 
     return (
@@ -78,8 +102,14 @@ const Logs: PageWithLayout<
             >
                 <Button
                     onClick={() => {
-                        refetch(`/api/admin/logs`);
+                        refetch(
+                            `/api/admin/logs?p=1&sortBy=datePerformed&sortDir=desc`
+                        );
                         setQuery("");
+                        setIsSearching(false);
+                        setSortDir("desc");
+                        setSortKey("datePerformed");
+                        setPage(1);
                     }}
                     px={"8"}
                     w={{ base: "full", md: "max-content" }}
@@ -89,20 +119,6 @@ const Logs: PageWithLayout<
                     </Center>
                     <Text color={"inherit"}>Refresh</Text>
                 </Button>
-                <Select
-                    w={{ base: "full", md: "30%" }}
-                    onChange={(e) => {
-                        setCriteria(e.target.value);
-                        setQuery("");
-                    }}
-                    required
-                >
-                    <option value={"name"} selected>
-                        User's Name
-                    </option>
-                    <option value={"action"}>Action</option>
-                    <option value={"details"}>Details</option>
-                </Select>
                 <SearchBar
                     query={query}
                     setQuery={setQuery}
@@ -112,12 +128,51 @@ const Logs: PageWithLayout<
                     hasForm
                 />
             </Stack>
+            <Flex align={"center"} justify={"end"}>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        if (isSearching) {
+                            refetch(
+                                `/api/admin/logs?$q=${query}&p=${
+                                    page - 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
+                        } else {
+                            refetch(`/api/admin/logs?p=${page - 1}&sortBy=${sortKey}&sortDir=${sortDir}`);
+                        }
+                        setPage((p) => p - 1);
+                    }}
+                    disabled={page - 1 <= 0 || isLoading}
+                >
+                    <Box as={FaCaretLeft} color={"primary"} />
+                </Button>
+                <Text>{page}</Text>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        if (isSearching) {
+                            refetch(
+                                `/api/admin/logs?q=${query}&p=${
+                                    page + 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
+                        } else {
+                            refetch(`/api/admin/logs?p=${page + 1}&sortBy=${sortKey}&sortDir=${sortDir}`);
+                        }
+                        setPage((p) => p + 1);
+                    }}
+                    disabled={isLoading || (data && data?.length < 30)}
+                >
+                    <Box as={FaCaretRight} color={"primary"} />
+                </Button>
+            </Flex>
             <TableContainer overflowY={"auto"}>
                 <Table>
                     <Thead
                         bg={"gray.100"}
                         position={"sticky"}
-                        top={"1"}
+                        top={"0"}
                         zIndex={"2"}
                         maxH={{
                             base: "calc(85vh-11rem)",
@@ -125,10 +180,26 @@ const Logs: PageWithLayout<
                         }}
                     >
                         <Tr>
-                            <TableHeader heading={"Date Performed"} />
-                            <TableHeader heading={"User"} />
-                            <TableHeader heading={"Action"} />
-                            <TableHeader heading={"Details"} />
+                            <TableHeader
+                                heading={"Date Performed"}
+                                sortable
+                                onClick={() => sortData("datePerformed")}
+                            />
+                            <TableHeader
+                                heading={"User"}
+                                sortable
+                                onClick={() => sortData("user.displayName")}
+                            />
+                            <TableHeader
+                                heading={"Action"}
+                                sortable
+                                onClick={() => sortData("action")}
+                            />
+                            <TableHeader
+                                heading={"Details"}
+                                sortable
+                                onClick={() => sortData("details")}
+                            />
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -189,52 +260,10 @@ export type LogDataInfo = ILogSchema & {
     memberSchool?: string;
 };
 
-export const getServerSideProps: GetServerSideProps<{
-    logs?: LogDataInfo[];
-}> = AuthGetServerSideProps(
+export const getServerSideProps: GetServerSideProps = AuthGetServerSideProps(
     async (ctx: GetServerSidePropsContextWithUser) => {
-        await connectDB();
-        const user = await User.findOne({ authId: ctx.uid });
-        if (user) {
-            switch (user.accountType) {
-                case AccountType.CEAP_SUPER_ADMIN:
-                case AccountType.CEAP_ADMIN:
-                    const logs = await Log.find({})
-                        .populate("user", ["id", "displayName"])
-                        .limit(30);
-
-                    return {
-                        props: {
-                            logs: logs.map((log) => ({
-                                ...log.toJSON(),
-                                datePerformed: log.datePerformed.toString(),
-                                memberSchool:
-                                    log?.memberSchool?.toHexString() || "",
-                            })),
-                        },
-                    };
-
-                case AccountType.MS_ADMIN:
-                    const logData = await Log.find({
-                        memberSchool: user.memberSchool,
-                    })
-                        .populate("user", ["id", "displayName"])
-                        .limit(30);
-                    return {
-                        props: {
-                            logs: logData.map((log) => ({
-                                ...log.toJSON(),
-                                datePerformed: log.datePerformed.toString(),
-                                memberSchool:
-                                    log?.memberSchool?.toHexString() || "",
-                            })),
-                        },
-                    };
-            }
-        }
-
         return {
-            notFound: true,
+            props: {},
         };
     },
     [AccountType.CEAP_SUPER_ADMIN, AccountType.CEAP_ADMIN, AccountType.MS_ADMIN]

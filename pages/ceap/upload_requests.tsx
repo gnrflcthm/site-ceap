@@ -13,6 +13,7 @@ import {
     TableContainer,
     Tbody,
     Td,
+    Text,
     Thead,
     Tr,
     useDisclosure,
@@ -27,23 +28,30 @@ import Layout from "@components/Layout";
 
 import TableHeader from "@components/TableHeader";
 import { useData } from "@util/hooks/useData";
-import ResourceData from "@components/Uploads/ResourceData";
+import ResourceData, {
+    IResourceDataType,
+} from "@components/Uploads/ResourceData";
 
-import { Resource, connectDB, IResourceSchema } from "@db/index";
+import { Resource, connectDB, IResourceSchema, IUserSchema } from "@db/index";
 
 import { AccountType, ResourceStatus, FileType } from "@util/Enums";
 import TabButton from "@components/Accounts/TabButton";
 import { useState } from "react";
-import { FaCloudUploadAlt, FaUpload } from "react-icons/fa";
+import { FaCaretLeft, FaCaretRight, FaCloudUploadAlt, FaUpload } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import AcceptResourceModal from "@components/Uploads/AcceptResourceModal";
 import UploadModal from "@components/Uploads/UploadModal";
 
-const UploadRequests: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ uploads }) => {
-    const { data, isLoading, refetch } = useData("", uploads);
+const UploadRequests: PageWithLayout = () => {
+    const { data, isLoading, refetch } = useData<IResourceDataType[]>(
+        "/api/resource/a/requests"
+    );
     const [current, setCurrent] = useState<"requests" | "uploads">("requests");
+
+    const [page, setPage] = useState<number>(1);
+
+    const [sortKey, setSortKey] = useState<string>("datePerformed");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     const {
         isOpen: showResourceModal,
@@ -58,8 +66,29 @@ const UploadRequests: PageWithLayout<
     } = useDisclosure();
 
     const [currentResource, setCurrentResource] = useState<
-        ResourceType | undefined
+        IResourceDataType | undefined
     >(undefined);
+
+    const sortData = (key: string) => {
+        setPage(1);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
+        }
+        setSortKey(key);
+
+        refetch(
+            `/api/resource/a${
+                current === "requests" ? "/requests" : ""
+            }?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+        );
+        console.log(
+            `/api/resource/a${
+                current === "requests" ? "/requests" : ""
+            }?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+        );
+    };
 
     return (
         <>
@@ -100,18 +129,80 @@ const UploadRequests: PageWithLayout<
                     </TabButton>
                 </Flex>
             </Flex>
+            <Flex align={"center"} justify={"end"}>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(
+                            `/api/resource/a${
+                                current === "requests" ? "/requests" : ""
+                            }?p=${
+                                page - 1
+                            }&sortBy=${sortKey}&sortDir=${sortDir}`
+                        );
+
+                        setPage((p) => p - 1);
+                    }}
+                    disabled={page - 1 <= 0 || isLoading}
+                >
+                    <Box as={FaCaretLeft} color={"primary"} />
+                </Button>
+                <Text>{page}</Text>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(
+                            `/api/resource/a${
+                                current === "requests" ? "/requests" : ""
+                            }?p=${
+                                page + 1
+                            }&sortBy=${sortKey}&sortDir=${sortDir}`
+                        );
+
+                        setPage((p) => p + 1);
+                    }}
+                    disabled={isLoading || (data && data?.length < 30)}
+                >
+                    <Box as={FaCaretRight} color={"primary"} />
+                </Button>
+            </Flex>
             <TableContainer maxH={"inherit"} overflowY={"auto"}>
                 <Table>
-                    <Thead bg={"gray.100"} position={"sticky"} top={"0"} zIndex={4}>
+                    <Thead
+                        bg={"gray.100"}
+                        position={"sticky"}
+                        top={"0"}
+                        zIndex={"2"}
+                    >
                         <Tr>
-                            <TableHeader heading={"Date Uploaded"} sortable />
-                            <TableHeader heading={"File Name"} />
-                            <TableHeader heading={"file type"} />
+                            <TableHeader
+                                heading={"Date Uploaded"}
+                                sortable
+                                onClick={() => sortData("dateAdded")}
+                            />
+                            <TableHeader
+                                heading={"File Name"}
+                                sortable
+                                onClick={() => sortData("filename")}
+                            />
+                            <TableHeader
+                                heading={"file type"}
+                                sortable
+                                onClick={() => sortData("fileType")}
+                            />
                             <TableHeader
                                 heading={
                                     current === "requests"
                                         ? "uploader"
                                         : "status"
+                                }
+                                sortable
+                                onClick={() =>
+                                    sortData(
+                                        current === "requests"
+                                            ? "uploadedBy.displayName"
+                                            : "status"
+                                    )
                                 }
                             />
                             <TableHeader heading="" />
@@ -121,12 +212,12 @@ const UploadRequests: PageWithLayout<
                         {data?.map((resource) => (
                             <ResourceData
                                 showStatus={current === "uploads"}
-                                key={resource.id}
+                                key={resource._id}
                                 resource={resource}
                                 refetch={refetch}
                                 onAccept={(id: string) => {
                                     const targetResource = data.find(
-                                        (resource) => resource.id === id
+                                        (resource) => resource._id === id
                                     );
                                     setCurrentResource(targetResource);
                                     openResourceModal();
@@ -170,35 +261,9 @@ const UploadRequests: PageWithLayout<
     );
 };
 
-export type ResourceType = IResourceSchema & {
-    id: string;
-    dateAdded: string;
-    uploadedBy: { id: string; displayName?: string };
-    memberSchool?: string;
-};
-
-export const getServerSideProps: GetServerSideProps<{
-    uploads?: ResourceType[];
-}> = AuthGetServerSideProps(
+export const getServerSideProps: GetServerSideProps = AuthGetServerSideProps(
     async (ctx: GetServerSidePropsContextWithUser) => {
-        await connectDB();
-
-        const uploads = await Resource.find({
-            status: ResourceStatus.FOR_CEAP_REVIEW,
-        })
-            .populate("uploadedBy", ["id", "displayName"])
-            .populate("folder", ["id", "name", "fullPath"])
-            .exec();
-
-        return {
-            props: {
-                uploads: uploads.map((resources) => ({
-                    ...resources.toJSON(),
-                    dateAdded: resources.dateAdded.toDateString(),
-                    memberSchool: resources.memberSchool?.toHexString() || "",
-                })),
-            },
-        };
+        return { props: {} };
     },
     [AccountType.CEAP_ADMIN, AccountType.CEAP_SUPER_ADMIN, AccountType.MS_ADMIN]
 );

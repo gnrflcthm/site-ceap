@@ -12,7 +12,15 @@ import {
     SimpleGrid,
     Flex,
     Button,
-    useToast,
+    Stack,
+    IconButton,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    useDisclosure,
+    Box,
+    Center,
     CircularProgress,
 } from "@chakra-ui/react";
 import Layout from "@components/Layout";
@@ -25,70 +33,77 @@ import axios, { AxiosError } from "axios";
 import UpdatePasswordModal from "@components/Profile/UpdatePasswordModal";
 import TopPanel from "@components/TopPanel";
 import { connectDB, IUserSchema, User } from "@db/index";
+import { FaCog } from "react-icons/fa";
+import { AnimatePresence } from "framer-motion";
+import EditUserModal from "@components/Accounts/EditUserModal";
+import { useData } from "@util/hooks/useData";
 
-export const ProfileModeContext = createContext<[boolean, Function]>([
-    false,
-    () => {},
-]);
+const Profile: PageWithLayout = () => {
+    const {
+        data: userData,
+        isLoading,
+        refetch,
+    } = useData<
+        IUserSchema & {
+            id: string;
+            memberSchool: { id: string; name: string };
+        }
+    >("/api/user/profile");
 
-const Profile: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ userInfo }) => {
-    const [updating, setUpdating] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
-    const toast = useToast();
+    const {
+        isOpen: showPass,
+        onClose: closePass,
+        onOpen: openPass,
+    } = useDisclosure();
 
-    const [showUpdatePassword, setShowUpdatePassword] =
-        useState<boolean>(false);
-
-    const [displayName, setDisplayName] = useState<string>(
-        userInfo?.displayName || ""
-    );
-
-    const save = () => {
-        setLoading(true);
-        axios
-            .post("/api/user/update", {
-                displayName /* Add more fields according to updateable fields */,
-            })
-            .then(() => {
-                toast({
-                    title: "Profile Updated Successfully",
-                    status: "success",
-                });
-            })
-            .catch((err: AxiosError) => {
-                console.log(err.response?.statusText);
-                toast({
-                    title: "An Error Has Occured While Updating Your Profile",
-                    status: "error",
-                });
-            })
-            .finally(() => {
-                setUpdating(false);
-                setLoading(false);
-            });
-    };
+    const {
+        isOpen: showEdit,
+        onClose: closeEdit,
+        onOpen: openEdit,
+    } = useDisclosure();
 
     return (
         <>
             <Head>
                 <title>Profile</title>
             </Head>
-            <VStack
-                align={"stretch"}
-                spacing={"2"}
-                flex={"1"}
-                position={"relative"}
-                overflow={"hidden"}
-                overflowY={"auto"}
-            >
-                <TopPanel title={"Profile"} />
-                <VStack align={"flex-start"} p={"4"} m={"0"}>
+            <TopPanel title={"Profile"} />
+            <VStack align={"flex-start"} p={"4"}>
+                <Flex justify={"space-between"} align={"center"} w={"full"}>
                     <Heading fontSize={{ base: "lg", lg: "2xl" }}>
-                        Basic Information
+                        User Information
                     </Heading>
-                    <Divider borderColor={"neutralizerDark"} />
+                    <Menu>
+                        <MenuButton
+                            color={"neutralizerDark"}
+                            _hover={{ color: "secondary" }}
+                        >
+                            <Box
+                                as={FaCog}
+                                color={"inherit"}
+                                fontSize={"2xl"}
+                            />
+                        </MenuButton>
+                        <MenuList>
+                            <MenuItem onClick={() => openEdit()}>
+                                Edit Info
+                            </MenuItem>
+                            <MenuItem onClick={() => openPass()}>
+                                Update Password
+                            </MenuItem>
+                        </MenuList>
+                    </Menu>
+                </Flex>
+                <Divider borderColor={"neutralizerDark"} />
+                {isLoading && !userData ? (
+                    <Center w={"full"} p={"8"}>
+                        <CircularProgress
+                            isIndeterminate
+                            size={"8"}
+                            color={"secondary"}
+                        />
+                    </Center>
+                ) : (
                     <SimpleGrid
                         templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
                         gridAutoFlow={"row"}
@@ -96,142 +111,66 @@ const Profile: PageWithLayout<
                         spacingX={"10"}
                         spacingY={"4"}
                     >
-                        <ProfileModeContext.Provider
-                            value={[updating, setUpdating]}
-                        >
-                            <UserInfo
-                                label={"Name"}
-                                value={`${userInfo?.firstName} ${
-                                    userInfo?.middleName
-                                        ? userInfo?.middleName[0] + "."
-                                        : ""
-                                } ${userInfo?.lastName}`}
-                            />
-                            <UserInfo
-                                label={"Display Name"}
-                                value={displayName}
-                                setValue={setDisplayName}
-                                isEditable
-                            />
-                            <UserInfo
-                                label={"Email"}
-                                value={`${userInfo?.email}`}
-                            />
-                            <UserInfo
-                                label={"Contact No."}
-                                value={`${userInfo?.mobileNumber || "N/A"}`}
-                            />
-                            <UserInfo
-                                label={"Member School"}
-                                value={`${
-                                    userInfo?.memberSchool?.name || "N/A"
-                                }`}
-                            />
-                            <UserInfo
-                                label={"Password"}
-                                placeholder={"Update Password"}
-                                onClick={() => setShowUpdatePassword(true)}
-                                isEditable
-                                isHidden
-                            />
-                        </ProfileModeContext.Provider>
+                        <UserInfo
+                            label={"First Name"}
+                            value={userData?.firstName}
+                        />
+                        <UserInfo
+                            label={"Last Name"}
+                            value={userData?.lastName}
+                        />
+                        <UserInfo
+                            label={"Middle Name"}
+                            value={userData?.middleName || ""}
+                        />
+                        <UserInfo
+                            label={"Display Name"}
+                            value={userData?.displayName || ""}
+                        />
+                        <UserInfo
+                            label={"Email"}
+                            value={`${userData?.email}`}
+                        />
+                        <UserInfo
+                            label={"Contact No."}
+                            value={`${userData?.mobileNumber || "N/A"}`}
+                        />
+                        <UserInfo
+                            label={"Member School"}
+                            value={`${userData?.memberSchool?.name || "N/A"}`}
+                        />
                     </SimpleGrid>
-                </VStack>
-                <UpdatePasswordModal
-                    email={userInfo?.email}
-                    show={showUpdatePassword}
-                    setShow={setShowUpdatePassword}
-                />
-                {updating && (
-                    <Flex justify={"flex-end"} align={"center"} p={"4"}>
-                        <Button
-                            w={"fit-content"}
-                            onClick={() => {
-                                setDisplayName(userInfo?.displayName || "");
-                                setUpdating(false);
-                            }}
-                            mr={"2"}
-                            bg={"red.500"}
-                            _hover={{
-                                bg: "red.300",
-                            }}
-                            disabled={loading}
-                            size={{ base: "sm", md: "md" }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            w={"fit-content"}
-                            bg={"green.500"}
-                            _hover={{
-                                bg: "green.300",
-                            }}
-                            onClick={() => save()}
-                            disabled={loading}
-                            size={{ base: "sm", md: "md" }}
-                        >
-                            {loading ? (
-                                <CircularProgress isIndeterminate size={6} />
-                            ) : (
-                                "Save Changes"
-                            )}
-                        </Button>
-                    </Flex>
                 )}
             </VStack>
+            <AnimatePresence>
+                {showPass && (
+                    <UpdatePasswordModal
+                        email={userData?.email}
+                        onDismiss={closePass}
+                    />
+                )}
+                {showEdit && (
+                    <EditUserModal
+                        user={userData!}
+                        onCancel={() => closeEdit()}
+                        onSave={() => {
+                            refetch();
+                            closeEdit();
+                        }}
+                        hasSchoolId={true}
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 };
 
-Profile.PageLayout = Layout;
-
-export interface IUserInfo {
-    id: string;
-    displayName?: string;
-    email: string;
-    mobileNumber?: string;
-    memberSchool?: {
-        name: string;
-    };
-    firstName: string;
-    lastName: string;
-    middleName?: string;
-}
-
-export const getServerSideProps: GetServerSideProps<{
-    userInfo?: IUserSchema & {
-        id: string;
-        memberSchool: { id: string; name: string };
-    };
-}> = AuthGetServerSideProps(
+export const getServerSideProps: GetServerSideProps = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        await connectDB();
-
-        const userInfo = await User.findOne(
-            { authId: uid },
-            {},
-            {
-                fields: [
-                    "id",
-                    "displayName",
-                    "email",
-                    "mobileNumber",
-                    "memberSchool.name",
-                    "firstName",
-                    "lastName",
-                    "middleName",
-                ],
-            }
-        )
-            .populate("memberSchool", ["id", "name"])
-            .exec();
-
-        return {
-            props: {
-                userInfo: userInfo?.toJSON(),
-            },
-        };
+        return { props: {} };
     }
 );
+
+Profile.PageLayout = Layout;
 
 export default Profile;

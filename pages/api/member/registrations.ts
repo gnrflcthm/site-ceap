@@ -17,39 +17,81 @@ export default authenticatedHandler([
     try {
         await connectDB();
 
-        const admin = await User.findOne({ authId: uid });
+        let page: number = 0;
 
-        let registrations;
-
-        if (admin) {
-            switch (admin.accountType) {
-                case AccountType.CEAP_ADMIN:
-                case AccountType.CEAP_SUPER_ADMIN:
-                    registrations = await MSAdminRegistration.find().populate(
-                        "memberSchool",
-                        ["id", "name"]
-                    );
-                    break;
-                case AccountType.MS_ADMIN:
-                    registrations = await UserRegistration.find({
-                        memberSchool: admin?.memberSchool,
-                    });
-                    break;
-                default:
-                    res.statusMessage =
-                        "You do not have sufficient permissions.";
-                    res.status(403);
-                    res.end();
-                    return;
-            }
-            res.status(200).json(registrations);
-            res.end();
-        } else {
-            res.statusMessage = "You do not have sufficient permissions.";
-            res.status(403);
-            res.end();
-            return;
+        if (req.query && req.query.p && !Array.isArray(req.query.p)) {
+            try {
+                let temp = parseInt(req.query.p) - 1;
+                page = temp < 0 ? 0 : temp;
+            } catch (err) {}
         }
+
+        let sortKey: string = "_id";
+        let sortDir: string = "desc";
+
+        if (req.query.sortBy && !Array.isArray(req.query.sortBy)) {
+            sortKey = req.query.sortBy;
+            if (req.query.sortDir && !Array.isArray(req.query.sortDir)) {
+                sortDir = req.query.sortDir;
+            }
+        }
+
+        const user = await User.findOne({ authId: uid }).orFail();
+
+        let registrations: any[] | undefined = undefined;
+        switch (user.accountType) {
+            case AccountType.CEAP_SUPER_ADMIN:
+            case AccountType.CEAP_ADMIN:
+                registrations = await MSAdminRegistration.aggregate([
+                    {
+                        $lookup: {
+                            from: "MemberSchool",
+                            localField: "memberSchool",
+                            foreignField: "_id",
+                            as: "memberSchool",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$memberSchool",
+                            includeArrayIndex: "0",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $sort: {
+                            [sortKey]: sortDir === "desc" ? -1 : 1,
+                        },
+                    },
+                    {
+                        $skip: page * 30,
+                    },
+                    {
+                        $limit: 30,
+                    },
+                ]);
+                break;
+            case AccountType.MS_ADMIN:
+                registrations = await UserRegistration.aggregate([
+                    {
+                        $match: {
+                            memberSchool: user.memberSchool,
+                        },
+                    },
+                    {
+                        $sort: {
+                            [sortKey]: sortDir === "desc" ? -1 : 1,
+                        },
+                    },
+                    {
+                        $skip: page * 30,
+                    },
+                    {
+                        $limit: 30,
+                    },
+                ]);
+        }
+        res.status(200).json(registrations || []);
     } catch (err) {
         res.statusMessage = "An Error has occured fetching the registrations.";
         res.status(500);

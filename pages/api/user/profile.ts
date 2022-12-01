@@ -11,7 +11,7 @@ export default authenticatedHandler().get(async ({ uid }, res) => {
         .exec();
 
     if (userInfo) {
-        res.status(200).json(userInfo);
+        res.status(200).json(userInfo.toJSON());
     } else {
         res.statusMessage = "User Info Not Found";
         res.status(404);

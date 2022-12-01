@@ -16,6 +16,9 @@ import { motion } from "framer-motion";
 import axios, { AxiosError } from "axios";
 import { IUserSchema } from "@db/models";
 import { AccountType } from "@util/Enums";
+import Overlay from "@components/Modal/Overlay";
+import Modal from "@components/Modal/Modal";
+import ModalHeader from "@components/Modal/ModalHeader";
 
 const EditUserModal: FC<{
     user: IUserSchema & {
@@ -23,14 +26,15 @@ const EditUserModal: FC<{
         memberSchool?: { id: string; name: string };
     };
     hasSchoolId?: boolean;
-    accountTypes: AccountType[];
     onSave: Function;
     onCancel: Function;
-}> = ({ user, hasSchoolId = false, accountTypes, onSave, onCancel }) => {
+}> = ({ user, hasSchoolId = false, onSave, onCancel }) => {
     const toast = useToast();
     const [firstName, setFirstName] = useState<string>(user.firstName);
     const [lastName, setLastName] = useState<string>(user.lastName);
-    const [middleName, setMiddleName] = useState<string | undefined>(user?.middleName);
+    const [middleName, setMiddleName] = useState<string | undefined>(
+        user?.middleName
+    );
     const [displayName, setDisplayName] = useState<string>(
         user.displayName || ""
     );
@@ -39,9 +43,7 @@ const EditUserModal: FC<{
         user.mobileNumber || ""
     );
     const [schoolId, setSchoolId] = useState<string>(user.schoolId || "");
-    const [accountType, setAccountType] = useState<AccountType>(
-        user.accountType
-    );
+
     const [error, setError] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -59,7 +61,6 @@ const EditUserModal: FC<{
                 displayName,
                 email,
                 mobileNumber,
-                accountType,
                 schoolId: hasSchoolId ? schoolId : "",
             })
             .then(() => {
@@ -77,115 +78,89 @@ const EditUserModal: FC<{
     };
 
     return (
-        <Center
-            as={motion.div}
-            position={"absolute"}
-            w={"full"}
-            h={"full"}
-            top={"0"}
-            left={"0"}
-            bg={"blackAlpha.500"}
-            zIndex={"modal"}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-        >
-            <Flex
-                as={motion.div}
-                flexDir={"column"}
-                justify={"flex-start"}
-                align={"stretch"}
-                rounded={"md"}
-                position={"relative"}
-                bg={"neutralizerLight"}
-                p={"8"}
-                w={{ base: "90%", md: "75%", xl: "25%" }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-            >
-                <Heading mb={"8"} textAlign={"center"} w={"full"}>
-                    Edit User
-                </Heading>
-                <form onSubmit={save}>
-                    <VStack spacing={"8"} w={"full"}>
+        <Overlay>
+            <Modal>
+                <ModalHeader
+                    title={"Update Profile"}
+                    onDismiss={() => onCancel()}
+                />
+                <VStack
+                    as={"form"}
+                    onSubmit={save}
+                    spacing={"8"}
+                    w={"full"}
+                    pt={"8"}
+                    px={"4"}
+                    id={"editProfile"}
+                >
+                    <CoreInput
+                        value={lastName}
+                        setValue={setLastName}
+                        placeholder={"Last Name"}
+                        disabled={loading}
+                        required
+                    />
+                    <CoreInput
+                        value={firstName}
+                        setValue={setFirstName}
+                        placeholder={"First Name"}
+                        disabled={loading}
+                        required
+                    />
+                    <CoreInput
+                        value={middleName}
+                        setValue={setMiddleName}
+                        placeholder={"Middle Name"}
+                        disabled={loading}
+                    />
+                    <CoreInput
+                        value={displayName}
+                        setValue={setDisplayName}
+                        placeholder={"Display Name"}
+                        disabled={loading}
+                        required
+                    />
+                    <CoreInput
+                        value={email}
+                        setValue={setEmail}
+                        placeholder={"Email Address"}
+                        disabled={loading}
+                        required
+                    />
+                    <CoreInput
+                        value={mobileNumber}
+                        setValue={setMobileNumber}
+                        placeholder={"Mobile Number (+639xxxxxxxxx)"}
+                        disabled={loading}
+                        pattern={"^\\+63\\d{10}$"}
+                    />
+                    {hasSchoolId && (
                         <CoreInput
-                            value={lastName}
-                            setValue={setLastName}
-                            placeholder={"Last Name"}
-                            disabled={loading}
-                            required
-                        />
-                        <CoreInput
-                            value={firstName}
-                            setValue={setFirstName}
-                            placeholder={"First Name"}
-                            disabled={loading}
-                            required
-                        />
-                        <CoreInput
-                            value={middleName}
-                            setValue={setMiddleName}
-                            placeholder={"Middle Name"}
-                            disabled={loading}
-                        />
-                        <CoreInput
-                            value={displayName}
-                            setValue={setDisplayName}
-                            placeholder={"Display Name"}
-                            disabled={loading}
-                            required
-                        />
-                        <CoreInput
-                            value={email}
-                            setValue={setEmail}
-                            placeholder={"Email Address"}
-                            disabled={loading}
-                            required
-                        />
-                        <CoreInput
-                            value={mobileNumber}
-                            setValue={setMobileNumber}
-                            placeholder={"Mobile Number (+639xxxxxxxxx)"}
-                            disabled={loading}
-                            pattern={"^\\+63\\d{10}$"}
-                        />
-                        {hasSchoolId && (
-                            <CoreInput
-                                value={schoolId}
-                                setValue={setSchoolId}
-                                placeholder={"School ID"}
-                                disabled={loading}
-                            />
-                        )}
-                        <CoreInput
-                            value={accountType}
-                            setValue={setAccountType}
-                            placeholder={"Account Type"}
-                            type={"select"}
-                            values={accountTypes.map((val) => ({
-                                name: getAccountType(val),
-                                value: val,
-                            }))}
+                            value={schoolId}
+                            setValue={setSchoolId}
+                            placeholder={"School ID"}
                             disabled={loading}
                         />
-                    </VStack>
-                    {error && (
-                        <Text
-                            my={"2"}
-                            color={"red.500"}
-                            textAlign={"center"}
-                            w={"full"}
-                        >
-                            {error}
-                        </Text>
                     )}
+                </VStack>
+                {error && (
+                    <Text
+                        my={"2"}
+                        color={"red.500"}
+                        textAlign={"center"}
+                        w={"full"}
+                    >
+                        {error}
+                    </Text>
+                )}
+                <Flex w={"full"} justify={"end"} align={"center"} p={"4"}>
                     <Button
                         variant={"secondary"}
                         mt={"4"}
-                        rounded={"md"}
                         type={"submit"}
+                        form={"editProfile"}
                         disabled={loading}
+                        w={"fit-content"}
                     >
                         {loading ? (
                             <CircularProgress
@@ -194,22 +169,12 @@ const EditUserModal: FC<{
                                 color={"primary"}
                             />
                         ) : (
-                            "Save"
+                            "Update Profile"
                         )}
                     </Button>
-                    <Button
-                        type={"button"}
-                        variant={"outline"}
-                        mt={"4"}
-                        rounded={"md"}
-                        onClick={() => onCancel()}
-                        disabled={loading}
-                    >
-                        Cancel
-                    </Button>
-                </form>
-            </Flex>
-        </Center>
+                </Flex>
+            </Modal>
+        </Overlay>
     );
 };
 

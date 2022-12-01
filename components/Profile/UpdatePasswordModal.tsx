@@ -1,11 +1,6 @@
 import { FC, FormEvent, useState } from "react";
 
 import {
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalHeader,
-    ModalOverlay,
     useDisclosure,
     Heading,
     VStack,
@@ -14,6 +9,7 @@ import {
     Text,
     CircularProgress,
     useToast,
+    Flex,
 } from "@chakra-ui/react";
 import CoreInput from "@components/CoreInput";
 
@@ -25,22 +21,14 @@ import {
     signOut,
     updatePassword,
 } from "firebase/auth";
+import Overlay from "@components/Modal/Overlay";
+import Modal from "@components/Modal/Modal";
+import ModalHeader from "@components/Modal/ModalHeader";
 
 const UpdatePasswordModal: FC<{
     email?: string;
-    show: boolean;
-    setShow: Function;
-}> = ({ email, show, setShow }) => {
-    const { isOpen, onClose, onOpen } = useDisclosure({
-        isOpen: show,
-        onClose: () => {
-            setShow(false);
-            setCurrent("");
-            setNewPassword("");
-            setConfirmPassword("");
-        },
-    });
-
+    onDismiss: Function;
+}> = ({ email, onDismiss }) => {
     const [current, setCurrent] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -68,7 +56,7 @@ const UpdatePasswordModal: FC<{
             );
             await updatePassword(user, newPassword);
             await signOut(auth);
-            onClose();
+            onDismiss();
             toast({
                 title: "Updated Password Successfully",
                 status: "success",
@@ -81,81 +69,68 @@ const UpdatePasswordModal: FC<{
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent
-                as={"form"}
-                p={"4"}
-                rounded={"md"}
-                onFocus={() => setError(undefined)}
-                onSubmit={updatePass}
-            >
-                <ModalHeader mb={"4"}>
-                    <Heading textAlign={"center"}>Update Password</Heading>
-                </ModalHeader>
-                <ModalBody>
-                    <VStack spacing={"8"}>
-                        <CoreInput
-                            placeholder={"Current Password"}
-                            type={"password"}
-                            value={current}
-                            setValue={setCurrent}
-                            disabled={loading}
-                        />
-                        <CoreInput
-                            placeholder={"New Password"}
-                            type={"password"}
-                            value={newPassword}
-                            setValue={setNewPassword}
-                            disabled={loading}
-                        />
-                        <CoreInput
-                            placeholder={"Confirm Password"}
-                            type={"password"}
-                            value={confirmPassword}
-                            setValue={setConfirmPassword}
-                            disabled={loading}
-                        />
-                        {error && (
-                            <Text as={"small"} fontSize={"sm"} color={"red"}>
-                                {error}
-                            </Text>
-                        )}
-                    </VStack>
-                </ModalBody>
-                <ModalFooter>
-                    <Button
-                        w={"fit-content"}
-                        fontSize={"md"}
-                        mr={"2"}
-                        onClick={onClose}
+        <Overlay>
+            <Modal>
+                <ModalHeader
+                    title={"Update Password"}
+                    onDismiss={() => onDismiss()}
+                />
+                <VStack
+                    spacing={"8"}
+                    p={"8"}
+                    pb={"0"}
+                    as={"form"}
+                    id={"passwordForm"}
+                    onSubmit={updatePass}
+                >
+                    <CoreInput
+                        placeholder={"Current Password"}
+                        type={"password"}
+                        value={current}
+                        setValue={setCurrent}
                         disabled={loading}
-                    >
-                        Cancel
-                    </Button>
+                    />
+                    <CoreInput
+                        placeholder={"New Password"}
+                        type={"password"}
+                        value={newPassword}
+                        setValue={setNewPassword}
+                        disabled={loading}
+                    />
+                    <CoreInput
+                        placeholder={"Confirm Password"}
+                        type={"password"}
+                        value={confirmPassword}
+                        setValue={setConfirmPassword}
+                        disabled={loading}
+                    />
+                    {error && (
+                        <Text as={"small"} fontSize={"sm"} color={"red"}>
+                            {error}
+                        </Text>
+                    )}
+                </VStack>
+                <Flex justify={"flex-end"} align={"center"} w={"full"} p={"4"}>
                     <Button
-                        type={"submit"}
-                        w={"fit-content"}
-                        fontSize={"md"}
                         variant={"secondary"}
+                        w={"fit-content"}
+                        type="submit"
+                        form={"passwordForm"}
                         disabled={loading}
                     >
                         {loading ? (
-                            <>
-                                <CircularProgress
-                                    size={6}
-                                    mr={"2"}
-                                    color={"primary"}
-                                />
-                                {" Updating"}
-                            </>
+                            <CircularProgress
+                                color={"primary"}
+                                isIndeterminate
+                                size={8}
+                            />
                         ) : (
                             "Update Password"
                         )}
                     </Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
+                </Flex>
+            </Modal>
+        </Overlay>
     );
 };
 

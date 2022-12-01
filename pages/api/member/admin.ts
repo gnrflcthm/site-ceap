@@ -9,38 +9,76 @@ export default authenticatedHandler([
     try {
         await connectDB();
 
-        const admin = await User.findOne({
+        const user = await User.findOne({
             authId: req.uid,
-        });
+        }).orFail();
 
-        if (admin) {
-            let admins = [];
-            switch (admin.accountType) {
-                case AccountType.MS_ADMIN:
-                    admins = await User.find({
-                        memberSchool: admin.memberSchool,
-                        accountType: AccountType.MS_ADMIN,
-                        authId: {
-                            $ne: req.uid
-                        }
-                    });
-                    break;
-                case AccountType.CEAP_SUPER_ADMIN:
-                    admins = await User.find({
-                        accountType: AccountType.MS_ADMIN,
-                    })
-                        .populate("memberSchool", ["id", "name"])
-                        .exec();
-                    break;
-                default:
-                    res.statusMessage =
-                        "You do not have sufficient permissions to access this route.";
-                    res.status(401);
-                    res.end();
-                    return;
-            }
-            res.status(200).json(admins);
+        let page: number = 0;
+
+        if (req.query.p && !Array.isArray(req.query.p)) {
+            try {
+                let temp = parseInt(req.query.p) - 1;
+                page = temp < 0 ? 0 : temp;
+            } catch (err) {}
         }
+
+        let sortKey: string = "_id";
+        let sortDir: string = "desc";
+
+        if (req.query.sortBy && !Array.isArray(req.query.sortBy)) {
+            sortKey = req.query.sortBy;
+            if (req.query.sortDir && !Array.isArray(req.query.sortDir)) {
+                sortDir = req.query.sortDir;
+            }
+        }
+
+        const admins = await User.aggregate([
+            ...(user.accountType === AccountType.CEAP_SUPER_ADMIN
+                ? [
+                      {
+                          $lookup: {
+                              from: "MemberSchool",
+                              localField: "memberSchool",
+                              foreignField: "_id",
+                              as: "memberSchool",
+                          },
+                      },
+                      {
+                          $unwind: {
+                              path: "$memberSchool",
+                              includeArrayIndex: "0",
+                              preserveNullAndEmptyArrays: true,
+                          },
+                      },
+                  ]
+                : []),
+            {
+                $match: {
+                    $and: [
+                        {
+                            accountType: AccountType.MS_ADMIN,
+                        },
+                        ...(user.accountType === AccountType.MS_ADMIN
+                            ? [{ memberSchool: user.memberSchool }]
+                            : []),
+                    ],
+                    _id: { $ne: user._id },
+                },
+            },
+            {
+                $sort: {
+                    [sortKey]: sortDir === "desc" ? -1 : 1,
+                },
+            },
+            {
+                $skip: 30 * page,
+            },
+            {
+                $limit: 30,
+            },
+        ]);
+
+        res.status(200).json(admins);
     } catch (err) {
         console.log(err);
         res.statusMessage = "An error has occured while retrieving data.";

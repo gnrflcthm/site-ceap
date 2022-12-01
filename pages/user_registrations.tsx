@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
@@ -20,9 +20,14 @@ import {
     Thead,
     Center,
     Td,
+    Flex,
+    Button,
+    Text,
+    Box,
+    useDisclosure,
 } from "@chakra-ui/react";
 
-import { FaSync } from "react-icons/fa";
+import { FaCaretLeft, FaCaretRight, FaSync } from "react-icons/fa";
 
 import TableHeader from "@components/TableHeader";
 import { AuthContext } from "@context/AuthContext";
@@ -30,14 +35,7 @@ import TopPanel from "@components/TopPanel";
 
 import { useData } from "@util/hooks/useData";
 
-import {
-    connectDB,
-    IUserRegistrationSchema,
-    IMSAdminRegistrationSchema,
-    User,
-    MSAdminRegistration,
-    UserRegistration,
-} from "@db/index";
+import { IUserRegistrationSchema, IMSAdminRegistrationSchema } from "@db/index";
 
 const AdminRegistrationData = dynamic(
     () => import("@components/Registrations/AdminRegistrationData")
@@ -50,27 +48,36 @@ import { AccountType } from "@util/Enums";
 
 const UserRegistrations: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ registrations }) => {
+> = () => {
     const { user, loading } = useContext(AuthContext);
+    const [page, setPage] = useState<number>(1);
+    const { data, isLoading, error, refetch } = useData<IRegistrationInfo[]>(
+        `/api/member/registrations?p=${page}`
+    );
 
-    const { data, isLoading, error, refetch } = useData<
-        | (IUserRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              birthday?: string;
-          })[]
-        | (IMSAdminRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              memberSchool: { id: string; name: string };
-          })[]
-    >("/api/member/registrations", registrations);
+    const [sortKey, setSortKey] = useState<string>("datePerformed");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+    const sortData = (key: string) => {
+        setPage(1);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
+        }
+        setSortKey(key);
+
+        refetch(
+            `/api/member/registrations?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+        );
+    };
 
     return (
         <>
             <Head>
                 <title>Registrations</title>
             </Head>
+
             <TopPanel
                 title={"User Registrations"}
                 actionIcon={FaSync}
@@ -78,22 +85,55 @@ const UserRegistrations: PageWithLayout<
                 actionIsProcessing={isLoading}
                 hasAction
             />
+
+            <Flex align={"center"} justify={"end"}>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(`/api/member/registrations?p=${page - 1}`);
+                        setPage((p) => p - 1);
+                    }}
+                    disabled={page - 1 <= 0 || isLoading}
+                >
+                    <Box as={FaCaretLeft} color={"primary"} />
+                </Button>
+                <Text>{page}</Text>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        refetch(`/api/member/registrations?p=${page + 1}`);
+                        setPage((p) => p + 1);
+                    }}
+                    disabled={isLoading || (data && data?.length < 30)}
+                >
+                    <Box as={FaCaretRight} color={"primary"} />
+                </Button>
+            </Flex>
             {loading || !user ? (
                 <Center w={"full"} h={"full"}>
-                    <CircularProgress isIndeterminate />
+                    <CircularProgress isIndeterminate color={"secondary"} />
                 </Center>
             ) : (
                 <TableContainer maxH={"inherit"} overflowY={"auto"}>
                     <Table>
                         <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
                             <Tr>
-                                <TableHeader heading={"date registered"} />
+                                <TableHeader
+                                    heading={"date registered"}
+                                    sortable
+                                    onClick={() => sortData("registeredAt")}
+                                />
                                 <TableHeader
                                     heading={"full name"}
                                     subheading={"email address"}
                                     sortable
+                                    onClick={() => sortData("lastName")}
                                 />
-                                <TableHeader heading={"mobile #"} />
+                                <TableHeader
+                                    heading={"mobile #"}
+                                    sortable
+                                    onClick={() => sortData("mobileNumber")}
+                                />
                                 <TableHeader
                                     heading={
                                         [
@@ -103,6 +143,19 @@ const UserRegistrations: PageWithLayout<
                                             ? "member school"
                                             : "school id"
                                     }
+                                    sortable
+                                    onClick={() => {
+                                        if (
+                                            [
+                                                "CEAP_ADMIN",
+                                                "CEAP_SUPER_ADMIN",
+                                            ].includes(user.role)
+                                        ) {
+                                            sortData("memberSchool.name");
+                                        } else {
+                                            sortData("schoolId");
+                                        }
+                                    }}
                                 />
                                 <TableHeader heading={""} />
                             </Tr>
@@ -129,7 +182,7 @@ const UserRegistrations: PageWithLayout<
                                                 <AdminRegistrationData
                                                     data={
                                                         reg as IMSAdminRegistrationSchema & {
-                                                            id: string;
+                                                            _id: string;
                                                             registeredAt: string;
                                                             memberSchool: {
                                                                 id: string;
@@ -137,7 +190,7 @@ const UserRegistrations: PageWithLayout<
                                                             };
                                                         }
                                                     }
-                                                    key={reg.id}
+                                                    key={reg._id}
                                                     refresh={refetch}
                                                 />
                                             );
@@ -145,7 +198,7 @@ const UserRegistrations: PageWithLayout<
                                             return (
                                                 <UserRegistrationData
                                                     data={reg}
-                                                    key={reg.id}
+                                                    key={reg._id}
                                                     refresh={refetch}
                                                 />
                                             );
@@ -160,76 +213,28 @@ const UserRegistrations: PageWithLayout<
     );
 };
 
-export const getServerSideProps: GetServerSideProps<{
-    registrations?:
-        | (IUserRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              birthday?: string;
-          })[]
-        | (IMSAdminRegistrationSchema & {
-              id: string;
-              registeredAt: string;
-              memberSchool: { id: string; name: string };
-          })[];
-}> = AuthGetServerSideProps(
-    async ({ uid }: GetServerSidePropsContextWithUser) => {
-        await connectDB();
+export type IRegistrationInfo =
+    | (IUserRegistrationSchema & {
+          _id: string;
+          registeredAt: string;
+          birthday?: string;
+      })
+    | (IMSAdminRegistrationSchema & {
+          _id: string;
+          registeredAt: string;
+          memberSchool: { id: string; name: string };
+      });
 
-        const user = await User.findOne({ authId: uid });
-
-        if (!user) {
-            return {
-                redirect: {
-                    destination: "/",
-                    statusCode: 301,
-                },
-            };
-        }
-
-        let registrations = [];
-
-        switch (user.accountType) {
-            case AccountType.CEAP_ADMIN:
-            case AccountType.CEAP_SUPER_ADMIN:
-                registrations = await MSAdminRegistration.find()
-                    .populate("memberSchool", ["id", "name"])
-                    .exec();
-
-                return {
-                    props: {
-                        registrations: registrations.map((reg) => ({
-                            ...reg.toJSON(),
-                            registeredAt: reg.registeredAt.toDateString(),
-                        })),
-                    },
-                };
-            case AccountType.MS_ADMIN:
-                registrations = await UserRegistration.find({
-                    memberSchool: user?.memberSchool,
-                })
-                    .populate("memberSchool", ["id", "name"])
-                    .exec();
-
-                return {
-                    props: {
-                        registrations: registrations.map((reg) => ({
-                            ...reg.toJSON(),
-                            birthday: reg.birthday?.toDateString() || "",
-                            registeredAt: reg.registeredAt.toDateString(),
-                        })),
-                    },
-                };
-            default:
-                return {
-                    redirect: {
-                        destination: "/",
-                        statusCode: 301,
-                    },
-                };
-        }
-    }
-);
+export const getServerSideProps: GetServerSideProps =
+    AuthGetServerSideProps(async () => {
+        return {
+            props: {},
+        };
+    }, [
+        AccountType.MS_ADMIN,
+        AccountType.CEAP_ADMIN,
+        AccountType.CEAP_SUPER_ADMIN,
+    ]);
 
 UserRegistrations.PageLayout = Layout;
 

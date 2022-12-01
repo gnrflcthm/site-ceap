@@ -3,14 +3,10 @@ import { getAuth } from "firebase-admin/auth";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 
 import { connectDB, IUserSchema, User, UserRegistration } from "@db/index";
-import { AccountType } from "@util/Enums";
 import { Action, logAction } from "@util/logging";
 
-export default authenticatedHandler([
-    AccountType.CEAP_SUPER_ADMIN,
-    AccountType.MS_ADMIN,
-]).patch(async (req, res) => {
-    const { id, email, accountType } = req.body;
+export default authenticatedHandler().patch(async (req, res) => {
+    const { id, email } = req.body;
 
     const auth = getAuth();
 
@@ -39,38 +35,38 @@ export default authenticatedHandler([
                 }
             });
 
-            if (
-                [AccountType.CEAP_SUPER_ADMIN, AccountType.MS_ADMIN].includes(
-                    user.accountType
-                )
-            ) {
-                if (updated.includes("accountType"))
-                    switch (user.accountType) {
-                        case AccountType.CEAP_SUPER_ADMIN:
-                            const ceapAdminCount = await User.count({
-                                accountType: AccountType.CEAP_SUPER_ADMIN,
-                            });
-                            if (ceapAdminCount === 1) {
-                                res.statusMessage =
-                                    "Cannot demote existing CEAP Super Admin.";
-                                throw new Error(
-                                    "Cannot demote existing CEAP Super Admin."
-                                );
-                            }
-                        case AccountType.MS_ADMIN:
-                            const adminCount = await User.count({
-                                memberSchool: user.memberSchool,
-                                accountType: AccountType.MS_ADMIN,
-                            });
-                            if (adminCount === 1) {
-                                res.statusMessage =
-                                    "Cannot demote the only admin.";
-                                throw new Error(
-                                    "Cannot demote the only admin."
-                                );
-                            }
-                    }
-            }
+            // if (
+            //     [AccountType.CEAP_SUPER_ADMIN, AccountType.MS_ADMIN].includes(
+            //         user.accountType
+            //     )
+            // ) {
+            //     if (updated.includes("accountType"))
+            //         switch (user.accountType) {
+            //             case AccountType.CEAP_SUPER_ADMIN:
+            //                 const ceapAdminCount = await User.count({
+            //                     accountType: AccountType.CEAP_SUPER_ADMIN,
+            //                 });
+            //                 if (ceapAdminCount === 1) {
+            //                     res.statusMessage =
+            //                         "Cannot demote existing CEAP Super Admin.";
+            //                     throw new Error(
+            //                         "Cannot demote existing CEAP Super Admin."
+            //                     );
+            //                 }
+            //             case AccountType.MS_ADMIN:
+            //                 const adminCount = await User.count({
+            //                     memberSchool: user.memberSchool,
+            //                     accountType: AccountType.MS_ADMIN,
+            //                 });
+            //                 if (adminCount === 1) {
+            //                     res.statusMessage =
+            //                         "Cannot demote the only admin.";
+            //                     throw new Error(
+            //                         "Cannot demote the only admin."
+            //                     );
+            //                 }
+            //         }
+            // }
 
             // Firebase Updates
             let newData: { [key: string]: string } = {};
@@ -85,11 +81,11 @@ export default authenticatedHandler([
                 delete newData["phoneNumber"];
 
             await auth.updateUser(fbUser.uid, newData);
-            if (updated.includes("accountType")) {
-                await auth.setCustomUserClaims(fbUser.uid, {
-                    role: accountType,
-                });
-            }
+            // if (updated.includes("accountType")) {
+            //     await auth.setCustomUserClaims(fbUser.uid, {
+            //         role: accountType,
+            //     });
+            // }
 
             // MongoDB Updates
             newData = { ...req.body };
@@ -99,18 +95,18 @@ export default authenticatedHandler([
             if (user) {
                 let status = `Updated user info. (${user.displayName})`;
                 let action: Action = Action.UPDATE_USER;
-                if (updated.includes("accountType")) {
-                    if (
-                        [
-                            AccountType.CEAP_SUPER_ADMIN,
-                            AccountType.MS_ADMIN,
-                        ].includes(accountType)
-                    ) {
-                        status = `Promoted user and updated info. (${user.displayName})`;
-                    } else {
-                        status = `Demoted user and updated info. (${user.displayName})`;
-                    }
-                }
+                // if (updated.includes("accountType")) {
+                //     if (
+                //         [
+                //             AccountType.CEAP_SUPER_ADMIN,
+                //             AccountType.MS_ADMIN,
+                //         ].includes(accountType)
+                //     ) {
+                //         status = `Promoted user and updated info. (${user.displayName})`;
+                //     } else {
+                //         status = `Demoted user and updated info. (${user.displayName})`;
+                //     }
+                // }
                 await logAction(user, action, status);
             }
         }

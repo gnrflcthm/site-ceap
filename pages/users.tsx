@@ -1,4 +1,4 @@
-import { FormEvent, useContext, useState } from "react";
+import { FormEvent, useContext, useState, useEffect } from "react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import AuthGetServerSideProps, {
@@ -21,6 +21,7 @@ import {
     useDisclosure,
     useToast,
     Select,
+    Text,
 } from "@chakra-ui/react";
 
 import { PageWithLayout } from "./_app";
@@ -34,33 +35,42 @@ import UserData from "@components/Accounts/UserData";
 import TabButton from "@components/Accounts/TabButton";
 
 import { useData } from "@util/hooks/useData";
-import { FaSearch } from "react-icons/fa";
+import { FaCaretLeft, FaCaretRight, FaSearch } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import EditUserModal from "@components/Accounts/EditUserModal";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@components/ConfirmationModal";
 
 import { AccountType } from "@util/Enums";
-import { IUserSchema, connectDB, User } from "@db/index";
+import { IUserSchema, connectDB, User, IMemberSchoolSchema } from "@db/index";
 import SearchBar from "@components/SearchBar";
+import DeleteRejectPrompt from "@components/Accounts/DeleteRejectPrompt";
 
 // TODO: Add accepted roles for every GetServersideProps page if applicable
 
-const ManageAccounts: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ accounts }) => {
+const ManageAccounts: PageWithLayout = () => {
     const toast = useToast();
     const [current, setCurrent] = useState<"admin" | "users" | "none">("admin");
     const { user, loading } = useContext(AuthContext);
-    const { data, isLoading, refetch } = useData("", accounts);
+    const { data, isLoading, refetch } = useData<
+        (IUserSchema & {
+            _id: string;
+            memberSchool: IMemberSchoolSchema & { _id: string };
+        })[]
+    >("/api/member/admin");
 
     const [query, setQuery] = useState<string>("");
-    const [criteria, setCriteria] = useState<string>("name");
+
+    const [page, setPage] = useState<number>(1);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+
+    const [sortKey, setSortKey] = useState<string>("lastName");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
     const {
-        isOpen: openEditUser,
-        onClose: closeEditUser,
-        onOpen: showEditUserModal,
+        isOpen: openRoleConfirmation,
+        onClose: closeRoleConfirmation,
+        onOpen: showRoleConfirmation,
     } = useDisclosure();
 
     const {
@@ -71,15 +81,15 @@ const ManageAccounts: PageWithLayout<
 
     const [currentUser, setCurrentUser] = useState<
         | (IUserSchema & {
-              id: string;
-              memberSchool?: { id: string; name: string };
+              _id: string;
+              memberSchool: IMemberSchoolSchema & { _id: string };
           })
         | undefined
     >(undefined);
 
-    const deleteUser = () => {
+    const deleteUser = (reason: string) => {
         axios
-            .post("/api/member/delete", { id: currentUser?.id })
+            .post("/api/member/delete", { id: currentUser?._id, reason })
             .then(() => {
                 toast({
                     title: "User Deleted Successfully.",
@@ -91,19 +101,85 @@ const ManageAccounts: PageWithLayout<
             .catch(() => {
                 toast({ title: "Error In Deleting User.", status: "error" });
                 hideDeleteConfirmation();
+            })
+            .finally(() => {
+                setCurrentUser(undefined);
             });
     };
 
-    const showEditModal = (id: string) => {
-        let targetUser = data?.find((u) => u.id === id);
+    const updateRole = (id: string) => {
+        axios
+            .post("/api/member/updaterole", { id })
+            .then((res) => {
+                toast({
+                    title: `Sucessfully ${res.data.action} User.`,
+                    status: "success",
+                });
+                refetch(
+                    `/api/member/${
+                        currentUser &&
+                        [
+                            AccountType.MS_ADMIN,
+                            AccountType.CEAP_SUPER_ADMIN,
+                        ].includes(currentUser.accountType)
+                            ? "users"
+                            : "admin"
+                    }`
+                );
+                setCurrent(
+                    currentUser &&
+                        [
+                            AccountType.MS_ADMIN,
+                            AccountType.CEAP_SUPER_ADMIN,
+                        ].includes(currentUser.accountType)
+                        ? "users"
+                        : "admin"
+                );
+            })
+            .catch((err: AxiosError) => {
+                toast({
+                    title:
+                        err.response?.statusText ||
+                        "Error In Updating User Account Type.",
+                    status: "error",
+                });
+            })
+            .finally(() => {
+                closeRoleConfirmation();
+                setCurrentUser(undefined);
+            });
+    };
+
+    const showRoleConfirmationModal = (id: string) => {
+        let targetUser = data?.find((u) => u._id === id);
         setCurrentUser(targetUser);
-        showEditUserModal();
+        showRoleConfirmation();
     };
 
     const searchUsers = (e: FormEvent) => {
         e.preventDefault();
+        setIsSearching(true);
+        setPage(1);
         setCurrent("none");
-        refetch(`/api/admin/users?${criteria}=${query}`);
+        refetch(`/api/admin/users?q=${query}`);
+    };
+
+    const sortData = (key: string) => {
+        setPage(1);
+        if (sortKey === key) {
+            setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+        } else {
+            setSortKey(key);
+        }
+        if (isSearching) {
+            refetch(
+                `/api/admin/users?q=${query}&p=${page}&sortBy=${sortKey}&sortDir=${sortDir}`
+            );
+        } else {
+            refetch(
+                `/api/member/${current}?p=${page}&sortBy=${sortKey}&sortDir=${sortDir}`
+            );
+        }
     };
 
     return (
@@ -129,6 +205,9 @@ const ManageAccounts: PageWithLayout<
                                 onClick={() => {
                                     setCurrent("admin");
                                     refetch("/api/member/admin");
+                                    setPage(1);
+                                    setQuery("");
+                                    setIsSearching(false);
                                 }}
                                 isActive={current === "admin"}
                             >
@@ -138,6 +217,9 @@ const ManageAccounts: PageWithLayout<
                                 onClick={() => {
                                     setCurrent("users");
                                     refetch("/api/member/users");
+                                    setPage(1);
+                                    setQuery("");
+                                    setIsSearching(false);
                                 }}
                                 isActive={current === "users"}
                             >
@@ -153,59 +235,87 @@ const ManageAccounts: PageWithLayout<
                             flexDir={{ base: "column", md: "row" }}
                             mb={{ base: "1.5", md: "0" }}
                         >
-                            <Select
-                                required
-                                onChange={(e) => {
-                                    setCriteria(e.target.value);
-                                    setQuery("");
-                                }}
-                                mb={{ base: "1.5", md: "2" }}
-                            >
-                                <option value="name" selected>
-                                    Name
-                                </option>
-                                <option value="mobileNumber">
-                                    Mobile Number
-                                </option>
-                                <option value="email">Email Address</option>
-                                <option value="schoolId">School ID</option>
-                            </Select>
-                            <Flex>
-                                <SearchBar
-                                    query={query}
-                                    setQuery={setQuery}
-                                    placeholder={"Search..."}
-                                    inputColor={"neutralizerDark"}
-                                    hasForm={true}
-                                    showIcon={false}
-                                />
+                            <SearchBar
+                                query={query}
+                                setQuery={setQuery}
+                                placeholder={"Search..."}
+                                inputColor={"neutralizerDark"}
+                                hasForm={true}
+                                showIcon={false}
+                            />
 
-                                <Tooltip
-                                    label={"Search"}
-                                    placement={"bottom"}
-                                    hasArrow
-                                >
-                                    <Center px={"1"}>
-                                        <Button
-                                            w={"full"}
-                                            _hover={{ color: "secondary" }}
-                                            bg={"transparent"}
-                                            color={"neutralizerDark"}
-                                            type={"submit"}
-                                            p={"0"}
-                                            m={"0"}
-                                        >
-                                            <Box
-                                                as={FaSearch}
-                                                m={"auto"}
-                                                cursor={"pointer"}
-                                                fontSize={"2xl"}
-                                            />
-                                        </Button>
-                                    </Center>
-                                </Tooltip>
-                            </Flex>
+                            <Tooltip
+                                label={"Search"}
+                                placement={"bottom"}
+                                hasArrow
+                            >
+                                <Center px={"1"}>
+                                    <Button
+                                        w={"full"}
+                                        _hover={{ color: "secondary" }}
+                                        bg={"transparent"}
+                                        color={"neutralizerDark"}
+                                        type={"submit"}
+                                        p={"0"}
+                                        m={"0"}
+                                    >
+                                        <Box
+                                            as={FaSearch}
+                                            m={"auto"}
+                                            cursor={"pointer"}
+                                            fontSize={"2xl"}
+                                        />
+                                    </Button>
+                                </Center>
+                            </Tooltip>
                         </Flex>
+                    </Flex>
+                    <Flex align={"center"} justify={"end"}>
+                        <Button
+                            variant={"transparent"}
+                            onClick={() => {
+                                if (isSearching) {
+                                    refetch(
+                                        `/api/admin/users?q=${query}&p=${
+                                            page - 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                } else {
+                                    refetch(
+                                        `/api/member/${current}?p=${
+                                            page - 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                }
+                                setPage((p) => p - 1);
+                            }}
+                            disabled={page - 1 <= 0 || isLoading}
+                        >
+                            <Box as={FaCaretLeft} color={"primary"} />
+                        </Button>
+                        <Text>{page}</Text>
+                        <Button
+                            variant={"transparent"}
+                            onClick={() => {
+                                if (isSearching) {
+                                    refetch(
+                                        `/api/admin/users?q=${query}&p=${
+                                            page + 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                } else {
+                                    refetch(
+                                        `/api/member/${current}?p=${
+                                            page + 1
+                                        }&sortBy=${sortKey}&sortDir=${sortDir}`
+                                    );
+                                }
+                                setPage((p) => p + 1);
+                            }}
+                            disabled={isLoading || (data && data?.length < 30)}
+                        >
+                            <Box as={FaCaretRight} color={"primary"} />
+                        </Button>
                     </Flex>
                     <TableContainer maxH={"inherit"} overflowY={"auto"}>
                         <Table>
@@ -213,52 +323,72 @@ const ManageAccounts: PageWithLayout<
                                 bg={"gray.100"}
                                 position={"sticky"}
                                 top={"0"}
+                                zIndex={"2"}
                             >
                                 <Tr>
                                     <TableHeader
                                         heading={"full name"}
                                         subheading={"email address"}
                                         sortable
+                                        onClick={() => sortData("lastName")}
                                     />
-                                    <TableHeader heading={"mobile #"} />
-                                    <TableHeader heading={"school id"} />
+                                    <TableHeader
+                                        heading={"mobile #"}
+                                        sortable
+                                        onClick={() => sortData("mobileNumber")}
+                                    />
+                                    <TableHeader
+                                        heading={"school id"}
+                                        sortable
+                                        onClick={() => sortData("schoolId")}
+                                    />
                                     <TableHeader heading="" />
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {data?.map((account) => (
-                                    <UserData
-                                        user={account}
-                                        key={account.id}
-                                        onDelete={(id: string) => {
-                                            showDeleteConfirmation();
-                                            let currentUser = data.find(
-                                                (u) => u.id === id
-                                            );
-                                            setCurrentUser(currentUser);
-                                        }}
-                                        showEdit={(id: string) =>
-                                            showEditModal(id)
-                                        }
-                                    />
-                                ))}
-                                {isLoading && (
-                                    <Tr>
-                                        <Td colSpan={5}>
-                                            <Center h={"full"} w={"full"}>
-                                                <CircularProgress
-                                                    isIndeterminate
-                                                    color={"secondary"}
-                                                />
-                                            </Center>
-                                        </Td>
-                                    </Tr>
-                                )}
-                                {!isLoading && !data && (
-                                    <Center>
-                                        There are currently no users.
-                                    </Center>
-                                )}
+                                {(() => {
+                                    if (data && data.length > 0) {
+                                        return data?.map((account) => (
+                                            <UserData
+                                                user={account}
+                                                key={account._id}
+                                                onDelete={(id: string) => {
+                                                    let currentUser = data.find(
+                                                        (u) => u._id === id
+                                                    );
+                                                    setCurrentUser(currentUser);
+                                                    showDeleteConfirmation();
+                                                }}
+                                                onChangeAccountType={(
+                                                    id: string
+                                                ) =>
+                                                    showRoleConfirmationModal(
+                                                        id
+                                                    )
+                                                }
+                                            />
+                                        ));
+                                    }
+
+                                    return (
+                                        <Tr>
+                                            <Td colSpan={5}>
+                                                <Center h={"full"} w={"full"}>
+                                                    {isLoading ? (
+                                                        <CircularProgress
+                                                            isIndeterminate
+                                                            color={"secondary"}
+                                                        />
+                                                    ) : (
+                                                        <Text>
+                                                            No Users Found
+                                                        </Text>
+                                                    )}
+                                                </Center>
+                                            </Td>
+                                        </Tr>
+                                    );
+                                })()}
                             </Tbody>
                         </Table>
                     </TableContainer>
@@ -269,37 +399,45 @@ const ManageAccounts: PageWithLayout<
                 </Center>
             )}
             <AnimatePresence>
-                {openEditUser && currentUser && (
-                    <EditUserModal
-                        user={currentUser}
-                        accountTypes={[
-                            AccountType.MS_ADMIN,
-                            AccountType.MS_USER,
-                        ]}
-                        onSave={() => {
-                            setCurrentUser(undefined);
-                            closeEditUser();
-                            refetch(`/api/member/${current}`);
-                        }}
-                        onCancel={() => {
-                            setCurrentUser(undefined);
-                            closeEditUser();
-                        }}
-                        hasSchoolId
-                    />
-                )}
-                {openDeleteConfirmation && currentUser && (
+                {openRoleConfirmation && currentUser && (
                     <ConfirmationModal
-                        title={"Delete User"}
-                        prompt={`Are you sure you want to delete ${currentUser.displayName}'s account?`}
+                        title={`${
+                            [
+                                AccountType.MS_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(currentUser.accountType)
+                                ? "Demote"
+                                : "Promote"
+                        } User`}
+                        prompt={`Are you sure you want to ${
+                            [
+                                AccountType.MS_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(currentUser.accountType)
+                                ? "Demote"
+                                : "Promote"
+                        } ${currentUser.displayName}'s account?`}
                         rejectText={"Cancel"}
                         acceptText={"Confirm"}
                         onReject={() => {
                             setCurrentUser(undefined);
+                            closeRoleConfirmation();
+                        }}
+                        onAccept={() => updateRole(currentUser._id)}
+                        willProcessOnAccept
+                    />
+                )}
+                {openDeleteConfirmation && currentUser && (
+                    <DeleteRejectPrompt
+                        action="delete"
+                        confirmText="Delete"
+                        title="Delete User"
+                        prompt={`Are you sure you want to delete ${currentUser.displayName}'s account?`}
+                        onDismiss={() => {
+                            setCurrentUser(undefined);
                             hideDeleteConfirmation();
                         }}
-                        onAccept={() => deleteUser()}
-                        willProcessOnAccept
+                        onConfirm={deleteUser}
                     />
                 )}
             </AnimatePresence>
@@ -307,43 +445,11 @@ const ManageAccounts: PageWithLayout<
     );
 };
 
-export const getServerSideProps: GetServerSideProps<{
-    accounts?: (IUserSchema & {
-        id: string;
-        memberSchool: { id: string; name: string };
-    })[];
-}> = AuthGetServerSideProps(
+export const getServerSideProps: GetServerSideProps = AuthGetServerSideProps(
     async ({ uid }: GetServerSidePropsContextWithUser) => {
-        await connectDB();
-
-        const admin = await User.findOne({ authId: uid });
-
-        if (!admin) {
-            return {
-                redirect: {
-                    destination: "/",
-                    statusCode: 301,
-                    permanent: false,
-                },
-            };
-        }
-
-        const accounts = await User.find({
-            accountType: AccountType.MS_ADMIN,
-            memberSchool: admin.memberSchool,
-            authId: {
-                $ne: uid,
-            },
-        })
-            .populate("memberSchool", ["id", "name"])
-            .exec();
-
-        return {
-            props: {
-                accounts: accounts.map((account) => account.toJSON()),
-            },
-        };
-    }
+        return { props: {} };
+    },
+    [AccountType.MS_ADMIN]
 );
 
 ManageAccounts.PageLayout = Layout;
