@@ -32,26 +32,6 @@ export default authenticatedHandler([
     try {
         const user = await User.findOne({ authId: req.uid }).orFail();
 
-        // const temp = [
-        //     "Christian Formation",
-        //     "Basic Education",
-        //     "Higher Education",
-        //     "Techinical Vocation Education",
-        //     "ALS & SPED",
-        //     "Programs",
-        //     "National Convention",
-        //     "Advocacy",
-        //     "Research",
-        //     "General CEAP",
-        //     "COCOPEA & PEAC",
-        //     "International Linkages",
-        //     "Others",
-        // ];
-
-        // const tempData = temp.map((name) => ({ name, fullPath: `/${name}` }));
-        // await Folder.insertMany(tempData);
-
-        // let uploads = [];
         const uploads = await Resource.aggregate([
             {
                 $lookup: {
@@ -100,56 +80,6 @@ export default authenticatedHandler([
             },
         ]);
 
-        console.log(uploads);
-
-        // switch (user.accountType) {
-        //     case AccountType.CEAP_SUPER_ADMIN:
-        //     case AccountType.CEAP_ADMIN:
-        //         uploads = await Resource.find({
-        //             status: ResourceStatus.FOR_CEAP_REVIEW,
-        //         })
-        //             .populate({
-        //                 path: "uploadedBy",
-        //                 select: "id displayName memberSchool",
-        //                 populate: {
-        //                     path: "memberSchool",
-        //                     select: "id",
-        //                 },
-        //             })
-        //             .exec();
-        //         res.status(200);
-        //         res.json(
-        //             uploads.map((ur) => ({
-        //                 ...ur.toJSON(),
-        //                 dateAdded: ur.dateAdded.toDateString(),
-        //             }))
-        //         );
-        //         return;
-        //     case AccountType.MS_ADMIN:
-        //         uploads = await Resource.find({
-        //             status: ResourceStatus.FOR_ADMIN_REVIEW,
-        //         })
-        //             .populate({
-        //                 path: "uploadedBy",
-        //                 select: "id displayName memberSchool",
-        //                 populate: {
-        //                     path: "memberSchool",
-        //                     select: "id",
-        //                 },
-        //             })
-        //             .exec();
-
-        //         uploads = uploads.filter((ur) =>
-        //             // @ts-ignore
-        //             ur.uploadedBy?.memberSchool.equals(user.memberSchool)
-        //         );
-        //         res.json(
-        //             uploads.map((ur) => ({
-        //                 ...ur.toJSON(),
-        //                 dateAdded: ur.dateAdded.toDateString(),
-        //             }))
-        //         );
-        // }
         res.status(200).json(uploads);
     } catch (error) {
         console.log(error);
