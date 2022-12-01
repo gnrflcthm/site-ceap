@@ -4,6 +4,7 @@ import axios, { AxiosError } from "axios";
 import {
     Box,
     Button,
+    Checkbox,
     Flex,
     Progress,
     Text,
@@ -19,6 +20,7 @@ import AddFileModal from "./AddFileModal";
 import { FaFile } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import FileUploadItem from "./FileUploadItem";
+import UploadTermsModal from "@components/Modal/UploadTermsModal";
 
 export interface FileUpload {
     file: File;
@@ -35,11 +37,23 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
     const [error, setError] = useState<string | undefined>(undefined);
     const toast = useToast();
 
+    const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
+
     const [current, setCurrent] = useState<number>(-1);
 
     const [progress, setProgress] = useState<number>(0);
 
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const {
+        isOpen: showAddFile,
+        onOpen: openAddFile,
+        onClose: closeAddFile,
+    } = useDisclosure();
+
+    const {
+        isOpen: showTerms,
+        onClose: closeTerms,
+        onOpen: openTerms,
+    } = useDisclosure();
 
     const upload = async (e: FormEvent) => {
         e.preventDefault();
@@ -89,7 +103,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
 
     const onEdit = (i: number) => {
         setCurrent(i);
-        onOpen();
+        openAddFile();
     };
 
     const updateFile = (file: FileUpload) => {
@@ -99,7 +113,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
             console.log(temp);
             return temp;
         });
-        onClose();
+        closeAddFile();
         setCurrent(-1);
     };
 
@@ -116,7 +130,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                 />
                 <Box as={"form"} onSubmit={upload} p={"4"}>
                     <Flex justify={"end"} mb={"2"}>
-                        <Button w={"fit-content"} onClick={() => onOpen()}>
+                        <Button w={"fit-content"} onClick={() => openAddFile()}>
                             <Box as={FaFile} mr={"4"} />
                             Add File
                         </Button>
@@ -142,11 +156,21 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                             <Text>No Files Selected</Text>
                         )}
                     </VStack>
-                    <Text fontSize={"sm"} color={"gray.500"} mt={"2"}>
-                        *Upon requesting for upload, the uploaded files will
-                        initially be under review for approval by CEAP
-                        Super-admins and Admins.
-                    </Text>
+                    <Checkbox
+                        mt={"4"}
+                        isChecked={termsAgreed}
+                        onChange={(e) => setTermsAgreed(e.target.checked)}
+                    >
+                        I agree to the{" "}
+                        <Button
+                            variant={"link"}
+                            display={"inline"}
+                            onClick={() => openTerms()}
+                        >
+                            Terms and Conditions
+                        </Button>{" "}
+                        when uploading resources
+                    </Checkbox>
                     {error && (
                         <Text color={"red"} fontWeight={"normal"} mt={"2"}>
                             {error}
@@ -159,6 +183,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                             variant={"secondary"}
                             mt={error ? "2" : "4"}
                             type={"submit"}
+                            disabled={files.length < 1 || !termsAgreed}
                         >
                             Upload
                         </Button>
@@ -166,13 +191,13 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                 </Box>
             </Modal>
             <AnimatePresence>
-                {isOpen && (
+                {showAddFile && (
                     <AddFileModal
                         onAdd={(fileUpload: FileUpload) => {
                             setFiles((files) => [...files, fileUpload]);
-                            onClose();
+                            closeAddFile();
                         }}
-                        onDismiss={() => onClose()}
+                        onDismiss={() => closeAddFile()}
                         update={current !== -1}
                         currentFile={
                             current !== -1 ? files[current] : undefined
@@ -180,6 +205,7 @@ const RequestUploadModal: FC<{ refetch: Function; close: Function }> = ({
                         onUpdate={current !== -1 ? updateFile : () => {}}
                     />
                 )}
+                {showTerms && <UploadTermsModal onDismiss={closeTerms} />}
             </AnimatePresence>
         </Overlay>
     );
