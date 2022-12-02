@@ -22,7 +22,7 @@ import { SelectClassifications } from "@util/helper";
 import { useData } from "@util/hooks/useData";
 import axios from "axios";
 import { AnimatePresence } from "framer-motion";
-import { ResourceType } from "pages/ceap/upload_requests";
+import { IResourceDataType } from "./ResourceData";
 import { FC, FormEvent, useEffect, useRef, useState } from "react";
 
 import FolderSelectModal from "./FolderSelectModal";
@@ -44,7 +44,7 @@ export type FolderType = IFolderSchema & { id: string; root?: FolderType };
 
 const AcceptResourceModal: FC<{
     reload: Function;
-    resource?: ResourceType;
+    resource?: IResourceDataType;
     close: Function;
 }> = ({ resource, close, reload }) => {
     const [filename, setFilename] = useState<string>(resource?.filename || "");
@@ -85,7 +85,7 @@ const AcceptResourceModal: FC<{
         }
 
         try {
-            await axios.patch(`/api/resource/a/${resource.id}`, {
+            await axios.patch(`/api/resource/a/${resource._id}`, {
                 filename,
                 accessibility,
                 classification,
