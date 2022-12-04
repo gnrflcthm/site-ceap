@@ -1,5 +1,14 @@
 import { FC } from "react";
-import { Flex, Heading, Button, Text, As, Box, Center } from "@chakra-ui/react";
+import {
+    Flex,
+    Heading,
+    Button,
+    Text,
+    As,
+    Box,
+    Center,
+    CircularProgress,
+} from "@chakra-ui/react";
 import { motion } from "framer-motion";
 
 const TopPanel: FC<{
@@ -34,24 +43,32 @@ const TopPanel: FC<{
             </Heading>
 
             {hasAction && (
-                <Button
-                    variant={"transparent"}
-                    px={{ base: "0", md: "4" }}
-                    color={"neutralizerLight"}
-                    onClick={() => onActionClick()}
-                    m={"0"}
-                >
-                    <Center
-                        as={motion.div}
-                        color={"inherit"}
-                        mr={actionText ? "2" : "0"}
-                    >
-                        <Box as={actionIcon} color={"inherit"} />
-                    </Center>{" "}
-                    <Text as={"span"} color={"inherit"}>
-                        {actionText}
-                    </Text>
-                </Button>
+                <>
+                    {actionIsProcessing ? (
+                        <Center>
+                            <CircularProgress isIndeterminate size={8} color={"primary"} />
+                        </Center>
+                    ) : (
+                        <Button
+                            variant={"transparent"}
+                            px={{ base: "0", md: "4" }}
+                            color={"neutralizerLight"}
+                            onClick={() => onActionClick()}
+                            m={"0"}
+                        >
+                            <Center
+                                as={motion.div}
+                                color={"inherit"}
+                                mr={actionText ? "2" : "0"}
+                            >
+                                <Box as={actionIcon} color={"inherit"} />
+                            </Center>{" "}
+                            <Text as={"span"} color={"inherit"}>
+                                {actionText}
+                            </Text>
+                        </Button>
+                    )}
+                </>
             )}
         </Flex>
     );
