@@ -19,7 +19,6 @@ import {
     Tooltip,
     useDisclosure,
     useToast,
-    Select,
     Text,
 } from "@chakra-ui/react";
 
@@ -36,6 +35,7 @@ import { useData } from "@util/hooks/useData";
 import {
     FaCaretLeft,
     FaCaretRight,
+    FaDownload,
     FaPlus,
     FaSearch,
     FaTimes,
@@ -61,6 +61,9 @@ const CEAPUsers: PageWithLayout = () => {
 
     const [sortKey, setSortKey] = useState<string>("lastName");
     const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+    const [generatingMSReport, setGeneratingMSReport] =
+        useState<boolean>(false);
 
     const {
         isOpen: openCreateAdmin,
@@ -168,12 +171,42 @@ const CEAPUsers: PageWithLayout = () => {
         }
     };
 
+    const generateMsReport = () => {
+        setGeneratingMSReport(true);
+
+        axios
+            .get("/api/admin/msreport", { responseType: "blob" })
+            .then((res) => {
+                const href = URL.createObjectURL(res.data);
+                const link = document.createElement("a");
+                link.href = href;
+                link.setAttribute("download", res.statusText);
+                link.click();
+                toast({
+                    title: "Your download will begin shortly",
+                    status: "info",
+                });
+                setGeneratingMSReport(false);
+            })
+            .catch((err: AxiosError) => {
+                console.log(err);
+                setGeneratingMSReport(false);
+            });
+    };
+
     return (
         <>
             <Head>
                 <title>Manage Accounts</title>
             </Head>
-            <TopPanel title={"Manage Accounts"} />
+            <TopPanel
+                title={"Manage Accounts"}
+                hasAction={current === "admin"}
+                actionText={"Export"}
+                actionIcon={FaDownload}
+                onActionClick={() => generateMsReport()}
+                actionIsProcessing={generatingMSReport}
+            />
             {user && !loading ? (
                 <>
                     <Flex

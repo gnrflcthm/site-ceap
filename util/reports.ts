@@ -1,13 +1,9 @@
-import { jsPDF, CellConfig } from "jspdf";
-import { connectDB, Log, ILogSchema } from "@db/index";
+import { AccountType } from "./Enums";
+import { connectDB, Log, ILogSchema, MemberSchool, User } from "@db/index";
 import { existsSync, mkdirSync } from "fs";
-import { join, resolve } from "path";
+import { join } from "path";
 import pdfmake from "pdfmake";
 import { TDocumentDefinitions } from "pdfmake/interfaces";
-import { createWriteStream } from "fs";
-
-import coreLogo from "@assets/CORE_L.png";
-import ceapLogo from "@assets/CEAP.png";
 
 export async function generateAuditReport(
     from: Date,
@@ -18,8 +14,6 @@ export async function generateAuditReport(
     if (!existsSync(join(baseDir, "/temp"))) {
         mkdirSync(join(baseDir, "/temp"));
     }
-
-    // const doc = new jsPDF({ orientation: "l", format: "letter" });
 
     const fonts = {
         Roboto: {
@@ -45,13 +39,6 @@ export async function generateAuditReport(
     if (data.length === 0) {
         throw new Error("No Logs to Report");
     }
-
-    // const temp = data.map((d) => ({
-    //     "Date Performed": d.datePerformed.toLocaleString(),
-    //     User: d.user?.displayName || "DELETED USER",
-    //     Action: d.action,
-    //     Details: d.details || "",
-    // }));
 
     let s = from.toISOString().split("T")[0];
     let e = to.toISOString().split("T")[0];
@@ -134,13 +121,10 @@ export async function generateAuditReport(
         },
     };
 
-    const date =
-        from.toDateString() === to.toDateString()
-            ? from.toDateString()
-            : `${from.toDateString()} - ${to.toDateString()}`;
-
-    // doc.text(`Audit Log Reports (${date})`, 5, 10);
-    // doc.table(6, 15, temp, createHeaders(Object.keys(temp[0])), {});
+    // const date =
+    //     from.toDateString() === to.toDateString()
+    //         ? from.toDateString()
+    //         : `${from.toDateString()} - ${to.toDateString()}`;
 
     const pdfDoc = doc.createPdfKitDocument(content);
 
@@ -148,28 +132,183 @@ export async function generateAuditReport(
 
     return new Promise<string>((resolve, reject) => {
         pdfDoc.write(`temp/${fileName}`, () => resolve(fileName));
-
-        // pdfDoc
-        //     .pipe(createWriteStream(`temp/${fileName}`))
-        //     .on("pipe", () => console.log("pipe"))
-        //     .on("ready", () => console.log("ready"))
-        //     .on("error", (err) => console.log(err))
-        //     .on("drain", () => console.log("drain"))
-        //     .on("finish", () => resolve(fileName));
     });
 }
 
-function createHeaders(keys: string[]): CellConfig[] {
-    var result: CellConfig[] = [];
-    const size = [80, 65, 70, 140];
-    for (var i = 0; i < keys.length; i += 1) {
-        result.push({
-            name: keys[i],
-            prompt: keys[i],
-            width: size[i],
-            align: "center",
-            padding: 0,
-        });
+export async function generateMSReport() {
+    // @ts-ignore
+    const baseDir = global.__basedir;
+    if (!existsSync(join(baseDir, "/temp"))) {
+        mkdirSync(join(baseDir, "/temp"));
     }
-    return result;
+
+    const fonts = {
+        Roboto: {
+            normal: "style/fonts/Roboto-Regular.ttf",
+            bold: "style/fonts/Roboto-Medium.ttf",
+            italics: "style/fonts/Roboto-Italic.ttf",
+            bolditalics: "style/fonts/Roboto-MediumItalic.ttf",
+        },
+    };
+
+    const doc = new pdfmake(fonts);
+
+    await connectDB();
+
+    const msQuery = MemberSchool.aggregate([
+        {
+            $lookup: {
+                from: "User",
+                localField: "_id",
+                foreignField: "memberSchool",
+                as: "users",
+            },
+        },
+        {
+            $match: {
+                isRegistered: true,
+            },
+        },
+        {
+            $addFields: {
+                adminCount: {
+                    $size: {
+                        $filter: {
+                            input: "$users",
+                            as: "user",
+                            cond: {
+                                $eq: ["$$user.accountType", "MS_ADMIN"],
+                            },
+                        },
+                    },
+                },
+                userCount: {
+                    $size: {
+                        $filter: {
+                            input: "$users",
+                            as: "user",
+                            cond: {
+                                $eq: ["$$user.accountType", "MS_USER"],
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        {
+            $sort: {
+                "region": 1,
+                "name": 1,
+            }
+        }
+    ]);
+    const userCountQuery = User.count({
+        accountType: [AccountType.MS_ADMIN, AccountType.MS_USER],
+    });
+
+    const [registeredMemberSchools, userCount] = await Promise.all([
+        msQuery,
+        userCountQuery,
+    ]);
+
+    const content: TDocumentDefinitions = {
+        pageSize: "LEGAL",
+        pageOrientation: "portrait",
+        content: [
+            {
+                layout: "noBorders",
+                margin: [0, 0, 0, 20],
+                table: {
+                    widths: [125, "*", 100],
+                    body: [
+                        [
+                            {
+                                image: "public/CORE_L.png",
+                                width: 125,
+                                alignment: "left",
+                            },
+                            {
+                                layout: "noBorders",
+                                alignment: "center",
+                                table: {
+                                    widths: "*",
+                                    body: [
+                                        [" "],
+                                        [
+                                            {
+                                                text: "Member School Reports",
+                                                bold: true,
+                                                alignment: "center",
+                                                fontSize: 24,
+                                            },
+                                        ],
+                                        [
+                                            {
+                                                text: `As of ${new Date().toDateString()}`,
+                                                alignment: "center",
+                                            },
+                                        ],
+                                    ],
+                                },
+                            },
+                            {
+                                image: "public/CEAP.png",
+                                width: 100,
+                                alignment: "right",
+                            },
+                        ],
+                    ],
+                },
+            },
+            {
+                layout: "noBorders",
+                margin: [20, 0],
+                table: {
+                    body: [
+                        [
+                            {
+                                text: "Total Registered Member Schools:",
+                                alignment: "right",
+                            },
+                            registeredMemberSchools.length,
+                        ],
+                        [
+                            { text: "Total Active Users:", alignment: "right" },
+                            userCount,
+                        ],
+                    ],
+                },
+            },
+            {
+                margin: [0, 20],
+                table: {
+                    headerRows: 2,
+                    widths: ["*", 100, 50, 50, 50],
+                    body: [
+                        [{text: "Registered Member Schools", colSpan: 5, bold: true, alignment: "center", fontSize: 18, fillColor: "#0F1A64", color: "#FFF"}, {}, {}, {}, {}],
+                        ["Member School", "Region", "Total Admins", "Total Users", "Total Active Users"].map(
+                            (header) => ({
+                                text: header,
+                                bold: true,
+                                alignment: "center",
+                            })
+                        ),
+                        ...registeredMemberSchools.map((ms) => [ms.name, ms.region, ms.adminCount, ms.userCount, ms.adminCount + ms.userCount])
+                    ]
+                }
+            },
+        ],
+        styles: {
+            header: {
+                bold: true,
+                alignment: "center",
+            },
+        },
+    };
+
+    const pdfDoc = doc.createPdfKitDocument(content);
+
+    const fileName = `MemberSchoolReports(${new Date().toLocaleDateString()}).pdf`;
+
+    return { file: pdfDoc, fileName };
 }
