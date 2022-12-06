@@ -9,6 +9,7 @@ import {
     Text,
     Center,
     useDisclosure,
+    Checkbox,
 } from "@chakra-ui/react";
 import axios, { AxiosError } from "axios";
 
@@ -30,6 +31,8 @@ const RegistrationForm: FC<{
     const [mobile, setMobile] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [schoolId, setSchoolId] = useState<string>("");
+
+    const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
 
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | undefined>("");
@@ -143,6 +146,24 @@ const RegistrationForm: FC<{
                     pattern={"^[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}$"}
                     required
                 />
+                <Checkbox
+                    w={"full"}
+                    mt={"4"}
+                    isChecked={termsAgreed}
+                    onChange={(e) => setTermsAgreed(e.target.checked)}
+                    disabled={loading}
+                >
+                    By Registering, I agree to the{" "}
+                    <Button
+                        variant={"link"}
+                        display={"inline"}
+                        onClick={() => onOpen()}
+                        disabled={loading}
+                    >
+                        Terms and Conditions
+                    </Button>
+                    .
+                </Checkbox>
                 <Center w={"full"} flexDir={"column"}>
                     {error && (
                         <Text color={"red"} fontSize={"sm"} as={"small"}>
@@ -152,7 +173,7 @@ const RegistrationForm: FC<{
                     <Button
                         variant={"secondary"}
                         type={"submit"}
-                        disabled={loading}
+                        disabled={loading || !termsAgreed}
                     >
                         {loading ? (
                             <CircularProgress
@@ -166,7 +187,7 @@ const RegistrationForm: FC<{
                     </Button>
                 </Center>
             </VStack>
-            <Text mt={"4"} textAlign={"center"}>
+            {/* <Text mt={"4"} textAlign={"center"}>
                 By registering, you are agreeing to our{" "}
                 <Button
                     variant={"link"}
@@ -175,7 +196,7 @@ const RegistrationForm: FC<{
                 >
                     Terms and Conditions
                 </Button>
-            </Text>
+            </Text> */}
             <Text mt={"4"} textAlign={"center"}>
                 Can't find your region or school at the list?
                 <Link href={"/registration/admin_registration"} passHref>

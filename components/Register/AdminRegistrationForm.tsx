@@ -2,6 +2,7 @@ import { FC, useState, FormEvent, useMemo } from "react";
 
 import {
     Button,
+    Checkbox,
     CircularProgress,
     Heading,
     Text,
@@ -27,6 +28,8 @@ const AdminRegistrationForm: FC<{
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | undefined>(undefined);
     const [region, setRegion] = useState<string | undefined>(undefined);
+
+    const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
 
     const regions = useMemo<{ name: string; value: string }[]>(() => {
         return memberSchools
@@ -128,23 +131,31 @@ const AdminRegistrationForm: FC<{
                         filter={region}
                     />
                 )}
-                <Button
-                    type={"submit"}
-                    variant={"secondary"}
+                <Checkbox
+                    w={"full"}
+                    mt={"4"}
+                    isChecked={termsAgreed}
+                    onChange={(e) => setTermsAgreed(e.target.checked)}
                     disabled={loading}
                 >
-                    {loading ? <CircularProgress size={8} /> : "Register"}
-                </Button>
-                <Text textAlign={"center"}>
-                    By registering, you are agreeing to our{" "}
+                    By Registering, I agree to the{" "}
                     <Button
                         variant={"link"}
                         display={"inline"}
                         onClick={() => onOpen()}
+                        disabled={loading}
                     >
                         Terms and Conditions
                     </Button>
-                </Text>
+                    .
+                </Checkbox>
+                <Button
+                    type={"submit"}
+                    variant={"secondary"}
+                    disabled={loading || !termsAgreed}
+                >
+                    {loading ? <CircularProgress size={8} /> : "Register"}
+                </Button>
             </VStack>
             <AnimatePresence>
                 {isOpen && <DPAModal onDismiss={() => onClose()} />}
