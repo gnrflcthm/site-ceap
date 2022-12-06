@@ -5,3 +5,4 @@ export * from "./MSAdminRegistration";
 export * from "./Resource";
 export * from "./User";
 export * from "./UserRegistration";
+export * from "./AdminDirectory";
