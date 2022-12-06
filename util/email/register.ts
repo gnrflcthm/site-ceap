@@ -8,8 +8,9 @@ import transport from "./transport";
 
 export async function sendAcceptEmail(
     receiver: IUserSchema,
-    initialPassword: string = "random_password",
-    memberSchool: string
+    initialPassword: string,
+    memberSchool: string,
+    isInDirectory: boolean = false
 ) {
     const { firstName, lastName, email, schoolId, mobileNumber, accountType } =
         receiver;
@@ -17,7 +18,7 @@ export async function sendAcceptEmail(
     await transport.sendMail({
         from: process.env.SERVICE_EMAIL,
         to: email,
-        subject: "Account Accepted",
+        subject: `Account ${isInDirectory ? "Created" : "Accepted"}`,
         html: `
         Dear ${firstName} ${lastName}, 
         <br /><br />
