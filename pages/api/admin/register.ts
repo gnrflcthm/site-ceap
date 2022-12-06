@@ -53,7 +53,7 @@ export default handler().post(async (req, res) => {
             return;
         }
 
-        const existingAdminDirectory = await AdminDirectory.findOne({ email });
+        const existingAdminDirectory = await AdminDirectory.findOne({ email, memberSchool: memberSchoolId });
 
         if (existingAdminDirectory) {
             const auth = getAuth();

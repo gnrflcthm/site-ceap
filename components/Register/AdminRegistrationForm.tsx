@@ -54,12 +54,10 @@ const AdminRegistrationForm: FC<{
                 memberSchoolId: memberSchool,
             })
             .then((res) => {
-                console.log(`${res.status}: ${res.statusText}`);
                 setState("success");
             })
             .catch((err: AxiosError) => {
                 setError(err.response?.statusText);
-                alert(error);
             })
             .finally(() => setLoading(false));
     };
@@ -149,6 +147,11 @@ const AdminRegistrationForm: FC<{
                     </Button>
                     .
                 </Checkbox>
+                {error && (
+                    <Text color={"red"} fontSize={"sm"} as={"small"}>
+                        {error}
+                    </Text>
+                )}
                 <Button
                     type={"submit"}
                     variant={"secondary"}
