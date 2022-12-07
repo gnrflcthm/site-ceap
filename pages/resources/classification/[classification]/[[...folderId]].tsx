@@ -164,7 +164,7 @@ const FolderPage: PageWithLayout<
         // setMode("folders");
         refetchFolders();
         refetchResources();
-    }, [current]);
+    }, [current, user]);
 
     return (
         <>
