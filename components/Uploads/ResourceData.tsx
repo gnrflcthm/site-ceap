@@ -210,7 +210,7 @@ const ResourceData: FC<{
             <AnimatePresence>
                 {isOpen && (
                     <UserInfoModal
-                        userId={resource.uploadedBy?.id.toString() || ""}
+                        userId={resource.uploadedBy._id || ""}
                         onDismiss={() => onClose()}
                     />
                 )}
