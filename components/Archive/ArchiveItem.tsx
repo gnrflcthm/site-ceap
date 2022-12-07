@@ -20,7 +20,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { ArchiveType } from "pages/ceap/archive";
 import { FC, useState } from "react";
-import { FaCog, FaEllipsisV, FaPencilAlt, FaTrash } from "react-icons/fa";
+import { FaCog, FaEllipsisV, FaTrash } from "react-icons/fa";
 
 const UserInfoModal = dynamic(() => import("@components/Modal/UserInfoModal"));
 const EditResourceModal = dynamic(
@@ -32,7 +32,8 @@ const ResourceInfoModal = dynamic(
 
 const ArchiveItem: FC<{
     resource: ArchiveType;
-}> = ({ resource }) => {
+    refetch: Function;
+}> = ({ resource, refetch }) => {
     const textFontSize = { base: "sm", md: "md" };
     const toast = useToast();
     console.log(resource);
@@ -59,12 +60,13 @@ const ArchiveItem: FC<{
     const deleteItem = () => {
         axios
             .delete(`/api/resource/a/${resource._id}`)
-            .then(() =>
+            .then(() => {
                 toast({
                     title: "Successfully Deleted Resource",
                     status: "success",
-                })
-            )
+                });
+                refetch();
+            })
             .catch((err) =>
                 toast({ title: "Error In Deleting Resource", status: "error" })
             )

@@ -202,6 +202,17 @@ const Archives: PageWithLayout = () => {
                                 <ArchiveItem
                                     key={resource._id}
                                     resource={resource}
+                                    refetch={() => {
+                                        if (isSearching) {
+                                            refetch(
+                                                `/api/resource/a/archive?q=${query}&p=${1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                            );
+                                        } else {
+                                            refetch(
+                                                `/api/resource/a/archive?p=${1}&sortBy=${sortKey}&sortDir=${sortDir}`
+                                            );
+                                        }
+                                    }}
                                 />
                             ))
                         ) : (
