@@ -35,25 +35,6 @@ const ListResourceItem: FC<{
 }> = ({ resource, reload, onManage, onView }) => {
     const { user } = useContext(AuthContext);
 
-    const authorDetails: string = (() => {
-        if (resource.uploadedBy && resource.memberSchool) {
-            const { firstName, lastName } = resource.uploadedBy;
-            const { name } = resource.memberSchool;
-            return `${firstName} ${lastName} - ${name}`;
-        }
-
-        if (resource.uploadedBy && !resource.memberSchool) {
-            const { firstName, lastName } = resource.uploadedBy;
-            return `${firstName} ${lastName}`;
-        }
-
-        if (!resource.uploadedBy && resource.memberSchool) {
-            return resource.memberSchool.name;
-        }
-
-        return "DELETED USER";
-    })();
-
     const icon: As = (() => {
         switch (resource.fileType) {
             case FileType.DOCUMENT:
@@ -141,7 +122,7 @@ const ListResourceItem: FC<{
                                     (filesize(resource.size) as string)}
                             </Text>
                         </Flex>
-                        <Text
+                        {/* <Text
                             fontSize={"sm"}
                             whiteSpace={"nowrap"}
                             textOverflow={"ellipsis"}
@@ -155,7 +136,7 @@ const ListResourceItem: FC<{
                                 color={"gray.500"}
                             />
                             {authorDetails}
-                        </Text>
+                        </Text> */}
                     </Box>
                     <Text
                         justifySelf={"flex-end"}

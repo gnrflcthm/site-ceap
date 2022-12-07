@@ -90,7 +90,10 @@ const ResourceInfoModal: FC<{
                                 fontWeight={"bold"}
                                 pl={"2"}
                                 maxH={"10rem"}
+                                whiteSpace={'normal'}
+                                overflowX={"hidden"}
                                 overflowY={"auto"}
+                                w={"full"}
                                 css={{
                                     "&::-webkit-scrollbar": {
                                         width: "0.5rem",

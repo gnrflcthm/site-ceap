@@ -6,7 +6,7 @@ import AuthGetServerSideProps, {
     GetServerSidePropsContextWithUser,
 } from "@util/api/authGSSP";
 import Layout from "@components/Layout";
-import { FileClassification } from "@util/Enums";
+import { AccountType, FileClassification } from "@util/Enums";
 import { Classifications } from "@util/helper";
 
 import {
@@ -19,9 +19,11 @@ import {
     Button,
     Text,
     CircularProgress,
+    useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import SearchBar from "@components/SearchBar";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import Pill from "@components/Resources/Pill";
 import { useRouter } from "next/router";
 import { Folder, IFolderSchema, IResourceSchema } from "@db/models";
@@ -30,9 +32,12 @@ import { useData } from "@util/hooks/useData";
 import { connectDB } from "@db/index";
 import dynamic from "next/dynamic";
 import { BsGridFill, BsListUl } from "react-icons/bs";
-import { FaFolderOpen } from "react-icons/fa";
+import { FaFolderOpen, FaFolderPlus } from "react-icons/fa";
 import ListView from "@components/Resources/ListView";
 import GridView from "@components/Resources/GridView";
+import { AnimatePresence } from "framer-motion";
+import { AuthContext } from "@context/AuthContext";
+import axios, { AxiosError } from "axios";
 
 export type ResourceItemType = IResourceSchema & {
     id: string;
@@ -41,6 +46,11 @@ export type ResourceItemType = IResourceSchema & {
 };
 
 export type FolderType = IFolderSchema & { id: string; root: string };
+
+const FolderModal = dynamic(() => import("@components/Modal/FolderModal"));
+const ConfirmationModal = dynamic(
+    () => import("@components/ConfirmationModal")
+);
 
 const DisplayFolders = dynamic(
     () => import("@components/Resources/DisplayFolders")
@@ -51,15 +61,15 @@ const DisplayResources = dynamic(
 
 const FolderPage: PageWithLayout<
     InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ classification, current, query: q }) => {
-    const [mode, setMode] = useState<"folders" | "resources">("folders");
+> = ({ classification, current }) => {
+    // const [mode, setMode] = useState<"folders" | "resources">("folders");
+    const toast = useToast();
     const [view, setView] = useState<"list" | "grid">("list");
-
+    const { user } = useContext(AuthContext);
     const {
         data: folders,
         isLoading: foldersLoading,
         refetch: refetchFolders,
-        clear: clearFolders,
     } = useData<FolderType[]>(`/api/resource/folders/${current?.id}/folders`);
 
     const {
@@ -71,10 +81,59 @@ const FolderPage: PageWithLayout<
         `/api/resource/folders/${current?.id}/resources`
     );
 
+    const [currentFolder, setCurrentFolder] = useState<FolderType | undefined>(
+        undefined
+    );
+
+    const {
+        isOpen: showFolderModal,
+        onClose: closeFolderModal,
+        onOpen: openFolderModal,
+    } = useDisclosure();
+
+    const displayFolderModal = (folder: FolderType | undefined) => {
+        setCurrentFolder(folder);
+        openFolderModal();
+    };
+
+    const {
+        isOpen: showDeleteConfirmation,
+        onOpen: openDeleteConfirmation,
+        onClose: closeDeleteConfirmation,
+    } = useDisclosure();
+
+    const displayaDeleteFolder = (folder: FolderType) => {
+        setCurrentFolder(folder);
+        openDeleteConfirmation();
+    };
+
+    const deleteFolder = (id: string) => {
+        axios
+            .delete(`/api/resource/folders/a/${id}`)
+            .then(() => {
+                toast({
+                    status: "success",
+                    title: "Folder Deleted Successfully",
+                });
+            })
+            .catch((err: AxiosError) => {
+                console.log(err);
+                toast({
+                    status: "error",
+                    title:
+                        err.response?.statusText || "Error In Deleting Folder",
+                });
+            })
+            .finally(() => {
+                closeDeleteConfirmation();
+                refetchFolders();
+            });
+    };
+
     const pageTitle =
         Classifications[classification as keyof typeof Classifications];
 
-    const [query, setQuery] = useState<string>(q || "");
+    const [query, setQuery] = useState<string>("");
 
     const [primary, neutralizerLight, neutralizerDark] = useToken("colors", [
         "primary",
@@ -102,7 +161,7 @@ const FolderPage: PageWithLayout<
     };
 
     useEffect(() => {
-        setMode("folders");
+        // setMode("folders");
         refetchFolders();
         refetchResources();
     }, [current]);
@@ -194,7 +253,9 @@ const FolderPage: PageWithLayout<
                 >
                     <Flex
                         flexDir={"column"}
-                        justify={current && current.root ? "flex-start" : "flex-end"}
+                        justify={
+                            current && current.root ? "flex-start" : "flex-end"
+                        }
                         h={current && current.root ? "initial" : "full"}
                         align={"start"}
                     >
@@ -230,6 +291,22 @@ const FolderPage: PageWithLayout<
                         </Text>
                     </Flex>
                     <Flex>
+                        {user &&
+                            [
+                                AccountType.CEAP_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(user.role as AccountType) && (
+                                <Button
+                                    w={"fit-content"}
+                                    onClick={() =>
+                                        displayFolderModal(undefined)
+                                    }
+                                    mr={"2"}
+                                >
+                                    <Box mr={"4"} as={FaFolderPlus} />
+                                    New Folder
+                                </Button>
+                            )}
                         <IconButton
                             icon={<BsGridFill />}
                             aria-label={"grid"}
@@ -299,52 +376,60 @@ const FolderPage: PageWithLayout<
                                     />
                                 </Center>
                             );
-                        } else {
-                            if (view === "grid") {
-                                return (
-                                    <GridView>
-                                        <DisplayFolders
-                                            folders={folders}
-                                            view={view}
-                                            loading={foldersLoading}
-                                            reload={refetchFolders}
-                                            classification={
-                                                classification as FileClassification
-                                            }
-                                        />
-                                        <DisplayResources
-                                            resources={resources}
-                                            view={view}
-                                            loading={resourcesLoading}
-                                            refetchResources={refetchResources}
-                                        />
-                                    </GridView>
-                                );
-                            } else {
-                                return (
-                                    <ListView>
-                                        <DisplayFolders
-                                            folders={folders}
-                                            view={view}
-                                            loading={foldersLoading}
-                                            reload={refetchFolders}
-                                            classification={
-                                                classification as FileClassification
-                                            }
-                                        />
-                                        <DisplayResources
-                                            resources={resources}
-                                            view={view}
-                                            loading={resourcesLoading}
-                                            refetchResources={refetchResources}
-                                        />
-                                    </ListView>
-                                );
-                            }
                         }
+
+                        const DataContainer =
+                            view === "grid" ? GridView : ListView;
+
+                        return (
+                            <DataContainer>
+                                <DisplayFolders
+                                    folders={folders}
+                                    view={view}
+                                    loading={foldersLoading}
+                                    reload={refetchFolders}
+                                    classification={
+                                        classification as FileClassification
+                                    }
+                                    onRename={displayFolderModal}
+                                    onDelete={displayaDeleteFolder}
+                                />
+                                <DisplayResources
+                                    resources={resources}
+                                    view={view}
+                                    loading={resourcesLoading}
+                                    refetchResources={refetchResources}
+                                />
+                            </DataContainer>
+                        );
                     })()}
                 </Flex>
             </Box>
+            <AnimatePresence>
+                {showFolderModal && (
+                    <FolderModal
+                        id={currentFolder ? currentFolder.id : undefined}
+                        name={currentFolder ? currentFolder.name : undefined}
+                        onDismiss={() => {
+                            setCurrentFolder(undefined);
+                            closeFolderModal();
+                        }}
+                        refetch={() => refetchFolders()}
+                        baseFolderId={current?.id!}
+                    />
+                )}
+                {showDeleteConfirmation && currentFolder && (
+                    <ConfirmationModal
+                        title={"Delete Folder"}
+                        acceptText={"Delete"}
+                        rejectText={"Cancel"}
+                        onAccept={() => deleteFolder(currentFolder.id)}
+                        onReject={() => closeDeleteConfirmation()}
+                        prompt={`Are you sure you want to delete what we call the <b>${currentFolder.name}</b> Folder?`}
+                        willProcessOnAccept
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 };
@@ -352,7 +437,6 @@ const FolderPage: PageWithLayout<
 export const getServerSideProps: GetServerSideProps<{
     classification?: FileClassification;
     current?: IFolderSchema & { id: string };
-    query?: string;
 }> = AuthGetServerSideProps(
     async ({ params }: GetServerSidePropsContextWithUser) => {
         await connectDB();
@@ -385,7 +469,6 @@ export const getServerSideProps: GetServerSideProps<{
                         classification: c,
                         current: rootFolder?.toJSON(),
                     };
-                    if (params?.q) props["query"] = params.q;
 
                     return { props };
                 }

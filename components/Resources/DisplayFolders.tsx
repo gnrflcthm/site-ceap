@@ -4,9 +4,7 @@ import { useRouter } from "next/router";
 import { FolderType } from "pages/resources/classification/[classification]/[[...folderId]]";
 import { FC } from "react";
 import GridFolderItem from "./GridFolderItem";
-import GridView from "./GridView";
 import ListFolderItem from "./ListFolderItem";
-import ListView from "./ListView";
 
 const DisplayFolders: FC<{
     folders: FolderType[] | undefined;
@@ -14,7 +12,9 @@ const DisplayFolders: FC<{
     loading: boolean;
     reload: Function;
     classification: FileClassification;
-}> = ({ folders, view, loading = true, reload, classification }) => {
+    onRename: Function;
+    onDelete: Function;
+}> = ({ folders, view, loading = true, reload, classification, onRename, onDelete }) => {
     const router = useRouter();
 
     const navigateFolder = (folderId: string) => {
@@ -46,29 +46,21 @@ const DisplayFolders: FC<{
         );
     }
 
-    if (view === "list") {
-        return (
-            <>
-                {folders.map((folder) => (
-                    <ListFolderItem
-                        folder={folder}
-                        navigateFolder={navigateFolder}
-                    />
-                ))}
-            </>
-        );
-    } else {
-        return (
-            <>
-                {folders.map((folder) => (
-                    <GridFolderItem
-                        folder={folder}
-                        navigateFolder={navigateFolder}
-                    />
-                ))}
-            </>
-        );
-    }
+    const DataView = view === "grid" ? GridFolderItem : ListFolderItem;
+
+    return (
+        <>
+            {folders.map((folder) => (
+                <DataView
+                    folder={folder}
+                    navigateFolder={navigateFolder}
+                    onRename={onRename}
+                    onDelete={onDelete}
+                    
+                />
+            ))}
+        </>
+    );
 };
 
 export default DisplayFolders;

@@ -32,7 +32,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import FolderSelectModal from "@components/Uploads/FolderSelectModal";
 
 const EditResourceModal: FC<{
-    resource: IResourceSchema & { id: string; folder?: string };
+    resource: IResourceSchema & { id: string; _id: string; folder?: string };
     onDismiss: Function;
     refetch?: Function;
 }> = ({ resource, onDismiss = () => {}, refetch = () => {} }) => {
@@ -71,7 +71,7 @@ const EditResourceModal: FC<{
         e.preventDefault();
         setLoading(true);
         axios
-            .patch(`/api/resource/a/${resource.id}`, {
+            .patch(`/api/resource/a/${resource.id || resource._id}`, {
                 filename,
                 accessibility,
                 classification,
