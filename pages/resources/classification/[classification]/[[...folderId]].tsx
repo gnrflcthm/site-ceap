@@ -425,7 +425,7 @@ const FolderPage: PageWithLayout<
                         rejectText={"Cancel"}
                         onAccept={() => deleteFolder(currentFolder.id)}
                         onReject={() => closeDeleteConfirmation()}
-                        prompt={`Are you sure you want to delete what we call the <b>${currentFolder.name}</b> Folder?`}
+                        prompt={`Are you sure you want to delete the <b>${currentFolder.name}</b> Folder?`}
                         willProcessOnAccept
                     />
                 )}
