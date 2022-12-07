@@ -14,6 +14,7 @@ import {
     Center,
 } from "@chakra-ui/react";
 import ConfirmationModal from "@components/ConfirmationModal";
+import { IResourceSchema } from "@db/models";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -34,7 +35,7 @@ const ArchiveItem: FC<{
 }> = ({ resource }) => {
     const textFontSize = { base: "sm", md: "md" };
     const toast = useToast();
-
+    console.log(resource);
     const {
         isOpen: showUser,
         onOpen: openUser,
@@ -57,7 +58,7 @@ const ArchiveItem: FC<{
 
     const deleteItem = () => {
         axios
-            .delete(`/api/resource/a/${resource.id}`)
+            .delete(`/api/resource/a/${resource._id}`)
             .then(() =>
                 toast({
                     title: "Successfully Deleted Resource",
@@ -93,13 +94,25 @@ const ArchiveItem: FC<{
                     </Text>
                 </Td>
                 <Td px={"4"} py={"2"}>
-                    <Button
-                        variant={"link"}
-                        onClick={() => /*download*/ openResource()}
+                    <Text
+                        onClick={() => openResource()}
                         fontSize={textFontSize}
+                        color={"primary"}
+                        w={"fit-content"}
+                        _hover={{
+                            color: "primaryAccent",
+                            textDecor: "underline",
+                        }}
+                        fontWeight={"bold"}
+                        cursor={"pointer"}
+                        transition={"all 0.2s ease"}
+                        overflowX={"hidden"}
+                        textOverflow={"ellipsis"}
+                        whiteSpace={"nowrap"}
+                        maxW={"42rem"}
                     >
                         {resource.filename}
-                    </Button>
+                    </Text>
                 </Td>
                 <Td px={"4"} py={"2"}>
                     <Text fontSize={textFontSize}>{resource.fileType}</Text>
@@ -117,53 +130,57 @@ const ArchiveItem: FC<{
                     </Button>
                 </Td>
                 <Td px={"4"} py={"2"}>
-                    <Td px={"4"} py={"2"}>
-                        {processing ? (
-                            <Center>
-                                <CircularProgress
-                                    isIndeterminate
-                                    size={6}
-                                    color={"secondary"}
+                    {processing ? (
+                        <Center>
+                            <CircularProgress
+                                isIndeterminate
+                                size={6}
+                                color={"secondary"}
+                            />
+                        </Center>
+                    ) : (
+                        <Menu>
+                            <MenuButton w={"full"}>
+                                <Box
+                                    as={FaEllipsisV}
+                                    m={"auto"}
+                                    cursor={"pointer"}
                                 />
-                            </Center>
-                        ) : (
-                            <Menu>
-                                <MenuButton w={"full"}>
-                                    <Box
-                                        as={FaEllipsisV}
-                                        m={"auto"}
-                                        cursor={"pointer"}
-                                    />
-                                </MenuButton>
-                                <MenuList>
-                                    <MenuItem onClick={() => openEdit()}>
-                                        <Box as={FaCog} mr={"2"} />
-                                        <Text fontSize={"md"} lineHeight={"0"}>
-                                            Manage
-                                        </Text>
-                                    </MenuItem>
-                                    <MenuItem onClick={() => openDelete()}>
-                                        <Box as={FaTrash} mr={"2"} />
-                                        <Text fontSize={"md"} lineHeight={"0"}>
-                                            Delete
-                                        </Text>
-                                    </MenuItem>
-                                </MenuList>
-                            </Menu>
-                        )}
-                    </Td>
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem onClick={() => openEdit()}>
+                                    <Box as={FaCog} mr={"2"} />
+                                    <Text fontSize={"md"} lineHeight={"0"}>
+                                        Manage
+                                    </Text>
+                                </MenuItem>
+                                <MenuItem onClick={() => openDelete()}>
+                                    <Box as={FaTrash} mr={"2"} />
+                                    <Text fontSize={"md"} lineHeight={"0"}>
+                                        Delete
+                                    </Text>
+                                </MenuItem>
+                            </MenuList>
+                        </Menu>
+                    )}
                 </Td>
             </Tr>
             <AnimatePresence>
                 {showUser && (
                     <UserInfoModal
-                        userId={resource.uploadedBy.id}
+                        userId={resource.uploadedBy._id}
                         onDismiss={() => closeUser()}
                     />
                 )}
                 {showEdit && (
                     <EditResourceModal
-                        resource={resource}
+                        resource={
+                            resource as unknown as IResourceSchema & {
+                                id: string;
+                                _id: string;
+                                folder?: string;
+                            }
+                        }
                         onDismiss={() => closeEdit()}
                     />
                 )}
@@ -181,7 +198,7 @@ const ArchiveItem: FC<{
                 {showResource && (
                     <ResourceInfoModal
                         onDismiss={() => closeResource()}
-                        resourceId={resource.id}
+                        resourceId={resource._id}
                     />
                 )}
             </AnimatePresence>

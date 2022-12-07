@@ -18,29 +18,60 @@ import {
     Thead,
     Tr,
     Td,
+    Box,
+    Button,
+    Stack,
 } from "@chakra-ui/react";
 import { AccountType, ResourceStatus } from "@util/Enums";
-import { IResourceSchema, Resource } from "@db/models";
+import { IResourceSchema, IUserSchema } from "@db/models";
 import { connectDB } from "@db/index";
 import TableHeader from "@components/TableHeader";
 import { useData } from "@util/hooks/useData";
 import { FilterQuery } from "mongoose";
 import SearchBar from "@components/SearchBar";
-import { useState } from "react";
-import { useRouter } from "next/router";
+import { FormEvent, useState } from "react";
+import { FaCaretLeft, FaCaretRight, FaSync } from "react-icons/fa";
 
 const ArchiveItem = dynamic(() => import("@components/Archive/ArchiveItem"));
 
-const Archives: PageWithLayout<
-    InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ resources, q }) => {
-    const { data, isLoading } = useData<ArchiveType[]>("", resources);
-    const router = useRouter();
+const Archives: PageWithLayout = () => {
+    const [query, setQuery] = useState<string>("");
 
-    const [query, setQuery] = useState<string>(q || "");
+    const [page, setPage] = useState<number>(1);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
 
-    const search = () => {
-        router.push(`/ceap/archive?q=${query}`);
+    const [sortKey, setSortKey] = useState<string>("datePerformed");
+    const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+    const { data, isLoading, refetch } = useData<ArchiveType[]>(
+        "/api/resource/a/archive"
+    );
+
+    const search = (e: FormEvent) => {
+        e.preventDefault();
+        setIsSearching(true);
+        setPage(1);
+        refetch(`/api/resource/a/archive?q=${query}&p=1`);
+    };
+
+    const sortData = (key: string) => {
+        setPage(1);
+        let currentDir = sortDir;
+        if (key === sortKey) {
+            setSortDir(sortDir === "asc" ? "desc" : "asc");
+            currentDir = sortDir === "asc" ? "desc" : "asc";
+        }
+        setSortKey(key);
+
+        if (isSearching) {
+            refetch(
+                `/api/resource/a/archive?q=${query}&p=${1}&sortBy=${key}&sortDir=${currentDir}`
+            );
+        } else {
+            refetch(
+                `/api/resource/a/archive?p=${1}&sortBy=${key}&sortDir=${currentDir}`
+            );
+        }
     };
 
     return (
@@ -49,22 +80,119 @@ const Archives: PageWithLayout<
                 <title>Archived Resources</title>
             </Head>
             <TopPanel title={"Archived Resources"} />
-            <Flex justify={"flex-end"} align={"center"} p={"4"}>
+            <Stack
+                direction={{ base: "column-reverse", md: "row" }}
+                p={"4"}
+                minH={{ base: "11rem", md: "4.5rem" }}
+                overflow={"hidden"}
+                as={"form"}
+                onSubmit={search}
+            >
+                <Button
+                    onClick={() => {
+                        refetch(
+                            `/api/resource/a/archive?p=1&sortBy=dateUploaded&sortDir=desc`
+                        );
+                        setQuery("");
+                        setIsSearching(false);
+                        setSortDir("desc");
+                        setSortKey("dateUploaded");
+                        setPage(1);
+                    }}
+                    px={"8"}
+                    w={{ base: "full", md: "max-content" }}
+                >
+                    <Center mr={"2"}>
+                        <Box as={FaSync} w={"8"} />
+                    </Center>
+                    <Text color={"inherit"}>Refresh</Text>
+                </Button>
                 <SearchBar
                     query={query}
                     setQuery={setQuery}
-                    onSearch={() => search()}
+                    onSearch={search}
                     inputColor={"neutralizerDark"}
+                    hasForm
                 />
+            </Stack>
+            <Flex align={"center"} justify={"end"}>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        if (isSearching) {
+                            refetch(
+                                `/api/resource/a/archive?$q=${query}&p=${
+                                    page - 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
+                        } else {
+                            refetch(
+                                `/api/resource/a/archive?p=${
+                                    page - 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
+                        }
+                        setPage((p) => p - 1);
+                    }}
+                    disabled={page - 1 <= 0 || isLoading}
+                >
+                    <Box as={FaCaretLeft} color={"primary"} />
+                </Button>
+                <Text>{page}</Text>
+                <Button
+                    variant={"transparent"}
+                    onClick={() => {
+                        if (isSearching) {
+                            refetch(
+                                `/api/resource/a/archive?q=${query}&p=${
+                                    page + 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
+                        } else {
+                            refetch(
+                                `/api/resource/a/archive?p=${
+                                    page + 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
+                        }
+                        setPage((p) => p + 1);
+                    }}
+                    disabled={isLoading || (data && data?.length < 30)}
+                >
+                    <Box as={FaCaretRight} color={"primary"} />
+                </Button>
             </Flex>
-            <TableContainer>
+            <TableContainer overflowY={"auto"}>
                 <Table>
-                    <Thead bg={"gray.100"} position={"sticky"} top={"0"}>
+                    <Thead
+                        bg={"gray.100"}
+                        position={"sticky"}
+                        top={"0"}
+                        zIndex={"2"}
+                    >
                         <Tr>
-                            <TableHeader heading={"Date Uploaded"} sortable />
-                            <TableHeader heading={"File Name"} />
-                            <TableHeader heading={"file type"} />
-                            <TableHeader heading={"uploaded by"} />
+                            <TableHeader
+                                heading={"Date Uploaded"}
+                                sortable
+                                onClick={() => sortData("dateUploaded")}
+                            />
+                            <TableHeader
+                                heading={"File Name"}
+                                sortable
+                                onClick={() => sortData("filename")}
+                            />
+                            <TableHeader
+                                heading={"file type"}
+                                sortable
+                                onClick={() => sortData("fileType")}
+                            />
+                            <TableHeader
+                                heading={"uploaded by"}
+                                sortable
+                                onClick={() =>
+                                    sortData("uploadedBy.displayName")
+                                }
+                            />
                             <TableHeader heading={""} />
                         </Tr>
                     </Thead>
@@ -72,7 +200,7 @@ const Archives: PageWithLayout<
                         {data && data.length > 0 ? (
                             data.map((resource) => (
                                 <ArchiveItem
-                                    key={resource.id}
+                                    key={resource._id}
                                     resource={resource}
                                 />
                             ))
@@ -101,79 +229,14 @@ const Archives: PageWithLayout<
 };
 
 export type ArchiveType = IResourceSchema & {
-    id: string;
-    dateAdded: string;
-    uploadedBy: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        displayName?: string;
-    };
-    folder: string;
+    _id: string;
+    uploadedBy: IUserSchema & { _id: string };
 };
 
-export const getServerSideProps: GetServerSideProps<{
-    resources?: ArchiveType[];
-    q?: string;
-}> = AuthGetServerSideProps(
+export const getServerSideProps: GetServerSideProps = AuthGetServerSideProps(
     async ({ req, query }: GetServerSidePropsContextWithUser) => {
-        let q: string | undefined = undefined;
-        let p: number | undefined = undefined;
-
-        if (query.p && typeof query.p === "string") {
-            try {
-                p = parseInt(query.p) - 1;
-                if (p < 1) {
-                    return {
-                        notFound: true,
-                    };
-                }
-            } catch {
-                return {
-                    notFound: true,
-                };
-            }
-        } else {
-            p = 0;
-        }
-
-        if (query.q) {
-            if (Array.isArray(query.q)) {
-                q = query.q[0];
-            } else {
-                q = query.q;
-            }
-        }
-
-        await connectDB();
-
-        const tempQuery: FilterQuery<IResourceSchema> = {
-            status: ResourceStatus.ARCHIVED,
-        };
-
-        if (q) {
-            tempQuery["filename"] = { $regex: `.*${q}.*`, $options: "i" };
-        }
-
-        const resources = await Resource.find(tempQuery)
-            .populate("uploadedBy", [
-                "id",
-                "firstName",
-                "lastName",
-                "displayName",
-            ])
-            .skip(p * 15)
-            .limit(15);
-
         return {
-            props: {
-                resources: resources.map((resource) => ({
-                    ...resource.toJSON(),
-                    dateAdded: resource.dateAdded.toLocaleString(),
-                    folder: resource.folder?.toHexString(),
-                })),
-                q: q || null,
-            },
+            props: {},
         };
     },
     [AccountType.CEAP_ADMIN, AccountType.CEAP_SUPER_ADMIN]
