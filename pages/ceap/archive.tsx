@@ -174,7 +174,7 @@ const Archives: PageWithLayout = () => {
                             <TableHeader
                                 heading={"Date Uploaded"}
                                 sortable
-                                onClick={() => sortData("dateUploaded")}
+                                onClick={() => sortData("dateAdded")}
                             />
                             <TableHeader
                                 heading={"File Name"}
