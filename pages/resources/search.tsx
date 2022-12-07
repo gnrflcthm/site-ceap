@@ -108,7 +108,12 @@ const SearchResource: PageWithLayout<
                     w={"full"}
                     bg={`${primary}EE`}
                 >
-                    <Button aria-label={"Return"} variant={"transparent"} leftIcon={<FaCaretLeft />} onClick={() => router.push("/")}>
+                    <Button
+                        aria-label={"Return"}
+                        variant={"transparent"}
+                        leftIcon={<FaCaretLeft />}
+                        onClick={() => router.push("/")}
+                    >
                         <Text color={"neutralizerLight"}>Back</Text>
                     </Button>
                     <SearchBar
@@ -146,7 +151,13 @@ const SearchResource: PageWithLayout<
             <AnimatePresence>
                 {isOpen && selected && (
                     <EditResourceModal
-                        resource={selected}
+                        resource={
+                            selected as unknown as IResourceSchema & {
+                                id: string;
+                                _id: string;
+                                folder?: string | undefined;
+                            }
+                        }
                         onDismiss={() => onClose()}
                         refetch={() => router.reload()}
                     />

@@ -82,6 +82,7 @@ const DisplayResources: FC<{
                             resource={
                                 currentResource as IResourceSchema & {
                                     id: string;
+                                    _id: string;
                                     folder?: string | undefined;
                                 }
                             }
@@ -115,6 +116,7 @@ const DisplayResources: FC<{
                             resource={
                                 currentResource as IResourceSchema & {
                                     id: string;
+                                    _id: string;
                                     folder?: string | undefined;
                                 }
                             }
