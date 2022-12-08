@@ -1,20 +1,15 @@
 import { AccountType } from "./Enums";
-import { connectDB, Log, ILogSchema, MemberSchool, User } from "@db/index";
-import { existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import { connectDB, Log, MemberSchool, User } from "@db/index";
 import pdfmake from "pdfmake";
 import { TDocumentDefinitions } from "pdfmake/interfaces";
+import { ObjectId } from "mongodb";
 
 export async function generateAuditReport(
     from: Date,
-    to: Date
-): Promise<string> {
-    // @ts-ignore
-    const baseDir = global.__basedir;
-    if (!existsSync(join(baseDir, "/temp"))) {
-        mkdirSync(join(baseDir, "/temp"));
-    }
-
+    to: Date,
+    accountType: string,
+    memberSchool?: ObjectId
+) {
     const fonts = {
         Roboto: {
             normal: "style/fonts/Roboto-Regular.ttf",
@@ -24,17 +19,52 @@ export async function generateAuditReport(
         },
     };
 
-    const doc = new pdfmake(fonts);
+    if (accountType === AccountType.MS_USER) {
+        throw new Error("Unauthorized Access");
+    }
 
+    const doc = new pdfmake(fonts);
+    console.log(memberSchool);
     await connectDB();
-    const data: Array<
-        ILogSchema & {
-            datePerformed: string;
-            user: { displayName: string };
-        }
-    > = await Log.find({
-        datePerformed: { $gte: from, $lte: to },
-    }).populate("user", ["displayName"]);
+
+    const roles: AccountType[] = [AccountType.MS_USER];
+
+    switch (accountType) {
+        case AccountType.CEAP_SUPER_ADMIN:
+            roles.push(AccountType.CEAP_SUPER_ADMIN);
+        case AccountType.CEAP_ADMIN:
+            roles.push(AccountType.CEAP_ADMIN);
+        case AccountType.MS_ADMIN:
+            roles.push(AccountType.MS_ADMIN);
+    }
+
+    const data = await Log.aggregate([
+        {
+            $lookup: {
+                from: "User",
+                localField: "user",
+                foreignField: "_id",
+                as: "user",
+            },
+        },
+        {
+            $unwind: {
+                path: "$user",
+                includeArrayIndex: "0",
+                preserveNullAndEmptyArrays: true,
+            },
+        },
+        {
+            $match: {
+                datePerformed: { $gte: from, $lte: to },
+                ...(!roles.includes(AccountType.CEAP_ADMIN)
+                    ? {
+                          memberSchool: memberSchool,
+                      }
+                    : { "user.accountType": { $in: roles } }),
+            },
+        },
+    ]);
 
     if (data.length === 0) {
         throw new Error("No Logs to Report");
@@ -121,27 +151,14 @@ export async function generateAuditReport(
         },
     };
 
-    // const date =
-    //     from.toDateString() === to.toDateString()
-    //         ? from.toDateString()
-    //         : `${from.toDateString()} - ${to.toDateString()}`;
-
     const pdfDoc = doc.createPdfKitDocument(content);
 
     const fileName = `AuditReports(${s === e ? s : s + " - " + e}).pdf`;
 
-    return new Promise<string>((resolve, reject) => {
-        pdfDoc.write(`temp/${fileName}`, () => resolve(fileName));
-    });
+    return { file: pdfDoc, fileName };
 }
 
 export async function generateMSReport() {
-    // @ts-ignore
-    const baseDir = global.__basedir;
-    if (!existsSync(join(baseDir, "/temp"))) {
-        mkdirSync(join(baseDir, "/temp"));
-    }
-
     const fonts = {
         Roboto: {
             normal: "style/fonts/Roboto-Regular.ttf",
@@ -197,10 +214,10 @@ export async function generateMSReport() {
         },
         {
             $sort: {
-                "region": 1,
-                "name": 1,
-            }
-        }
+                region: 1,
+                name: 1,
+            },
+        },
     ]);
     const userCountQuery = User.count({
         accountType: [AccountType.MS_ADMIN, AccountType.MS_USER],
@@ -285,17 +302,41 @@ export async function generateMSReport() {
                     headerRows: 2,
                     widths: ["*", 100, 50, 50, 50],
                     body: [
-                        [{text: "Registered Member Schools", colSpan: 5, bold: true, alignment: "center", fontSize: 18, fillColor: "#0F1A64", color: "#FFF"}, {}, {}, {}, {}],
-                        ["Member School", "Region", "Total Admins", "Total Users", "Total Active Users"].map(
-                            (header) => ({
-                                text: header,
+                        [
+                            {
+                                text: "Registered Member Schools",
+                                colSpan: 5,
                                 bold: true,
                                 alignment: "center",
-                            })
-                        ),
-                        ...registeredMemberSchools.map((ms) => [ms.name, ms.region, ms.adminCount, ms.userCount, ms.adminCount + ms.userCount])
-                    ]
-                }
+                                fontSize: 18,
+                                fillColor: "#0F1A64",
+                                color: "#FFF",
+                            },
+                            {},
+                            {},
+                            {},
+                            {},
+                        ],
+                        [
+                            "Member School",
+                            "Region",
+                            "Total Admins",
+                            "Total Users",
+                            "Total Active Users",
+                        ].map((header) => ({
+                            text: header,
+                            bold: true,
+                            alignment: "center",
+                        })),
+                        ...registeredMemberSchools.map((ms) => [
+                            ms.name,
+                            ms.region,
+                            ms.adminCount,
+                            ms.userCount,
+                            ms.adminCount + ms.userCount,
+                        ]),
+                    ],
+                },
             },
         ],
         styles: {

@@ -1,30 +1,27 @@
+import { connectDB, User } from "@db/index";
 import authenticatedHandler from "@util/api/authenticatedHandler";
 import { generateAuditReport } from "@util/reports";
-
-import { createReadStream, rmSync } from "fs";
-import path from "path";
 
 export default authenticatedHandler().post(async (req, res) => {
     const { start, end } = req.body;
 
+    await connectDB();
+
     try {
-        const fileName = await generateAuditReport(
+        const user = await User.findOne({ authId: req.uid }).orFail();
+
+        const { file, fileName } = await generateAuditReport(
             new Date(start),
-            new Date(end)
+            new Date(end),
+            user.accountType,
+            user.memberSchool
         );
 
-        const logPath = path.join(process.cwd(), "/temp", fileName);
-        const file = createReadStream(logPath);
         file.pipe(res);
-        file.on("close", () => rmSync(path.join(process.cwd(), "/temp", fileName)))
-        file.on("error", () => rmSync(path.join(process.cwd(), "/temp", fileName)))
         res.setHeader("Content-Type", "application/pdf");
         res.statusMessage = fileName;
         res.status(200);
-        file.on("close", async function () {
-            res.end();
-            rmSync(logPath);
-        });
+        file.end();
     } catch (err) {
         console.log(err);
         res.statusMessage =

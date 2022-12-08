@@ -52,7 +52,7 @@ const GenerateReportsModal: FC<{ onDismiss: Function }> = ({ onDismiss }) => {
             axios
                 .post(
                     "/api/admin/report",
-                    { start, end: new Date(end.setHours(23, 59, 59)) },
+                    { start: new Date(start.setHours(0, 0, 0)), end: new Date(end.setHours(23, 59, 59)) },
                     { responseType: "blob" }
                 )
                 .then((res) => {
