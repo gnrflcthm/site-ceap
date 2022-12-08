@@ -13,6 +13,7 @@ import {
     Center,
     CircularProgress,
     Flex,
+    MenuItem,
     Stack,
     Table,
     TableContainer,
@@ -22,6 +23,7 @@ import {
     Thead,
     Tr,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import TableHeader from "@components/TableHeader";
 import { ILogSchema, IUserSchema } from "@db/index";
@@ -31,8 +33,10 @@ import { FaDownload, FaSync, FaCaretLeft, FaCaretRight } from "react-icons/fa";
 import { AnimatePresence } from "framer-motion";
 import GenerateReportsModal from "@components/Logs/GenerateReportsModal";
 import SearchBar from "@components/SearchBar";
-import { FormEvent, useState } from "react";
+import { FormEvent, useContext, useState } from "react";
 import { useData } from "@util/hooks/useData";
+import { AuthContext } from "@context/AuthContext";
+import axios, { AxiosError } from "axios";
 
 const Logs: PageWithLayout = () => {
     const {
@@ -40,6 +44,9 @@ const Logs: PageWithLayout = () => {
         onOpen: openReports,
         onClose: closeReports,
     } = useDisclosure();
+
+    const { user } = useContext(AuthContext);
+    const toast = useToast();
 
     const [query, setQuery] = useState<string>("");
 
@@ -52,6 +59,31 @@ const Logs: PageWithLayout = () => {
     const { data, refetch, isLoading } = useData<LogDataInfo[]>(
         "/api/admin/logs?p=1&sortBy=datePerformed&sortDir=desc"
     );
+
+    const generateMsReport = () => {
+        toast({
+            status: "info",
+            title: "Generating Member School Report",
+            description: "This may take some time.",
+        });
+
+        axios
+            .get("/api/admin/msreport", { responseType: "blob" })
+            .then((res) => {
+                const href = URL.createObjectURL(res.data);
+                const link = document.createElement("a");
+                link.href = href;
+                link.setAttribute("download", res.statusText);
+                link.click();
+                toast({
+                    title: "Your download will begin shortly",
+                    status: "info",
+                });
+            })
+            .catch((err: AxiosError) => {
+                console.log(err);
+            });
+    };
 
     const search = (e: FormEvent) => {
         e.preventDefault();
@@ -87,12 +119,30 @@ const Logs: PageWithLayout = () => {
             </Head>
             <TopPanel
                 title={"Audit Logs"}
-                hasAction
-                actionIcon={FaDownload}
-                actionText={"Export"}
-                onActionClick={() => openReports()}
+                hasMenu
+                menuItems={
+                    <>
+                        <MenuItem onClick={() => openReports()}>
+                            Generate Audit Logs Report
+                        </MenuItem>
+                        {user &&
+                            [
+                                AccountType.CEAP_ADMIN,
+                                AccountType.CEAP_SUPER_ADMIN,
+                            ].includes(user.role as AccountType) && (
+                                <MenuItem onClick={() => generateMsReport()}>
+                                    Generate Member School Report
+                                </MenuItem>
+                            )}
+                    </>
+                }
+                // hasAction
+                // actionIcon={FaDownload}
+                // actionText={"Export"}
+                // onActionClick={() => openReports()}
             />
             <Stack
+                position={"relative"}
                 direction={{ base: "column-reverse", md: "row" }}
                 p={"4"}
                 minH={{ base: "11rem", md: "4.5rem" }}
@@ -139,7 +189,11 @@ const Logs: PageWithLayout = () => {
                                 }&sortBy=${sortKey}&sortDir=${sortDir}`
                             );
                         } else {
-                            refetch(`/api/admin/logs?p=${page - 1}&sortBy=${sortKey}&sortDir=${sortDir}`);
+                            refetch(
+                                `/api/admin/logs?p=${
+                                    page - 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
                         }
                         setPage((p) => p - 1);
                     }}
@@ -158,7 +212,11 @@ const Logs: PageWithLayout = () => {
                                 }&sortBy=${sortKey}&sortDir=${sortDir}`
                             );
                         } else {
-                            refetch(`/api/admin/logs?p=${page + 1}&sortBy=${sortKey}&sortDir=${sortDir}`);
+                            refetch(
+                                `/api/admin/logs?p=${
+                                    page + 1
+                                }&sortBy=${sortKey}&sortDir=${sortDir}`
+                            );
                         }
                         setPage((p) => p + 1);
                     }}

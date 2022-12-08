@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import {
     Flex,
     Heading,
@@ -8,12 +8,19 @@ import {
     Box,
     Center,
     CircularProgress,
+    Menu,
+    MenuButton,
+    MenuList,
+    IconButton,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
+import { FaEllipsisV } from "react-icons/fa";
 
 const TopPanel: FC<{
     title: string;
     hasAction?: boolean;
+    hasMenu?: boolean;
+    menuItems?: ReactNode;
     actionText?: string;
     onActionClick?: Function;
     actionIcon?: As;
@@ -21,6 +28,8 @@ const TopPanel: FC<{
 }> = ({
     title,
     hasAction,
+    hasMenu,
+    menuItems,
     actionText,
     onActionClick = () => {},
     actionIcon,
@@ -34,6 +43,7 @@ const TopPanel: FC<{
             top={"0"}
             justify={"space-between"}
             align={"center"}
+            zIndex={"8"}
         >
             <Heading
                 fontSize={{ base: "lg", lg: "2xl" }}
@@ -44,31 +54,53 @@ const TopPanel: FC<{
 
             {hasAction && (
                 <>
-                    {actionIsProcessing ? (
-                        <Center>
-                            <CircularProgress isIndeterminate size={8} color={"primary"} />
-                        </Center>
-                    ) : (
-                        <Button
-                            variant={"transparent"}
-                            px={{ base: "0", md: "4" }}
-                            color={"neutralizerLight"}
-                            onClick={() => onActionClick()}
-                            m={"0"}
-                        >
-                            <Center
-                                as={motion.div}
-                                color={"inherit"}
-                                mr={actionText ? "2" : "0"}
+                    {(() => {
+                        if (actionIsProcessing) {
+                            return (
+                                <Center>
+                                    <CircularProgress
+                                        isIndeterminate
+                                        size={8}
+                                        color={"primary"}
+                                    />
+                                </Center>
+                            );
+                        }
+                        return (
+                            <Button
+                                variant={"transparent"}
+                                px={{ base: "0", md: "4" }}
+                                color={"neutralizerLight"}
+                                onClick={() => onActionClick()}
+                                m={"0"}
                             >
-                                <Box as={actionIcon} color={"inherit"} />
-                            </Center>{" "}
-                            <Text as={"span"} color={"inherit"}>
-                                {actionText}
-                            </Text>
-                        </Button>
-                    )}
+                                <Center
+                                    as={motion.div}
+                                    color={"inherit"}
+                                    mr={actionText ? "2" : "0"}
+                                >
+                                    <Box as={actionIcon} color={"inherit"} />
+                                </Center>{" "}
+                                <Text as={"span"} color={"inherit"}>
+                                    {actionText}
+                                </Text>
+                            </Button>
+                        );
+                    })()}
                 </>
+            )}
+            {hasMenu && (
+                <Menu>
+                    <IconButton
+                        as={MenuButton}
+                        aria-label="expand menu"
+                        icon={<FaEllipsisV />}
+                        variant={"transparent"}
+                        textAlign={"center"}
+                        p={"auto"}
+                    />
+                    <MenuList zIndex={8} position={"relative"}>{menuItems}</MenuList>
+                </Menu>
             )}
         </Flex>
     );

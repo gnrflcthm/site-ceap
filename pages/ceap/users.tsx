@@ -1,6 +1,6 @@
 import { FormEvent, useContext, useState } from "react";
 
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { GetServerSideProps } from "next";
 import Head from "next/head";
 import AuthGetServerSideProps from "@util/api/authGSSP";
 
@@ -171,28 +171,28 @@ const CEAPUsers: PageWithLayout = () => {
         }
     };
 
-    const generateMsReport = () => {
-        setGeneratingMSReport(true);
+    // const generateMsReport = () => {
+    //     setGeneratingMSReport(true);
 
-        axios
-            .get("/api/admin/msreport", { responseType: "blob" })
-            .then((res) => {
-                const href = URL.createObjectURL(res.data);
-                const link = document.createElement("a");
-                link.href = href;
-                link.setAttribute("download", res.statusText);
-                link.click();
-                toast({
-                    title: "Your download will begin shortly",
-                    status: "info",
-                });
-                setGeneratingMSReport(false);
-            })
-            .catch((err: AxiosError) => {
-                console.log(err);
-                setGeneratingMSReport(false);
-            });
-    };
+    //     axios
+    //         .get("/api/admin/msreport", { responseType: "blob" })
+    //         .then((res) => {
+    //             const href = URL.createObjectURL(res.data);
+    //             const link = document.createElement("a");
+    //             link.href = href;
+    //             link.setAttribute("download", res.statusText);
+    //             link.click();
+    //             toast({
+    //                 title: "Your download will begin shortly",
+    //                 status: "info",
+    //             });
+    //             setGeneratingMSReport(false);
+    //         })
+    //         .catch((err: AxiosError) => {
+    //             console.log(err);
+    //             setGeneratingMSReport(false);
+    //         });
+    // };
 
     return (
         <>
@@ -201,11 +201,11 @@ const CEAPUsers: PageWithLayout = () => {
             </Head>
             <TopPanel
                 title={"Manage Accounts"}
-                hasAction={current === "admin"}
-                actionText={"Export"}
-                actionIcon={FaDownload}
-                onActionClick={() => generateMsReport()}
-                actionIsProcessing={generatingMSReport}
+                // hasAction={current === "admin"}
+                // actionText={"Export"}
+                // actionIcon={FaDownload}
+                // onActionClick={() => generateMsReport()}
+                // actionIsProcessing={generatingMSReport}
             />
             {user && !loading ? (
                 <>
